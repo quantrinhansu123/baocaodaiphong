@@ -203,7 +203,7 @@
             </div>
         </div>
 
-        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG MÁY, THIẾT BỊ NGÀY <span id="val-ngay">26/01/2026</span></h1>
+        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG MÁY<span id="val-ten-taisan"></span>, THIẾT BỊ NGÀY <span id="val-ngay">26/01/2026</span></h1>
 
         <div class="pre-table-info">
             <span>Ký xác nhận kiểm tra nhiên liệu đầu ngày:</span>
@@ -1318,6 +1318,18 @@
             return a || b;
         }
 
+        function getTaiSanName(record) {
+            if (!record || typeof record !== 'object') return '';
+            const keys = ['Tên tài sản', 'Ten tai san', 'TenTaiSan', 'Tên thiết bị', 'Ten thiet bi', 'TenThietBi'];
+            for (const k of keys) {
+                const v = record[k];
+                if (v == null) continue;
+                const t = String(v).trim();
+                if (t) return t;
+            }
+            return '';
+        }
+
         /** Bắt đầu / Kết thúc / Tổng từ bảng Nhật trình máy CT */
         function thoiGianTuDongCT(row) {
             const t = (v) => (v == null || v === '' ? '' : String(v).trim());
@@ -1690,6 +1702,9 @@
             
             const ngayLamViec = record['Ngày làm việc'] ?? record['Ngay'];
             document.getElementById('val-ngay').innerText = ngayLamViec || '...';
+            const tenTaiSan = getTaiSanName(record);
+            const tenTaiSanEl = document.getElementById('val-ten-taisan');
+            if (tenTaiSanEl) tenTaiSanEl.innerText = tenTaiSan ? ` + ${tenTaiSan}` : '';
             const tenLaiMay = record['Tên lái máy'] ?? record['TenLaiMay'];
             document.getElementById('val-laimay').innerText = tenLaiMay || '';
             document.getElementById('val-baove').innerText = record['TenBaoVe'] || '';
