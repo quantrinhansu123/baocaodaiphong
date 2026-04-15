@@ -110,6 +110,15 @@
         .data-row td {
             height: 30px;
         }
+        #td-stt-sang,
+        #td-stt-chieu,
+        #td-stt-toi {
+            white-space: nowrap;
+            font-size: 13px;
+            line-height: 1.25;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
 
         /* Vertical text */
         .vertical-text {
@@ -1416,7 +1425,6 @@
 
         function resetShiftDetailRowsLayout() {
             document.querySelectorAll('tr.shift-detail-row').forEach((tr) => {
-                tr.style.visibility = '';
                 tr.style.display = '';
             });
             const maxSlots = { sang: 3, chieu: 3, toi: 2 };
@@ -1427,15 +1435,15 @@
                 const sau = document.getElementById(`val-${shift}-dobinh-sau`);
                 if (stt) {
                     stt.rowSpan = m;
-                    stt.style.visibility = '';
+                    stt.style.display = '';
                 }
                 if (truoc) {
                     truoc.rowSpan = m;
-                    truoc.style.visibility = '';
+                    truoc.style.display = '';
                 }
                 if (sau) {
                     sau.rowSpan = m;
-                    sau.style.visibility = '';
+                    sau.style.display = '';
                 }
             });
         }
@@ -1448,11 +1456,11 @@
                 const tr = document.querySelector(`tr.shift-detail-row[data-shift="${shift}"][data-slot="${slot}"]`);
                 if (!tr) continue;
                 if (n === 0) {
-                    tr.style.visibility = 'collapse';
+                    tr.style.display = 'none';
                 } else if (slot < n) {
-                    tr.style.visibility = '';
+                    tr.style.display = '';
                 } else {
-                    tr.style.visibility = 'collapse';
+                    tr.style.display = 'none';
                 }
             }
             const rs = n > 0 ? n : 1;
@@ -1461,15 +1469,15 @@
             const sau = document.getElementById(`val-${shift}-dobinh-sau`);
             if (stt) {
                 stt.rowSpan = rs;
-                stt.style.visibility = n === 0 ? 'collapse' : '';
+                stt.style.display = n === 0 ? 'none' : '';
             }
             if (truoc) {
                 truoc.rowSpan = rs;
-                truoc.style.visibility = n === 0 ? 'collapse' : '';
+                truoc.style.display = n === 0 ? 'none' : '';
             }
             if (sau) {
                 sau.rowSpan = rs;
-                sau.style.visibility = n === 0 ? 'collapse' : '';
+                sau.style.display = n === 0 ? 'none' : '';
             }
         }
 
