@@ -451,6 +451,18 @@
                     <td class="font-bold" id="val-cong-sua"></td>
                     <td id="val-cong-cbsig"></td>
                 </tr>
+                <tr class="data-row">
+                    <td colspan="7" class="text-right">Số liệu bổ sung</td>
+                    <td></td>
+                    <td></td>
+                    <td id="val-slbs-dobinh-truoc"></td>
+                    <td id="val-slbs-dobinh-sau"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
 
                 <!-- NHIÊN LIỆU PHỤ: mỗi ô gộp «tiêu đề + số» — dữ liệu từ «Nhật trình NL» -->
                 <tr>
@@ -944,6 +956,20 @@
             if (n == null || isNaN(n)) return '';
             return new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
         }
+        function clearSlbsDobinhCells() {
+            ['val-slbs-dobinh-truoc', 'val-slbs-dobinh-sau'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
+        function fillSlbsDobinhCm(tonTruocShow, tonCuoiShow) {
+            const truocEl = document.getElementById('val-slbs-dobinh-truoc');
+            const sauEl = document.getElementById('val-slbs-dobinh-sau');
+            const fmt = (v) =>
+                v != null && typeof v === 'number' && !isNaN(v) ? formatNlNumber(v) + ' cm' : '';
+            if (truocEl) truocEl.textContent = fmt(tonTruocShow);
+            if (sauEl) sauEl.textContent = fmt(tonCuoiShow);
+        }
         function formatTongGio1Decimal(raw) {
             const n = parseNumericCell(raw);
             if (n != null) return n.toFixed(1);
@@ -972,6 +998,7 @@
 
         function fillNhienLieuPhuFromNL(record) {
             clearNlPhuCells();
+            clearSlbsDobinhCells();
             const statusEl = document.getElementById('nl-load-status');
             const parentId = String(record['ID'] ?? record['Row ID'] ?? '').trim();
             const nlTotal = (appSheetNlData && appSheetNlData.length) || 0;
@@ -1116,6 +1143,7 @@
             if (tonCuoiNgayEl && tonCuoiShow != null) tonCuoiNgayEl.textContent = formatNlNumber(tonCuoiShow);
             setCongRowText('val-cong-dobinh-truoc', tonTruocShow != null ? formatNlNumber(tonTruocShow) : '');
             setCongRowText('val-cong-dobinh-sau', tonCuoiShow != null ? formatNlNumber(tonCuoiShow) : '');
+            fillSlbsDobinhCm(tonTruocShow, tonCuoiShow);
 
             if (statusEl) {
                 statusEl.style.color = '#444';
