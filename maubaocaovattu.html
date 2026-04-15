@@ -46,6 +46,12 @@
         .company-name {
             text-transform: uppercase;
         }
+        .company-group-line {
+            margin-top: 4px;
+            font-size: 13px;
+            text-transform: none;
+            font-weight: normal;
+        }
 
         .form-code {
             text-align: right;
@@ -212,13 +218,14 @@
         <div class="header">
             <div class="company-name">
                 CÔNG TY CPXDHT ĐẠI PHONG
+                <div class="company-group-line"><span id="val-nhom-noi-quan-ly"></span></div>
             </div>
             <div class="form-code">
                 VT - TB.03.04c
             </div>
         </div>
 
-        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG MÁY NGÀY <span id="val-ngay">26/01/2026</span></h1>
+        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG MÁY <span id="val-ten-taisan"></span> NGÀY <span id="val-ngay">26/01/2026</span></h1>
 
         <div class="pre-table-info">
             <span>Ký xác nhận kiểm tra nhiên liệu đầu ngày:</span>
@@ -1714,11 +1721,19 @@
             document.getElementById('val-ngay').innerText = ngayLamViec || '...';
             const tenTaiSan = getTaiSanName(record);
             const tenTaiSanEl = document.getElementById('val-ten-taisan');
-            if (tenTaiSanEl) tenTaiSanEl.innerText = tenTaiSan ? ` + ${tenTaiSan}` : '';
+            if (tenTaiSanEl) tenTaiSanEl.innerText = tenTaiSan || '';
             const tenLaiMay = record['Tên lái máy'] ?? record['TenLaiMay'];
             document.getElementById('val-laimay').innerText = tenLaiMay || '';
             document.getElementById('val-baove').innerText = record['TenBaoVe'] || '';
             document.getElementById('val-thukho').innerText = record['TenThuKho'] || '';
+            const nhomNoiQuanLy =
+                record['Nhóm nơi quản lý'] ??
+                record['Nhom noi quan ly'] ??
+                record['Nhóm quản lý'] ??
+                record['Nhom quan ly'] ??
+                '';
+            const nhomNoiQuanLyEl = document.getElementById('val-nhom-noi-quan-ly');
+            if (nhomNoiQuanLyEl) nhomNoiQuanLyEl.innerText = nhomNoiQuanLy || '';
             
             // Bắt đầu / Kết thúc / Tổng từng dòng ca: lấy từ bảng CT trong fillCongViecFromChiTiet (fallback cha khi không có CT)
 
