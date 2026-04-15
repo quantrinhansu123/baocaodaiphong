@@ -181,7 +181,7 @@
         <!-- TITLE BANNER -->
         <div class="bg-[#2b7132] text-white text-center py-2">
             <h1 class="text-base font-bold uppercase mb-1">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
-            <p class="italic text-xs">(Từ 26/11/2025 đến 25/12/2025)</p>
+            <p id="report-date-range" class="italic text-xs">(Từ 26/11/2025 đến 25/12/2025)</p>
         </div>
 
         <!-- FILTERS -->
@@ -291,8 +291,8 @@
         /** Nhập nhiên liệu — «Lượng dầu nhập» = tổng từ «Nhật trình NL» (Dầu Diezel), gom theo Tên tài sản */
         const TABLE_NT_NL = "Nhật trình NL";
 
-        /** Cột ngày trên bảng Nhật trình máy (đổi thành «Ngày» nếu trên app chỉ có cột đó) */
-        const NT_FILTER_DATE_COLUMN = "Ngày làm việc";
+        /** Cột ngày trên bảng Nhật trình máy (một số file dùng «Ngày» thay cho «Ngày làm việc») */
+        const NT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
 
         const REPORT_COLUMNS = [
             "TT", "TenThietBi", "BienSoNhanHieu", "TenLaiMay", "GioLamHanhChinh", "GioLamTangCa",
@@ -762,6 +762,88 @@
             return byKey;
         }
 
+        function parseCtSortOrder(row) {
+            const raw = row?.["STT"] ?? row?.["Thứ tự"] ?? row?.["Thu tu"] ?? row?.["Dòng"] ?? row?.["Dong"] ?? "";
+            const n = parseInt(cellString(raw), 10);
+            return isNaN(n) ? Number.MAX_SAFE_INTEGER : n;
+        }
+
+        function pickCtCongViecText(row) {
+            if (!row || typeof row !== "object") return "";
+            const keys = [
+                "Công việc thực hiện",
+                "Cong viec thuc hien",
+                "Công việc",
+                "Cong viec",
+                "Nội dung",
+                "Noi dung",
+                "Mô tả",
+                "Mo ta",
+                "Diễn giải",
+                "Dien giai"
+            ];
+            for (const k of keys) {
+                const t = cellString(row[k]).trim();
+                if (t) return t;
+            }
+            for (const [k, v] of Object.entries(row)) {
+                const t = cellString(v).trim();
+                if (!t) continue;
+                if (/công việc|cong viec|nội dung|noi dung|mô tả|mo ta|diễn giải|dien giai/i.test(k)) return t;
+            }
+            return "";
+        }
+
+        function applyCongViecFromNtCtByTaiSan(mainRows, normalizedRows, ctRows) {
+            if (!ctRows?.length || !mainRows?.length) return normalizedRows;
+            const parsedCt = ctRows
+                .map((row) => ({
+                    refs: getCtParentRefCandidates(row),
+                    assetKey: assetKeyFromName(
+                        row["Tên tài sản"] ?? row["Ten tai san"] ?? row["TenTaiSan"] ?? row["Tên thiết bị"] ?? row["Ten thiet bi"] ?? ""
+                    ),
+                    task: pickCtCongViecText(row),
+                    order: parseCtSortOrder(row)
+                }))
+                .filter((x) => x.task && (x.assetKey || x.refs.length))
+                .sort((a, b) => a.order - b.order);
+            if (!parsedCt.length) return normalizedRows;
+
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
+                const parentIds = getNtParentMatchIds(raw);
+
+                const tasks = [];
+                const seen = new Set();
+                for (const ct of parsedCt) {
+                    let matched = false;
+                    if (key && ct.assetKey && ct.assetKey === key) {
+                        matched = true;
+                    }
+                    for (const rref of ct.refs) {
+                        if (matched) break;
+                        for (const pid of parentIds) {
+                            if (parentIdsMatch(rref, pid)) {
+                                matched = true;
+                                break;
+                            }
+                        }
+                        if (matched) break;
+                    }
+                    if (!matched) continue;
+                    if (!seen.has(ct.task)) {
+                        seen.add(ct.task);
+                        tasks.push(ct.task);
+                    }
+                }
+                if (tasks.length) out.CongViec = tasks.join(", ");
+                return out;
+            });
+        }
+
         function normalizeRowsFromAppSheet(rows) {
             return rows.map((raw) => {
                 const out = {};
@@ -941,6 +1023,7 @@
         const statusLine = document.getElementById("appsheet-status");
         const loadButton = document.getElementById("load-appsheet");
         const resetButton = document.getElementById("reset-filter");
+        const dateRangeEl = document.getElementById("report-date-range");
 
         const seedRows = [
             { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
@@ -974,6 +1057,77 @@
             };
         }
 
+        function parseDateInputYmd(value) {
+            if (!value) return null;
+            const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!m) return null;
+            const y = parseInt(m[1], 10);
+            const mm = parseInt(m[2], 10);
+            const dd = parseInt(m[3], 10);
+            if (!y || mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+            return new Date(y, mm - 1, dd);
+        }
+
+        function parseRecordNgayLamViec(raw) {
+            if (!raw || typeof raw !== "object") return null;
+            let v = "";
+            for (const k of NT_FILTER_DATE_COLUMNS) {
+                const t = cellString(raw[k]).trim();
+                if (t) {
+                    v = t;
+                    break;
+                }
+            }
+            if (!v) return null;
+
+            let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+            m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (m) return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+            m = v.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+            if (m) return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+            return null;
+        }
+
+        function formatDateVn(value) {
+            const d = value instanceof Date ? value : parseDateInputYmd(value);
+            if (!d || isNaN(d.getTime())) return "";
+            const dd = String(d.getDate()).padStart(2, "0");
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const yyyy = d.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
+        function applyNgayLamViecFilter(rows, filters) {
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
+            if (!from && !to) return rows;
+            return (rows || []).filter((raw) => {
+                const d = parseRecordNgayLamViec(raw);
+                if (!d || isNaN(d.getTime())) return false;
+                if (from && d < from) return false;
+                if (to && d > to) return false;
+                return true;
+            });
+        }
+
+        function updateDateRangeBanner(filters, rows) {
+            if (!dateRangeEl) return;
+            const fromFilter = formatDateVn(filters?.fromDate);
+            const toFilter = formatDateVn(filters?.toDate);
+            if (fromFilter || toFilter) {
+                dateRangeEl.textContent = `(Từ ${fromFilter || "..."} đến ${toFilter || "..."})`;
+                return;
+            }
+            const dates = (rows || []).map(parseRecordNgayLamViec).filter((d) => d && !isNaN(d.getTime()));
+            if (!dates.length) {
+                dateRangeEl.textContent = "(Từ ... đến ...)";
+                return;
+            }
+            dates.sort((a, b) => a - b);
+            dateRangeEl.textContent = `(Từ ${formatDateVn(dates[0])} đến ${formatDateVn(dates[dates.length - 1])})`;
+        }
+
         function buildFindCondition(filters) {
             const conditions = [];
             Object.entries(FILTER_FIELDS_BY_INPUT).forEach(([filterKey, columnNames]) => {
@@ -987,10 +1141,12 @@
             });
 
             if (filters.fromDate) {
-                conditions.push(`[${NT_FILTER_DATE_COLUMN}] >= DATE('${filters.fromDate}')`);
+                const parts = NT_FILTER_DATE_COLUMNS.map((c) => `[${c}] >= DATE('${filters.fromDate}')`);
+                conditions.push(parts.length === 1 ? parts[0] : `OR(${parts.join(",")})`);
             }
             if (filters.toDate) {
-                conditions.push(`[${NT_FILTER_DATE_COLUMN}] <= DATE('${filters.toDate}')`);
+                const parts = NT_FILTER_DATE_COLUMNS.map((c) => `[${c}] <= DATE('${filters.toDate}')`);
+                conditions.push(parts.length === 1 ? parts[0] : `OR(${parts.join(",")})`);
             }
 
             return conditions.length ? `AND(${conditions.join(",")})` : "";
@@ -1064,11 +1220,12 @@
                     }
                 }
 
-                const rows = Array.isArray(result)
+                const allRows = Array.isArray(result)
                     ? result
                     : Array.isArray(result?.Rows)
                         ? result.Rows
                         : [];
+                const rows = applyNgayLamViecFilter(allRows, filters);
 
                 let ctRows = [];
                 let ctLoadError = null;
@@ -1094,14 +1251,17 @@
                 let normalized = normalizeRowsFromAppSheet(rows);
                 normalized = applyGioLamHanhChinhFromNtCt(rows, normalized, sumHcByTaiSan);
                 normalized = applySoNgayThucTeFromNtCt(rows, normalized, sumNgayLvByTaiSan);
+                normalized = applyCongViecFromNtCtByTaiSan(rows, normalized, ctRows);
                 normalized = applyNlFuelColumnsFromNl(rows, normalized, nlFuelSumsByTaiSan);
                 renderRows(normalized);
+                updateDateRangeBanner(filters, rows);
 
                 let ctPart = "";
                 if (ctLoadError) {
                     ctPart = ` — không tải được «${TABLE_NT_CT}»: ${ctLoadError.message} (giờ HC theo phiếu nếu có)`;
                 } else if (ctRows.length) {
                     ctPart = `; giờ HC = tổng «Tổng giờ lv» (Trong giờ HC); số ngày làm việc = tổng «Số ngày lv thực tế» — gom theo Tên tài sản`;
+                    ctPart += "; cột Công việc = «Công việc thực hiện» từ Nhật trình máy CT (gom theo Tên tài sản, phân tách bằng dấu phẩy)";
                     const nHc = countCtRowsTrongGioHC(ctRows);
                     if (nHc > 0 && sumHcByTaiSan.size === 0) {
                         ctPart +=
@@ -1124,7 +1284,7 @@
                         ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
                     }
                 }
-                setStatus(`Đã tải ${rows.length} dòng từ bảng «Nhật trình máy»${ctPart}.`);
+                setStatus(`Đã tải ${rows.length}/${allRows.length} dòng từ bảng «Nhật trình máy» (đã lọc theo Ngày làm việc)${ctPart}.`);
             } catch (error) {
                 console.error(error);
                 setStatus(`Không tải được dữ liệu AppSheet: ${error.message}`, true);
@@ -1140,6 +1300,7 @@
             document.getElementById("filter-from-date").value = "";
             document.getElementById("filter-to-date").value = "";
             renderRows(seedRows);
+            updateDateRangeBanner({}, []);
             setStatus("Đã xóa bộ lọc, hiển thị dữ liệu mẫu.");
         }
 
@@ -1147,6 +1308,7 @@
         resetButton.addEventListener("click", resetFilters);
 
         renderRows(seedRows);
+        updateDateRangeBanner({}, []);
         setStatus(
             "Sẵn sàng: «Nhật trình máy» + CT + «Nhật trình NL» (mỡ, nhớt, TL, cầu, Diezel — theo Tên nhiên liệu & Tên tài sản)."
         );
