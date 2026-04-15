@@ -99,6 +99,14 @@
         td.font-bold { font-weight: bold; }
         .nowrap { white-space: nowrap; }
         .dobinh-line { line-height: 1.25; }
+        #val-sang-dobinh-truoc,
+        #val-sang-dobinh-sau,
+        #val-chieu-dobinh-truoc,
+        #val-chieu-dobinh-sau,
+        #val-toi-dobinh-truoc,
+        #val-toi-dobinh-sau {
+            visibility: hidden;
+        }
         .nl-phu-cell {
             white-space: normal;
             overflow-wrap: anywhere;
@@ -435,8 +443,8 @@
                     <td colspan="7" class="text-right font-bold">Cộng</td>
                     <td class="font-bold" id="val-cong-tong"></td>
                     <td class="font-bold" id="val-cong-nhap"></td>
-                    <td></td>
-                    <td></td>
+                    <td class="font-bold" id="val-cong-dobinh-truoc"></td>
+                    <td class="font-bold" id="val-cong-dobinh-sau"></td>
                     <td class="font-bold" id="val-cong-nhaphang"></td>
                     <td class="font-bold" id="val-cong-trahang"></td>
                     <td class="font-bold" id="val-cong-ruaxe"></td>
@@ -624,6 +632,14 @@
             return false;
         }
 
+        /** Giá trị ô AppSheet (Ref / enum có thể là object { Value }) — dùng trước khi so khớp ID */
+        function cellString(v) {
+            if (v == null) return '';
+            if (typeof v === 'object' && v !== null && 'Value' in v) return String(v.Value);
+            if (typeof v === 'object' && v !== null && 'value' in v) return String(v.value);
+            return String(v);
+        }
+
         function findRecordIndexById(data, wantedId) {
             if (wantedId == null || data == null || !data.length) return -1;
             const w = String(wantedId).trim();
@@ -699,7 +715,9 @@
             const keys = ['ID cha', 'ID Cha', 'Id cha', 'Ref', 'Nhật trình máy', 'Nhat trinh may'];
             for (const k of keys) {
                 const v = row[k];
-                if (v != null && String(v).trim() !== '') return v;
+                if (v == null) continue;
+                const t = cellString(v).trim();
+                if (t !== '') return t;
             }
             return '';
         }
@@ -711,6 +729,7 @@
                 'ID phiếu',
                 'ID phieu',
                 'Id phieu',
+                'Id Phieu',
                 'ID Phiếu',
                 'Ref',
                 'REF',
@@ -724,17 +743,19 @@
             const seen = new Set();
             for (const k of orderedKeys) {
                 const v = row[k];
-                if (v == null || String(v).trim() === '') continue;
-                const t = String(v).trim();
+                if (v == null) continue;
+                const t = cellString(v).trim();
+                if (t === '' || t === '[object Object]') continue;
                 if (!seen.has(t)) {
                     seen.add(t);
                     found.push(t);
                 }
             }
             for (const [k, v] of Object.entries(row)) {
-                if (v == null || String(v).trim() === '') continue;
+                if (v == null) continue;
+                const t = cellString(v).trim();
+                if (t === '' || t === '[object Object]') continue;
                 if (/phiếu|phieu|ref|nhật trình máy|id cha|related/i.test(k)) {
-                    const t = String(v).trim();
                     if (!seen.has(t)) {
                         seen.add(t);
                         found.push(t);
@@ -763,6 +784,32 @@
             }
             const n = parseFloat(s);
             return isNaN(n) ? null : n;
+        }
+
+        /** «SL nhập» trên Nhật trình NL — ưu tiên đúng tên cột, thêm biến thể AppSheet */
+        function parseNlSlNhapOnly(row) {
+            if (!row) return null;
+            const keys = [
+                'SL nhập',
+                'SL nhap',
+                'Sl nhập',
+                'Sl nhap',
+                'SL Nhập',
+                'Số lượng nhập',
+                'So luong nhap',
+                'Số lượng nhập ',
+                'SL nhập '
+            ];
+            for (const k of keys) {
+                const q = parseNumericCell(row[k]);
+                if (q != null) return q;
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (!/^sl\s*nh[aạ]p$/i.test(String(k).trim())) continue;
+                const q = parseNumericCell(v);
+                if (q != null) return q;
+            }
+            return null;
         }
 
         function parseNlQuantity(row) {
@@ -860,6 +907,39 @@
             return null;
         }
 
+        /** Khớp «Dầu Diezel» trên AppSheet (và biến thể Diesel / DO) */
+        function tenNlIsDauDiezel(tenRaw) {
+            return classifyNlByTen(tenRaw) === 'diesel';
+        }
+
+        /**
+         * Tổng «SL nhập» từ «Nhật trình NL»: Tên nhiên liệu = Dầu Diezel, ID phiếu khớp ID phiếu hiện tại.
+         */
+        function sumNlDauDiezelSlNhapForPhieu(record) {
+            const parentId = String(record['ID'] ?? record['Row ID'] ?? '').trim();
+            if (!parentId || !appSheetNlData?.length) return { sum: 0, any: false };
+            let sum = 0;
+            let any = false;
+            for (const row of appSheetNlData) {
+                const tenNl =
+                    row['Tên nhiên liệu'] ??
+                    row['Ten nhien lieu'] ??
+                    row['Tên NL'] ??
+                    row['Loại nhiên liệu'] ??
+                    row['Loai nhien lieu'] ??
+                    '';
+                if (!tenNlIsDauDiezel(tenNl)) continue;
+                if (!getNlParentRefCandidates(row).some((c) => parentIdsMatch(c, parentId))) continue;
+                let q = parseNlSlNhapOnly(row);
+                if (q == null) q = parseNlQuantity(row);
+                if (q != null) {
+                    sum += q;
+                    any = true;
+                }
+            }
+            return { sum, any };
+        }
+
         function formatNlNumber(n) {
             if (n == null || isNaN(n)) return '';
             return new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
@@ -876,27 +956,18 @@
                 if (el) el.textContent = '';
             });
         }
-        function renderDoBinhMultiLine(values) {
-            if (!values || !values.length) return '';
-            return values.map((v) => `<div class="dobinh-line">${formatNlNumber(v)}</div>`).join('');
-        }
-        function fillDoBinhFromNlRows(rows) {
-            const tonTruocList = [];
-            const tonSauList = [];
-            (rows || []).forEach((row) => {
-                const truoc = parseNlTonTruoc(row);
-                if (truoc != null) tonTruocList.push(truoc);
-                const sau = parseNlTonSau(row);
-                if (sau != null) tonSauList.push(sau);
-            });
-            const htmlTruoc = renderDoBinhMultiLine(tonTruocList);
-            const htmlSau = renderDoBinhMultiLine(tonSauList);
+        function clearDoBinhShiftCells() {
             ['sang', 'chieu', 'toi'].forEach((shift) => {
                 const beforeEl = document.getElementById(`val-${shift}-dobinh-truoc`);
                 const afterEl = document.getElementById(`val-${shift}-dobinh-sau`);
-                if (beforeEl) beforeEl.innerHTML = htmlTruoc;
-                if (afterEl) afterEl.innerHTML = htmlSau;
+                if (beforeEl) beforeEl.textContent = '';
+                if (afterEl) afterEl.textContent = '';
             });
+        }
+
+        /** Không hiển thị đo bình theo ca — chỉ dòng Cộng (gán trong fillNhienLieuPhuFromNL) */
+        function fillDoBinhFromNlRows(rows) {
+            clearDoBinhShiftCells();
         }
 
         function fillNhienLieuPhuFromNL(record) {
@@ -930,6 +1001,9 @@
             if (diezelEl) diezelEl.textContent = baseLabels.diesel;
 
             if (!parentId) {
+                clearDoBinhShiftCells();
+                setCongRowText('val-cong-dobinh-truoc', '');
+                setCongRowText('val-cong-dobinh-sau', '');
                 if (statusEl) {
                     statusEl.textContent =
                         'Nhật trình NL: không có ID phiếu trên bản ghi «Nhật trình máy» (cột ID).';
@@ -938,6 +1012,9 @@
                 return;
             }
             if (!nlTotal) {
+                clearDoBinhShiftCells();
+                setCongRowText('val-cong-dobinh-truoc', '');
+                setCongRowText('val-cong-dobinh-sau', '');
                 if (statusEl) {
                     statusEl.textContent =
                         'Nhật trình NL: chưa có dòng nào (kiểm tra tên bảng «Nhật trình NL», quyền API, hoặc F12 → Console).';
@@ -1037,6 +1114,8 @@
                       ? tonSauAnySum
                       : null;
             if (tonCuoiNgayEl && tonCuoiShow != null) tonCuoiNgayEl.textContent = formatNlNumber(tonCuoiShow);
+            setCongRowText('val-cong-dobinh-truoc', tonTruocShow != null ? formatNlNumber(tonTruocShow) : '');
+            setCongRowText('val-cong-dobinh-sau', tonCuoiShow != null ? formatNlNumber(tonCuoiShow) : '');
 
             if (statusEl) {
                 statusEl.style.color = '#444';
@@ -1104,14 +1183,6 @@
                 }
             }
             return found;
-        }
-
-        /** Giá trị ô AppSheet (Ref / enum có thể là object) */
-        function cellString(v) {
-            if (v == null) return '';
-            if (typeof v === 'object' && v !== null && 'Value' in v) return String(v.Value);
-            if (typeof v === 'object' && v !== null && 'value' in v) return String(v.value);
-            return String(v);
         }
 
         function normalizeBdText(s) {
@@ -1393,19 +1464,74 @@
                 den: t(row['Đến km'] ?? row['Den km'] ?? row['KM cuối'] ?? row['Km cuoi'] ?? row['Km kết thúc'] ?? row['Km ket thuc'])
             };
         }
+        /** Nhập/Trả/Rửa: ưu tiên cột TG… trên bảng CT (ID cha = ID phiếu) */
         function choHangRuaFromCtRow(row) {
             const t = (v) => (v == null || v === '' ? '' : String(v).trim());
             return {
-                nhaphang: t(row['Nhập hàng'] ?? row['Nhap hang'] ?? row['Thời gian nhập hàng'] ?? row['Thoi gian nhap hang']),
-                trahang: t(row['Trả hàng'] ?? row['Tra hang'] ?? row['Thời gian trả hàng'] ?? row['Thoi gian tra hang']),
-                ruaxe: t(row['Rửa xe'] ?? row['Rua xe'] ?? row['Thời gian rửa xe'] ?? row['Thoi gian rua xe'])
+                nhaphang: t(
+                    row['TG nhập hàng'] ??
+                        row['TG nhap hang'] ??
+                        row['Tg nhập hàng'] ??
+                        row['Tg nhap hang'] ??
+                        row['Nhập hàng'] ??
+                        row['Nhap hang'] ??
+                        row['Thời gian nhập hàng'] ??
+                        row['Thoi gian nhap hang']
+                ),
+                trahang: t(
+                    row['TG trả hàng'] ??
+                        row['TG tra hang'] ??
+                        row['Tg trả hàng'] ??
+                        row['Tg tra hang'] ??
+                        row['Trả hàng'] ??
+                        row['Tra hang'] ??
+                        row['Thời gian trả hàng'] ??
+                        row['Thoi gian tra hang']
+                ),
+                ruaxe: t(
+                    row['TG rửa xe'] ??
+                        row['TG rua xe'] ??
+                        row['Tg rửa xe'] ??
+                        row['Tg rua xe'] ??
+                        row['Rửa xe'] ??
+                        row['Rua xe'] ??
+                        row['Thời gian rửa xe'] ??
+                        row['Thoi gian rua xe']
+                )
             };
         }
         function parseChoHour(row, key) {
             const map = {
-                nhaphang: ['Nhập hàng', 'Nhap hang', 'Thời gian nhập hàng', 'Thoi gian nhap hang'],
-                trahang: ['Trả hàng', 'Tra hang', 'Thời gian trả hàng', 'Thoi gian tra hang'],
-                ruaxe: ['Rửa xe', 'Rua xe', 'Thời gian rửa xe', 'Thoi gian rua xe']
+                nhaphang: [
+                    'TG nhập hàng',
+                    'TG nhap hang',
+                    'Tg nhập hàng',
+                    'Tg nhap hang',
+                    'Nhập hàng',
+                    'Nhap hang',
+                    'Thời gian nhập hàng',
+                    'Thoi gian nhap hang'
+                ],
+                trahang: [
+                    'TG trả hàng',
+                    'TG tra hang',
+                    'Tg trả hàng',
+                    'Tg tra hang',
+                    'Trả hàng',
+                    'Tra hang',
+                    'Thời gian trả hàng',
+                    'Thoi gian tra hang'
+                ],
+                ruaxe: [
+                    'TG rửa xe',
+                    'TG rua xe',
+                    'Tg rửa xe',
+                    'Tg rua xe',
+                    'Rửa xe',
+                    'Rua xe',
+                    'Thời gian rửa xe',
+                    'Thoi gian rua xe'
+                ]
             };
             const keys = map[key] || [];
             for (const k of keys) {
@@ -1413,54 +1539,6 @@
                 if (n != null) return n;
             }
             return null;
-        }
-
-        /** Đo bình dầu tách 2 cột trên AppSheet; fallback một cột «trước và sau» (x / y) */
-        function doBinhFromCtRow(row) {
-            if (!row) return { truoc: '', sau: '' };
-            let truoc = cellString(
-                row['Đo bình dầu trước nhập'] ??
-                    row['Do binh dau truoc nhap'] ??
-                    row['Đo bình trước nhập'] ??
-                    row['Do binh truoc nhap'] ??
-                    ''
-            ).trim();
-            let sau = cellString(
-                row['Đo bình dầu sau nhập'] ??
-                    row['Do binh dau sau nhap'] ??
-                    row['Đo bình sau nhập'] ??
-                    row['Do binh sau nhap'] ??
-                    ''
-            ).trim();
-            if (truoc || sau) return { truoc, sau };
-            const legacy = cellString(
-                row['Đo bình dầu trước và sau nhập'] ??
-                    row['Do binh dau truoc va sau nhap'] ??
-                    row['Đo bình trước và sau nhập'] ??
-                    ''
-            ).trim();
-            if (!legacy) return { truoc: '', sau: '' };
-            const parts = legacy.split(/\s*(?:[/|]|\s+và\s+|\s*,\s*)\s*/).map((x) => x.trim()).filter(Boolean);
-            if (parts.length >= 2) return { truoc: parts[0], sau: parts.slice(1).join(' / ') };
-            return { truoc: legacy, sau: '' };
-        }
-
-        function ctNhapLitSum(list) {
-            if (!list || !list.length) return { sum: 0, any: false };
-            const keys = ['SL nhập', 'SL nhap', 'Sl nhập', 'Số lượng nhập', 'So luong nhap', 'Nhập (L)', 'Nhap (L)'];
-            let sum = 0;
-            let any = false;
-            list.forEach((row) => {
-                for (const k of keys) {
-                    const n = parseNumericCell(row[k]);
-                    if (n != null) {
-                        sum += n;
-                        any = true;
-                        break;
-                    }
-                }
-            });
-            return { sum, any };
         }
 
         function ctSuaChuaLitFromRow(row) {
@@ -1487,9 +1565,16 @@
             if (el) el.textContent = text == null ? '' : String(text);
         }
         function clearCongRowTotals() {
-            ['val-cong-tong', 'val-cong-nhap', 'val-cong-nhaphang', 'val-cong-trahang', 'val-cong-ruaxe', 'val-cong-sua'].forEach((id) =>
-                setCongRowText(id, '')
-            );
+            [
+                'val-cong-tong',
+                'val-cong-nhap',
+                'val-cong-dobinh-truoc',
+                'val-cong-dobinh-sau',
+                'val-cong-nhaphang',
+                'val-cong-trahang',
+                'val-cong-ruaxe',
+                'val-cong-sua'
+            ].forEach((id) => setCongRowText(id, ''));
         }
 
         function resetShiftDetailRowsLayout() {
@@ -1560,11 +1645,10 @@
                 setTextById(ids.sua, '');
                 return;
             }
-            const { sum, any } = ctNhapLitSum(list);
-            setTextById(ids.nhap, any ? formatNlNumber(sum) : '');
-            const db = doBinhFromCtRow(list[0]);
-            setTextById(ids.truoc, db.truoc);
-            setTextById(ids.sau, db.sau);
+            /* «Nhập» + «Đo bình dầu» trước/sau nhập lấy từ «Nhật trình NL», không lấy từ CT */
+            setTextById(ids.nhap, '');
+            setTextById(ids.truoc, '');
+            setTextById(ids.sau, '');
             setTextById(ids.sua, ctSuaChuaLitFromRow(list[0]));
         }
 
@@ -1584,39 +1668,39 @@
             resetShiftDetailRowsLayout();
         }
 
+        function ctRowHasCongViecMoTa(row) {
+            if (!row || typeof row !== 'object') return false;
+            const t = (
+                row['Công việc thực hiện'] ??
+                row['Cong viec thuc hien'] ??
+                row['Mô tả công việc'] ??
+                row['Mo ta cong viec'] ??
+                ''
+            )
+                .toString()
+                .trim();
+            return t.length > 0;
+        }
+
         function fillCongViecFromChiTiet(record) {
             clearShiftCongViecCells();
             const parentId = record['ID'] ?? record['Row ID'] ?? '';
-            const matched = (appSheetDetailData || []).filter((d) => parentIdsMatch(getDetailParentRef(d), parentId));
+            const matched = (appSheetDetailData || [])
+                .filter((d) => parentIdsMatch(getDetailParentRef(d), parentId))
+                .filter(ctRowHasCongViecMoTa);
 
             if (!matched.length) {
-                const ec = document.getElementById('val-sang-cv');
-                if (ec) ec.innerText = record['Sang_CongViec'] || '';
-                const kmTu = record['Sang_TuKm'] ?? record['Sang_TừKm'] ?? record['Sang_KmTu'] ?? '';
-                const kmDen = record['Sang_DenKm'] ?? record['Sang_ĐếnKm'] ?? record['Sang_KmDen'] ?? '';
-                document.getElementById('val-sang-kmtu').innerText = kmTu;
-                document.getElementById('val-sang-kmden').innerText = kmDen;
-                document.getElementById('val-sang-nhaphang').innerText =
-                    record['Sang_NhapHang'] ?? record['Sang_NhậpHang'] ?? record['Sang_ThoiGianNhapHang'] ?? '';
-                document.getElementById('val-sang-trahang').innerText =
-                    record['Sang_TraHang'] ?? record['Sang_TrảHang'] ?? record['Sang_ThoiGianTraHang'] ?? '';
-                document.getElementById('val-sang-ruaxe').innerText =
-                    record['Sang_RuaXe'] ?? record['Sang_RửaXe'] ?? record['Sang_ThoiGianRuaXe'] ?? '';
-                document.getElementById('val-sang-bd').innerText = record['Sang_GioBatDau'] || '';
-                document.getElementById('val-sang-kt').innerText = record['Sang_GioKetThuc'] || '';
-                document.getElementById('val-sang-tong').innerText = formatTongGio1Decimal(record['Sang_TongGio'] || '');
-                setCongRowText('val-cong-tong', formatTongGio1Decimal(record['Sang_TongGio'] || ''));
                 ['sang', 'chieu', 'toi'].forEach((shift) => {
-                    const n =
-                        shift === 'sang' &&
-                        (record['Sang_CongViec'] ||
-                            record['Sang_GioBatDau'] ||
-                            record['Sang_GioKetThuc'] ||
-                            record['Sang_TongGio'])
-                            ? 1
-                            : 0;
-                    applyShiftDetailRowVisibility(shift, n);
+                    applyShiftDetailRowVisibility(shift, 0);
+                    fillShiftNhienLieuFromCt([], shift);
                 });
+                setCongRowText('val-cong-tong', '');
+                setCongRowText('val-cong-sua', '');
+                setCongRowText('val-cong-nhaphang', '');
+                setCongRowText('val-cong-trahang', '');
+                setCongRowText('val-cong-ruaxe', '');
+                const nlNhapFallback = sumNlDauDiezelSlNhapForPhieu(record);
+                setCongRowText('val-cong-nhap', nlNhapFallback.any ? formatNlNumber(nlNhapFallback.sum) : '');
                 return;
             }
 
@@ -1720,9 +1804,9 @@
                     ruaXeCount++;
                 }
             });
-            const nhap = ctNhapLitSum(matched);
+            const nlNhapCong = sumNlDauDiezelSlNhapForPhieu(record);
             setCongRowText('val-cong-tong', tongGioCount ? tongGioSum.toFixed(1) : '');
-            setCongRowText('val-cong-nhap', nhap.any ? formatNlNumber(nhap.sum) : '');
+            setCongRowText('val-cong-nhap', nlNhapCong.any ? formatNlNumber(nlNhapCong.sum) : '');
             setCongRowText('val-cong-nhaphang', nhapHangCount ? formatNlNumber(nhapHangSum) : '');
             setCongRowText('val-cong-trahang', traHangCount ? formatNlNumber(traHangSum) : '');
             setCongRowText('val-cong-ruaxe', ruaXeCount ? formatNlNumber(ruaXeSum) : '');
@@ -1814,7 +1898,7 @@
             document.getElementById('val-baove').innerText = record['TenBaoVe'] || '';
             document.getElementById('val-thukho').innerText = record['TenThuKho'] || '';
             
-            // Bắt đầu / Kết thúc / Tổng từng dòng ca: lấy từ bảng CT trong fillCongViecFromChiTiet (fallback cha khi không có CT)
+            // Chi tiết công việc theo ca: chỉ dòng CT có «Công việc…» / mô tả; không có thì ẩn hết dòng chi tiết
 
             // Tổng giờ
             document.getElementById('val-tong-gio').innerText = formatTongGio1Decimal(record['TongGioHoatDong'] || '');

@@ -66,22 +66,45 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 28px;
+            height: 22px;
             width: 100%;
-            max-width: 350px;
-            padding: 0 12px;
-            font-size: 12px;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
             outline: none;
         }
         .filter-input:focus {
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
-        .action-btn {
-            height: 30px;
+        .filter-select {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
             border-radius: 9999px;
-            padding: 0 16px;
-            font-size: 12px;
+            height: 22px;
+            width: 100%;
+            max-width: 200px;
+            padding: 0 28px 0 10px;
+            font-size: 11px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232b7132' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 10px;
+        }
+        .filter-select:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -153,8 +176,9 @@
             .table-wrapper { font-size: 9px; }
             th, td { padding: 2px; }
             thead th { font-size: 8px; }
-            .filter-input { height: 24px; font-size: 11px; }
-            .action-btn { height: 26px; padding: 0 10px; font-size: 11px; }
+            .filter-input,
+            .filter-select { height: 22px; font-size: 10px; max-width: 180px; }
+            .action-btn { height: 24px; padding: 0 8px; font-size: 10px; }
         }
     </style>
 </head>
@@ -185,32 +209,38 @@
         </div>
 
         <!-- FILTERS -->
-        <div class="p-2 bg-white">
-            <div class="flex flex-wrap justify-between gap-2 font-bold text-[#2b7132] text-xs">
-                <div class="w-full lg:w-[49%] space-y-2">
-                    <div class="flex items-center">
-                        <span class="w-[180px]">TÊN CÔNG TRÌNH:</span>
-                        <input id="filter-project" class="filter-input" placeholder="Nhập tên công trình">
+        <div class="p-1.5 bg-white">
+            <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
+                <div class="w-full lg:w-[49%] space-y-1">
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN CÔNG TRÌNH:</span>
+                        <select id="filter-project" class="filter-select" title="Chọn tên công trình">
+                            <option value="">— Tất cả —</option>
+                        </select>
                     </div>
-                    <div class="flex items-center">
-                        <span class="w-[180px]">NHÓM XE MÁY THIẾT BỊ:</span>
-                        <input id="filter-group" class="filter-input" placeholder="Nhập nhóm thiết bị">
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">NHÓM XE MÁY THIẾT BỊ:</span>
+                        <select id="filter-group" class="filter-select" title="Chọn nhóm thiết bị">
+                            <option value="">— Tất cả —</option>
+                        </select>
                     </div>
-                    <div class="flex items-center">
-                        <span class="w-[180px]">TÊN LÁI MÁY:</span>
-                        <input id="filter-driver" class="filter-input" placeholder="Nhập tên lái máy">
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN LÁI MÁY:</span>
+                        <select id="filter-driver" class="filter-select" title="Chọn tên lái máy">
+                            <option value="">— Tất cả —</option>
+                        </select>
                     </div>
                 </div>
-                <div class="w-full lg:w-[49%] space-y-2 flex flex-col items-end lg:pr-4">
-                    <div class="flex items-center w-full lg:w-[340px]">
-                        <span class="w-[100px]">TỪ NGÀY</span>
-                        <input id="filter-from-date" type="date" class="filter-input flex-1">
+                <div class="w-full lg:w-[49%] space-y-1 flex flex-col items-end lg:pr-2">
+                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                        <span class="w-[72px] shrink-0">TỪ NGÀY</span>
+                        <input id="filter-from-date" type="date" class="filter-input flex-1 min-w-0 max-w-[200px]">
                     </div>
-                    <div class="flex items-center w-full lg:w-[340px]">
-                        <span class="w-[100px]">ĐẾN NGÀY</span>
-                        <input id="filter-to-date" type="date" class="filter-input flex-1">
+                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                        <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
+                        <input id="filter-to-date" type="date" class="filter-input flex-1 min-w-0 max-w-[200px]">
                     </div>
-                    <div class="flex items-center gap-2 w-full lg:w-[340px] justify-end">
+                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end">
                         <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
                         <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
                     </div>
@@ -313,13 +343,19 @@
         ];
 
         /**
-         * Bộ lọc: mỗi ô form map tới một hoặc nhiều tên cột (ưu tiên tên phổ biến trên «Nhật trình máy»,
-         * kèm tên cũ nếu virtual column vẫn dùng khóa tiếng Anh).
+         * Cột trên «Nhật trình máy» dùng cho dropdown và lọc văn bản (một nguồn — tránh lệch tên cột).
+         * Lọc công trình / lái máy / nhóm thực hiện trên trình duyệt để khớp mọi cột tương ứng.
          */
-        const FILTER_FIELDS_BY_INPUT = {
-            project: ["Tên công trình", "TenCongTrinh"],
+        const FILTER_DROPDOWN_SOURCE_KEYS = {
+            project: [
+                "Tên công trình",
+                "TenCongTrinh",
+                "Công trường",
+                "CongTruong",
+                "Cong truong"
+            ],
             group: ["Nhóm xe máy thiết bị", "NhomXeMayThietBi"],
-            driver: ["Tên lái máy", "TenLaiMay"]
+            driver: ["Tên lái máy", "TenLaiMay", "Tên lái xe", "Ten lai xe", "Ten lai may"]
         };
 
         /**
@@ -1052,10 +1088,34 @@
         const seedRows = [
             { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
             { TT: "1", TenThietBi: "NHÓM MÁY XÚC:", subGroupRow: true },
-            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", TenLaiMay: "Cù Như Phan", SoNgayXeHoatDong: "13,0", SoChuyenChayThang: "", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongXeBon: "115,0", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,5", DinhMucTieuHao: "10,8", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
-            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", TenLaiMay: "Phạm V Hoàng", SoNgayXeHoatDong: "25,0", SoChuyenChayThang: "", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongXeBon: "254,5", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,9", DinhMucTieuHao: "11,0", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TenThietBi: "Máy xúc PC 200-6/062", TenLaiMay: "Cù Như Phan", SoNgayXeHoatDong: "13,0", SoChuyenChayThang: "", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongXeBon: "115,0", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,5", DinhMucTieuHao: "10,8", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TenThietBi: "Máy xúc PC 200-8/013", TenLaiMay: "Phạm V Hoàng", SoNgayXeHoatDong: "25,0", SoChuyenChayThang: "", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongXeBon: "254,5", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,9", DinhMucTieuHao: "11,0", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
             { TT: "B", TenThietBi: "NHÓM MÁY THUÊ:", groupRow: true }
         ];
+
+        /** Gợi ý dropdown khi đang xem dữ liệu mẫu (cột đã chuẩn hóa) */
+        function populateFilterDropdownsFromSeedDemo() {
+            const proj = new Set();
+            const drv = new Set();
+            for (const r of seedRows) {
+                if (r.groupRow || r.subGroupRow) continue;
+                const p = String(r.CongTruong ?? "").trim();
+                if (p) proj.add(p);
+                const d = String(r.TenLaiMay ?? "").trim();
+                if (d) drv.add(d);
+            }
+            fillFilterSelectElement(
+                "filter-project",
+                [...proj].sort((a, b) => a.localeCompare(b, "vi")),
+                false
+            );
+            fillFilterSelectElement("filter-group", [], false);
+            fillFilterSelectElement(
+                "filter-driver",
+                [...drv].sort((a, b) => a.localeCompare(b, "vi")),
+                false
+            );
+        }
 
         function escapeHtml(value) {
             return String(value ?? "")
@@ -1069,6 +1129,52 @@
         function setStatus(message, isError = false) {
             statusLine.textContent = message;
             statusLine.className = `status-line ${isError ? "text-red-600" : "text-[#2b7132]"}`;
+        }
+
+        function pickRawFilterDropdownValue(raw, filterKey) {
+            const keys = FILTER_DROPDOWN_SOURCE_KEYS[filterKey] || [];
+            for (const k of keys) {
+                const v = raw[k];
+                if (v === undefined || v === null) continue;
+                const s = cellString(v).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function uniqueSortedFromRaw(rows, filterKey) {
+            const set = new Set();
+            for (const raw of rows || []) {
+                const v = pickRawFilterDropdownValue(raw, filterKey);
+                if (v) set.add(v);
+            }
+            return [...set].sort((a, b) => a.localeCompare(b, "vi"));
+        }
+
+        function fillFilterSelectElement(selectId, values, preserveSelection) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const prev = preserveSelection ? sel.value : "";
+            const valueSet = new Set(values || []);
+            sel.innerHTML = "";
+            const optAll = document.createElement("option");
+            optAll.value = "";
+            optAll.textContent = "— Tất cả —";
+            sel.appendChild(optAll);
+            for (const v of values || []) {
+                const o = document.createElement("option");
+                o.value = v;
+                o.textContent = v;
+                sel.appendChild(o);
+            }
+            if (prev && valueSet.has(prev)) sel.value = prev;
+            else sel.value = "";
+        }
+
+        function populateFilterDropdownsFromRawRows(rawRows) {
+            fillFilterSelectElement("filter-project", uniqueSortedFromRaw(rawRows, "project"), true);
+            fillFilterSelectElement("filter-group", uniqueSortedFromRaw(rawRows, "group"), true);
+            fillFilterSelectElement("filter-driver", uniqueSortedFromRaw(rawRows, "driver"), true);
         }
 
         function getFilters() {
@@ -1152,18 +1258,12 @@
             dateRangeEl.textContent = `(Từ ${formatDateVn(dates[0])} đến ${formatDateVn(dates[dates.length - 1])})`;
         }
 
-        function buildFindCondition(filters) {
+        /**
+         * Chỉ gửi lọc ngày lên AppSheet (giảm dữ liệu). Lọc công trình / nhóm / lái máy xử lý ở client
+         * để khớp đúng mọi cột trong FILTER_DROPDOWN_SOURCE_KEYS (tránh lệch với dropdown).
+         */
+        function buildFindRowFilterForApi(filters) {
             const conditions = [];
-            Object.entries(FILTER_FIELDS_BY_INPUT).forEach(([filterKey, columnNames]) => {
-                const value = filters[filterKey];
-                if (!value) return;
-                const safeValue = value.replaceAll("'", "''");
-                const containsParts = columnNames.map(
-                    (fieldName) => `CONTAINS(LOWER([${fieldName}]), LOWER('${safeValue}'))`
-                );
-                conditions.push(containsParts.length === 1 ? containsParts[0] : `OR(${containsParts.join(",")})`);
-            });
-
             if (filters.fromDate) {
                 const parts = NT_FILTER_DATE_COLUMNS.map((c) => `[${c}] >= DATE('${filters.fromDate}')`);
                 conditions.push(parts.length === 1 ? parts[0] : `OR(${parts.join(",")})`);
@@ -1172,8 +1272,34 @@
                 const parts = NT_FILTER_DATE_COLUMNS.map((c) => `[${c}] <= DATE('${filters.toDate}')`);
                 conditions.push(parts.length === 1 ? parts[0] : `OR(${parts.join(",")})`);
             }
-
             return conditions.length ? `AND(${conditions.join(",")})` : "";
+        }
+
+        function rawCellMatchesNeedle(raw, filterKey, needle) {
+            const n = needle.trim().toLowerCase();
+            if (!n) return true;
+            const cols = FILTER_DROPDOWN_SOURCE_KEYS[filterKey] || [];
+            for (const col of cols) {
+                const v = cellString(raw[col] ?? "").trim();
+                if (!v) continue;
+                if (v.toLowerCase() === n) return true;
+                if (v.toLowerCase().includes(n)) return true;
+            }
+            return false;
+        }
+
+        function rawRowMatchesTextFilters(raw, filters) {
+            for (const fk of ["project", "group", "driver"]) {
+                const needle = (filters[fk] ?? "").trim();
+                if (!needle) continue;
+                if (!rawCellMatchesNeedle(raw, fk, needle)) return false;
+            }
+            return true;
+        }
+
+        function applyRawTextFilters(rows, filters) {
+            if (!rows?.length) return rows || [];
+            return rows.filter((r) => rawRowMatchesTextFilters(r, filters));
         }
 
         function renderRows(rows) {
@@ -1186,6 +1312,7 @@
                 return;
             }
 
+            let sttAuto = 0;
             reportBody.innerHTML = rows.map((row) => {
                 if (row.groupRow) {
                     return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="23"></td></tr>`;
@@ -1194,9 +1321,11 @@
                     return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="23"></td></tr>`;
                 }
 
+                sttAuto += 1;
                 const cells = REPORT_COLUMNS.map((column, index) => {
                     const cssClass = index === 1 || index === 2 || index === 23 || index === 24 ? "text-left" : "";
-                    return `<td class="${cssClass}">${escapeHtml(row[column] ?? "")}</td>`;
+                    const rawVal = column === "TT" ? String(sttAuto) : (row[column] ?? "");
+                    return `<td class="${cssClass}">${escapeHtml(rawVal)}</td>`;
                 }).join("");
 
                 return `<tr>${cells}</tr>`;
@@ -1209,7 +1338,7 @@
 
             try {
                 const filters = getFilters();
-                const condition = buildFindCondition(filters);
+                const condition = buildFindRowFilterForApi(filters);
                 const endpoint = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(APPSHEET_CONFIG.tableName)}/Action`;
 
                 const payload = {
@@ -1249,7 +1378,9 @@
                     : Array.isArray(result?.Rows)
                         ? result.Rows
                         : [];
-                const rows = applyNgayLamViecFilter(allRows, filters);
+                const afterDate = applyNgayLamViecFilter(allRows, filters);
+                populateFilterDropdownsFromRawRows(afterDate);
+                const rows = applyRawTextFilters(afterDate, filters);
 
                 let ctRows = [];
                 let ctLoadError = null;
@@ -1308,7 +1439,9 @@
                         ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
                     }
                 }
-                setStatus(`Đã tải ${rows.length}/${allRows.length} dòng từ bảng «Nhật trình máy» (đã lọc theo Ngày làm việc)${ctPart}.`);
+                setStatus(
+                    `Đã hiển thị ${rows.length} dòng phù hợp (lọc ngày + công trình/nhóm/lái máy; ${afterDate.length} dòng sau lọc ngày; API ${allRows.length} dòng)${ctPart}.`
+                );
             } catch (error) {
                 console.error(error);
                 setStatus(`Không tải được dữ liệu AppSheet: ${error.message}`, true);
@@ -1318,11 +1451,9 @@
         }
 
         function resetFilters() {
-            document.getElementById("filter-project").value = "";
-            document.getElementById("filter-group").value = "";
-            document.getElementById("filter-driver").value = "";
             document.getElementById("filter-from-date").value = "";
             document.getElementById("filter-to-date").value = "";
+            populateFilterDropdownsFromSeedDemo();
             renderRows(seedRows);
             updateDateRangeBanner({}, []);
             setStatus("Đã xóa bộ lọc, hiển thị dữ liệu mẫu.");
@@ -1331,11 +1462,15 @@
         loadButton.addEventListener("click", loadFromAppSheet);
         resetButton.addEventListener("click", resetFilters);
 
-        renderRows(seedRows);
-        updateDateRangeBanner({}, []);
-        setStatus(
-            "Sẵn sàng: «Nhật trình máy» + CT + «Nhật trình NL» (mỡ, nhớt, TL, cầu, Diezel — theo Tên nhiên liệu & Tên tài sản)."
-        );
+        /** Tự kết nối AppSheet khi mở trang (giống các báo cáo khác trong dự án). */
+        function bootLoadFromAppSheet() {
+            loadFromAppSheet();
+        }
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootLoadFromAppSheet);
+        } else {
+            bootLoadFromAppSheet();
+        }
     </script>
 </body>
 </html>
