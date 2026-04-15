@@ -524,11 +524,22 @@
         // Cấu hình Application Access Key
         const ACCESS_KEY = 'V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa';
         
-        // Tên bảng chứa dữ liệu trên AppSheet
-        const TABLE_NAME = 'Nhật trình máy';
-        const TABLE_CT_NAME = 'Nhật trình máy CT';
-        const TABLE_NL_NAME = 'Nhật trình NL';
-        const TABLE_CV_BD_NAME = 'CV bảo dưỡng NT máy';
+        // Danh sách tab nguồn (các tab đánh dấu đỏ bạn xác nhận)
+        const TABLES = {
+            DS_SO_XUONG: 'Ds sổ xuống',
+            NHAT_TRINH_MAY: 'Nhật trình máy',
+            NHAT_TRINH_MAY_CT: 'Nhật trình máy CT',
+            KH_CONG_VIEC_NT_MAY: 'KH công việc NT máy',
+            CV_BAO_DUONG_NT_MAY: 'CV bảo dưỡng NT máy',
+            NHAT_TRINH_NL: 'Nhật trình NL',
+            NHAP_XUAT_LUAN_CHUYEN: 'Nhập xuất luân chuyển',
+            NHAP_XUAT_LUAN_CHUYEN_CT: 'Nhập xuất luân chuyển CT'
+        };
+        // 4 bảng đang dùng trực tiếp để fill sổ vận hành/bảo dưỡng
+        const TABLE_NAME = TABLES.NHAT_TRINH_MAY;
+        const TABLE_CT_NAME = TABLES.NHAT_TRINH_MAY_CT;
+        const TABLE_NL_NAME = TABLES.NHAT_TRINH_NL;
+        const TABLE_CV_BD_NAME = TABLES.CV_BAO_DUONG_NT_MAY;
 
         /** Khi AppSheet chưa có dòng CV bảo dưỡng: dùng 8 dòng mẫu (tắt: thêm ?bdSample=0 vào URL) */
         function wantsCvBdSampleFallback() {

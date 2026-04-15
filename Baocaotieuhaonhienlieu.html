@@ -224,22 +224,26 @@
             <table>
                 <thead>
                     <tr>
-                        <th rowspan="2" style="width: 2%;">TT</th>
+                        <th rowspan="2" style="width: 2%;">STT</th>
                         <th rowspan="2" style="width: 10%;">Tên thiết bị</th>
-                        <th rowspan="2" style="width: 6%;">Biển số<br>/Nhãn hiệu</th>
-                        <th rowspan="2" style="width: 7%;">Tên Lái Máy</th>
-                        <th rowspan="2" style="width: 3.5%;">Giờ làm<br>hành chính<br>(h)</th>
-                        <th rowspan="2" style="width: 3.5%;">Giờ làm<br>tăng ca (h)</th>
-                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động(h)</th>
-                        <th rowspan="2" style="width: 4%;">Số ngày<br>thực tế<br>làm việc<br>(ngày)</th>
+                        <th rowspan="2" style="width: 7%;">Tên lái xe</th>
+                        <th rowspan="2" style="width: 4%;">Số ngày xe<br>hoạt động</th>
+                        <th rowspan="2" style="width: 4%;">Số chuyến chạy/<br>tháng</th>
+                        <th rowspan="2" style="width: 3.5%;">Giờ làm<br>việc HC</th>
+                        <th rowspan="2" style="width: 3.5%;">Giờ tăng<br>ca/ tháng</th>
+                        <th rowspan="2" style="width: 4%;">Tổng giờ hoạt động<br>xe bồn (h)</th>
+                        <th rowspan="2" style="width: 3%;">Ẩn khi in</th>
+                        <th rowspan="2" style="width: 4%;">Tổng km hoạt động<br>T1(km)</th>
+                        <th rowspan="2" style="width: 4%;">Tổng km hoạt động<br>T2(km)</th>
                         <th rowspan="2" style="width: 4.5%;">Tồn đầu<br>kỳ (lít)</th>
-                        <th rowspan="2" style="width: 4.5%;">Lượng<br>dầu nhập<br>trong<br>tháng (lít)</th>
+                        <th rowspan="2" style="width: 4.5%;">Lượng dầu nhập<br>trong tháng (lít)</th>
                         <th rowspan="2" style="width: 4.5%;">Tồn cuối<br>kỳ (lít)</th>
-                        <th rowspan="2" style="width: 4.5%;">Lượng dầu<br>tiêu hao<br>(L)</th>
+                        <th rowspan="2" style="width: 4.5%;">Lượng dầu<br>tiêu hao (L)</th>
                         <th colspan="4">Nhiên liệu phụ</th>
-                        <th rowspan="2" style="width: 3.5%;">Định<br>mức<br>dầu<br>trung<br>bình</th>
-                        <th rowspan="2" style="width: 3.5%;">Định mức<br>tiêu hao<br>(l/h)</th>
-                        <th rowspan="2" style="width: 5%;">Chênh lệch<br>(>=0: trong<br>Định mức<br>cho phép;<br>&lt;0: vượt<br>định mức)</th>
+                        <th rowspan="2" style="width: 4%;">Tiêu hao thực tế<br>T1(l/km)</th>
+                        <th rowspan="2" style="width: 4%;">Tiêu hao thực tế<br>T12 (l/km)</th>
+                        <th rowspan="2" style="width: 3.5%;">Định mức<br>trong bình</th>
+                        <th rowspan="2" style="width: 3.5%;">Định mức tiêu hao<br>(l/km)</th>
                         <th rowspan="2" style="width: 6%;">Công việc</th>
                         <th rowspan="2" style="width: 6%;">Công trường</th>
                     </tr>
@@ -258,6 +262,7 @@
                         <th>(6)</th>
                         <th>(7)</th>
                         <th>(8)</th>
+                        <th></th>
                         <th>(9)</th>
                         <th>(10)</th>
                         <th>(11)</th>
@@ -268,9 +273,12 @@
                         <th>(16)</th>
                         <th>(17)</th>
                         <th>(18)</th>
-                        <th></th> <!-- Empty for Chênh lệch -->
+                        <th></th>
+                        <th></th>
                         <th>(19)</th>
+                        <th></th>
                         <th>(20)</th>
+                        <th>(21)</th>
                     </tr>
                 </thead>
                 <tbody id="report-body"></tbody>
@@ -295,11 +303,13 @@
         const NT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
 
         const REPORT_COLUMNS = [
-            "TT", "TenThietBi", "BienSoNhanHieu", "TenLaiMay", "GioLamHanhChinh", "GioLamTangCa",
-            "TongGioHoatDongT12", "SoNgayThucTe", "TonDauKy", "LuongDauNhap",
-            "TonCuoiKy", "LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
-            "DinhMucDauTrungBinh", "DinhMucTieuHao",
-            "ChenhLech", "CongViec", "CongTruong"
+            "TT", "TenThietBi", "TenLaiMay", "SoNgayXeHoatDong", "SoChuyenChayThang",
+            "GioLamHanhChinh", "GioLamTangCa", "TongGioHoatDongXeBon", "AnKhiIn",
+            "TongKmHoatDongT1", "TongKmHoatDongT2",
+            "TonDauKy", "LuongDauNhap", "TonCuoiKy", "LuongDauTieuHao",
+            "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
+            "TieuHaoThucTeT1", "TieuHaoThucTeT12", "DinhMucTrongBinh", "DinhMucTieuHao",
+            "CongViec", "CongTruong"
         ];
 
         /**
@@ -320,25 +330,31 @@
             TT: ["TT", "STT", "Stt"],
             /* Ưu tiên «Tên tài sản» (Nhật trình máy), sau đó «Tên thiết bị» */
             TenThietBi: ["Tên tài sản", "Ten tai san", "TenThietBi", "Tên thiết bị", "Ten thiet bi"],
-            BienSoNhanHieu: ["BienSoNhanHieu", "Biển số/Nhãn hiệu", "Biển số", "Bien so", "Nhãn hiệu"],
-            TenLaiMay: ["TenLaiMay", "Tên lái máy", "Ten lai may"],
+            TenLaiMay: ["TenLaiMay", "Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe"],
+            SoNgayXeHoatDong: [
+                "Số ngày xe hoạt động",
+                "So ngay xe hoat dong",
+                "SoNgayXeHoatDong",
+                "Số ngày thực tế làm việc (ngày)",
+                "So ngay thuc te lam viec (ngay)",
+                "SoNgayThucTe"
+            ],
+            SoChuyenChayThang: ["Số chuyến chạy/ tháng", "So chuyen chay/ thang", "SoChuyenChayThang"],
             /* Giờ HC: tổng Tổng giờ lv (Trong giờ HC) gom theo Tên tài sản; không có thì lấy từ phiếu */
-            GioLamHanhChinh: ["GioLamHanhChinh", "Giờ làm hành chính", "Gio lam hanh chinh"],
-            GioLamTangCa: ["GioLamTangCa", "Giờ làm tăng ca", "Gio lam tang ca"],
-            TongGioHoatDongT12: [
+            GioLamHanhChinh: ["GioLamHanhChinh", "Giờ làm hành chính", "Gio lam hanh chinh", "Giờ làm việc HC", "Gio lam viec HC"],
+            GioLamTangCa: ["GioLamTangCa", "Giờ làm tăng ca", "Gio lam tang ca", "Giờ tăng ca/ tháng", "Gio tang ca/ thang"],
+            TongGioHoatDongXeBon: [
+                "Tổng giờ hoạt động xe bồn (h)",
+                "Tong gio hoat dong xe bon (h)",
+                "TongGioHoatDongXeBon",
                 "TongGioHoatDongT12",
                 "Tổng giờ hoạt động T12",
                 "Tong gio hoat dong T12",
                 "TongGioHoatDong"
             ],
-            /* Ưu tiên tổng «Số ngày lv thực tế» từ bảng CT (gom theo Tên tài sản); trên phiếu dùng các tên dưới — không map trực tiếp cột lv từ phiếu */
-            SoNgayThucTe: [
-                "Số ngày thực tế làm việc (ngày)",
-                "So ngay thuc te lam viec (ngay)",
-                "SoNgayThucTe",
-                "Số ngày thực tế",
-                "So ngay thuc te"
-            ],
+            AnKhiIn: ["Ẩn khi in", "An khi in", "AnKhiIn"],
+            TongKmHoatDongT1: ["Tổng km hoạt động T1(km)", "Tong km hoat dong T1(km)", "TongKmHoatDongT1"],
+            TongKmHoatDongT2: ["Tổng km hoạt động T2(km)", "Tong km hoat dong T2(km)", "TongKmHoatDongT2"],
             TonDauKy: ["TonDauKy", "Tồn đầu kỳ", "Ton dau ky"],
             /* Tổng từ «Nhật trình NL» theo Tên nhiên liệu (Diezel→nhập dầu; Mỡ/Nhớt/TL/Cầu→4 cột phụ); không có thì lấy từ phiếu */
             LuongDauNhap: ["LuongDauNhap", "Lượng dầu nhập", "Luong dau nhap"],
@@ -348,9 +364,17 @@
             TongNhot: ["TongNhot", "Tổng nhớt", "Tong nhot"],
             DauThuyLuc: ["DauThuyLuc", "Dầu thủy lực", "Dau thuy luc"],
             DauCau: ["DauCau", "Dầu cầu", "Dau cau"],
-            DinhMucDauTrungBinh: ["DinhMucDauTrungBinh", "Định mức dầu trung bình", "Dinh muc dau trung binh"],
+            TieuHaoThucTeT1: ["Tiêu hao thực tế T1(l/km)", "Tieu hao thuc te T1(l/km)", "TieuHaoThucTeT1"],
+            TieuHaoThucTeT12: ["Tiêu hao thực tế T12 (l/km)", "Tieu hao thuc te T12 (l/km)", "TieuHaoThucTeT12"],
+            DinhMucTrongBinh: [
+                "Định mức trong bình",
+                "Dinh muc trong binh",
+                "DinhMucTrongBinh",
+                "DinhMucDauTrungBinh",
+                "Định mức dầu trung bình",
+                "Dinh muc dau trung binh"
+            ],
             DinhMucTieuHao: ["DinhMucTieuHao", "Định mức tiêu hao", "Dinh muc tieu hao"],
-            ChenhLech: ["ChenhLech", "Chênh lệch", "Chenh lech"],
             /* Cột báo cáo «Công việc» lấy từ «Nội dung» trên Nhật trình máy */
             CongViec: ["Nội dung", "Noi dung", "CongViec", "Công việc", "Cong viec"],
             CongTruong: ["CongTruong", "Công trường", "Cong truong", "Tên công trình"]
@@ -879,7 +903,7 @@
                 if (!raw) return out;
                 const key = assetKeyFromName(out.TenThietBi);
                 if (!key || !sumNgayByTaiSan.has(key)) return out;
-                out.SoNgayThucTe = formatHourDisplay(sumNgayByTaiSan.get(key));
+                out.SoNgayXeHoatDong = formatHourDisplay(sumNgayByTaiSan.get(key));
                 return out;
             });
         }
@@ -1028,8 +1052,8 @@
         const seedRows = [
             { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
             { TT: "1", TenThietBi: "NHÓM MÁY XÚC:", subGroupRow: true },
-            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", BienSoNhanHieu: "18XA-0062", TenLaiMay: "Cù Như Phan", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongT12: "115,0", SoNgayThucTe: "13,0", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", DinhMucDauTrungBinh: "4,5", DinhMucTieuHao: "10,8", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
-            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", BienSoNhanHieu: "18XA-0013", TenLaiMay: "Phạm V Hoàng", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongT12: "254,5", SoNgayThucTe: "25,0", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", DinhMucDauTrungBinh: "4,9", DinhMucTieuHao: "11,0", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", TenLaiMay: "Cù Như Phan", SoNgayXeHoatDong: "13,0", SoChuyenChayThang: "", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongXeBon: "115,0", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,5", DinhMucTieuHao: "10,8", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", TenLaiMay: "Phạm V Hoàng", SoNgayXeHoatDong: "25,0", SoChuyenChayThang: "", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongXeBon: "254,5", AnKhiIn: "", TongKmHoatDongT1: "", TongKmHoatDongT2: "", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT1: "", TieuHaoThucTeT12: "", DinhMucTrongBinh: "4,9", DinhMucTieuHao: "11,0", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
             { TT: "B", TenThietBi: "NHÓM MÁY THUÊ:", groupRow: true }
         ];
 
@@ -1156,7 +1180,7 @@
             if (!rows.length) {
                 reportBody.innerHTML = `
                     <tr>
-                        <td colspan="21" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
+                        <td colspan="25" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
                     </tr>
                 `;
                 return;
@@ -1164,14 +1188,14 @@
 
             reportBody.innerHTML = rows.map((row) => {
                 if (row.groupRow) {
-                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="19"></td></tr>`;
+                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="23"></td></tr>`;
                 }
                 if (row.subGroupRow) {
-                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="19"></td></tr>`;
+                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="23"></td></tr>`;
                 }
 
                 const cells = REPORT_COLUMNS.map((column, index) => {
-                    const cssClass = index === 1 || index === 3 ? "text-left" : "";
+                    const cssClass = index === 1 || index === 2 || index === 23 || index === 24 ? "text-left" : "";
                     return `<td class="${cssClass}">${escapeHtml(row[column] ?? "")}</td>`;
                 }).join("");
 
