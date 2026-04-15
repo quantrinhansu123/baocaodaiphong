@@ -99,6 +99,12 @@
         td.font-bold { font-weight: bold; }
         .nowrap { white-space: nowrap; }
         .dobinh-line { line-height: 1.25; }
+        .nl-phu-cell {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            line-height: 1.2;
+            font-size: 13px;
+        }
         
         /* Specific row heights for data */
         .data-row td {
@@ -237,7 +243,7 @@
                     <th rowspan="2">STT</th>
                     <th rowspan="2">Công việc/ Mô tả công việc thực hiện</th>
                     <th rowspan="2">Khối<br>lượng<br>(m3)</th>
-                    <th colspan="2">Quãng đường</th>
+                    <th colspan="2">Lý trình</th>
                     <th colspan="3">Thời gian làm việc (h)</th>
                     <th colspan="4">Nhiên liệu (Lít)</th>
                     <th rowspan="2"><span class="nowrap">CB phụ trách (ký)</span></th>
@@ -386,19 +392,19 @@
                     <td colspan="7" class="text-right font-bold">Cộng</td>
                     <td class="font-bold" id="val-cong-tong"></td>
                     <td class="font-bold" id="val-cong-nhap"></td>
-                    <td class="font-bold" id="val-cong-dobinh-truoc"></td>
-                    <td class="font-bold" id="val-cong-dobinh-sau"></td>
+                    <td></td>
+                    <td></td>
                     <td class="font-bold" id="val-cong-sua"></td>
                     <td id="val-cong-cbsig"></td>
                 </tr>
 
                 <!-- NHIÊN LIỆU PHỤ: mỗi ô gộp «tiêu đề + số» — dữ liệu từ «Nhật trình NL» -->
                 <tr>
-                    <td colspan="2" class="text-left font-bold" id="val-nl-phu"></td>
-                    <td colspan="2" class="text-left nowrap" id="val-nl-thuyluc"></td>
-                    <td colspan="2" class="text-left" id="val-nl-nhot"></td>
-                    <td colspan="2" class="text-left" id="val-nl-cau"></td>
-                    <td colspan="2" class="text-left nowrap" id="val-nl-mo"></td>
+                    <td colspan="2" class="text-left font-bold nl-phu-cell" id="val-nl-phu"></td>
+                    <td colspan="2" class="text-left nl-phu-cell" id="val-nl-thuyluc"></td>
+                    <td colspan="2" class="text-left nl-phu-cell" id="val-nl-nhot"></td>
+                    <td colspan="2" class="text-left nl-phu-cell" id="val-nl-cau"></td>
+                    <td colspan="2" class="text-left nl-phu-cell" id="val-nl-mo"></td>
                     <td colspan="3"></td>
                 </tr>
                 
@@ -845,8 +851,6 @@
             if (tonDauNgayEl) tonDauNgayEl.textContent = '';
             const tonCuoiNgayEl = document.getElementById('val-nl-cuoingay');
             if (tonCuoiNgayEl) tonCuoiNgayEl.textContent = '';
-            setCongRowText('val-cong-dobinh-truoc', '');
-            setCongRowText('val-cong-dobinh-sau', '');
             const baseLabels = {
                 thuyluc: 'Dầu thủy lực(L):',
                 nhot: 'Nhớt(L):',
@@ -976,8 +980,6 @@
                       ? tonSauAnySum
                       : null;
             if (tonCuoiNgayEl && tonCuoiShow != null) tonCuoiNgayEl.textContent = formatNlNumber(tonCuoiShow);
-            setCongRowText('val-cong-dobinh-truoc', tonTruocAnyCount ? formatNlNumber(tonTruocAnySum) : '');
-            setCongRowText('val-cong-dobinh-sau', tonSauAnyCount ? formatNlNumber(tonSauAnySum) : '');
 
             if (statusEl) {
                 statusEl.style.color = '#444';
@@ -1407,7 +1409,7 @@
             if (el) el.textContent = text == null ? '' : String(text);
         }
         function clearCongRowTotals() {
-            ['val-cong-tong', 'val-cong-nhap', 'val-cong-dobinh-truoc', 'val-cong-dobinh-sau', 'val-cong-sua'].forEach((id) =>
+            ['val-cong-tong', 'val-cong-nhap', 'val-cong-sua'].forEach((id) =>
                 setCongRowText(id, '')
             );
         }
