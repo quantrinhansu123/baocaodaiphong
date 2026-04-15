@@ -187,6 +187,8 @@
         <select id="record-selector" style="padding: 8px 12px; font-size: 15px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; min-width: 250px;">
             <option value="">Đang tải dữ liệu từ AppSheet...</option>
         </select>
+        <p id="nl-load-status" class="no-print" style="margin: 10px 0 0; font-size: 13px; color: #444; max-width: 720px; margin-left: auto; margin-right: auto; line-height: 1.4;"></p>
+        <p id="cv-bd-load-status" class="no-print" style="margin: 8px 0 0; font-size: 13px; color: #444; max-width: 720px; margin-left: auto; margin-right: auto; line-height: 1.4;"></p>
     </div>
 
     <div class="document">
@@ -359,28 +361,34 @@
                     <td colspan="4"></td>
                 </tr>
 
-                <!-- NHIÊN LIỆU PHỤ & BẢO DƯỠNG (Map to 10 cols) -->
+                <!-- NHIÊN LIỆU PHỤ: giá trị từ bảng AppSheet «Nhật trình NL» (khớp ID phiếu) -->
                 <tr>
-                    <td colspan="2" class="text-left">Nhiên liệu phụ:</td>
-                    <td colspan="2" class="text-left">Dầu thủy lực(L):</td>
-                    <td colspan="2" class="text-left">Nhớt(L):</td>
-                    <td colspan="2" class="text-left">Dầu Cầu(L):</td>
-                    <td colspan="2" class="text-left">Mỡ (kg):</td>
+                    <td class="text-left">Nhiên liệu phụ:</td>
+                    <td id="val-nl-phu" class="text-center"></td>
+                    <td class="text-left">Dầu thủy lực(L):</td>
+                    <td id="val-nl-thuyluc" class="text-center"></td>
+                    <td class="text-left">Nhớt(L):</td>
+                    <td id="val-nl-nhot" class="text-center"></td>
+                    <td class="text-left">Dầu Cầu(L):</td>
+                    <td id="val-nl-cau" class="text-center"></td>
+                    <td class="text-left">Mỡ (kg):</td>
+                    <td id="val-nl-mo" class="text-center"></td>
                 </tr>
                 
                 <tr>
-                    <td colspan="4" class="text-left">Tiêu hao nhiên liệu trong ngày:</td>
+                    <td colspan="2" class="text-left">Tiêu hao nhiên liệu trong ngày <span style="font-size: 11px;">(Dầu Diezel, L)</span>:</td>
+                    <td colspan="2" id="val-nl-tieuhao-diezel" class="text-center font-bold"></td>
                     <td colspan="3" class="font-bold">Xác nhận của lái máy</td>
                     <td colspan="3" class="font-bold">Xác nhận của B.thanh tra</td>
                 </tr>
 
-                <!-- Checklist Rows -->
+                <!-- Checklist Rows (ô tích: bảng «CV bảo dưỡng NT máy», ID cha ↔ ID / ID phát hiện phiếu) -->
                 <tr>
                     <td rowspan="4" class="col-stt"><div class="vertical-text">Công việc bảo dưỡng sau 1 ngày</div></td>
                     <td class="text-left col-desc">Mức dầu động cơ, két nước</td>
-                    <td class="col-vol"><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td class="col-vol"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-cat"></div></div></td>
                     <td colspan="3" class="text-left">Kiểm tra bổ sung</td>
-                    <td class="col-fuel1"><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td class="col-fuel1"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-act"></div></div></td>
                     
                     <td colspan="2" rowspan="4" class="big-sig-box">
                         <div class="big-sig-content"></div>
@@ -391,21 +399,21 @@
                 </tr>
                 <tr>
                     <td class="text-left">Ổ bi chuyển động + bạc</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-cat"></div></div></td>
                     <td colspan="3" class="text-left">Kiểm tra và bơm mỡ</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-act"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-left">Dây đai quạt gió</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-cat"></div></div></td>
                     <td colspan="3" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-act"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-left">Lọc gió</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-cat"></div></div></td>
                     <td colspan="3" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
-                    <td><div class="check-box-wrapper"><div class="check-box"></div></div></td>
+                    <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-act"></div></div></td>
                 </tr>
             </tbody>
         </table>
@@ -441,9 +449,38 @@
         // Tên bảng chứa dữ liệu trên AppSheet
         const TABLE_NAME = 'Nhật trình máy';
         const TABLE_CT_NAME = 'Nhật trình máy CT';
+        const TABLE_NL_NAME = 'Nhật trình NL';
+        const TABLE_CV_BD_NAME = 'CV bảo dưỡng NT máy';
+
+        /** Khi AppSheet chưa có dòng CV bảo dưỡng: dùng 8 dòng mẫu (tắt: thêm ?bdSample=0 vào URL) */
+        function wantsCvBdSampleFallback() {
+            try {
+                const p = new URLSearchParams(window.location.search).get('bdSample');
+                if (p === '0' || p === 'false') return false;
+            } catch (e) {}
+            return true;
+        }
+
+        /** 8 mục đúng chữ trên form + STT 1…8, Trạng thái Hoàn thành, ID cha = phiếu đang xem */
+        function buildDemoCvBdRows(parentId) {
+            const pk = String(parentId ?? '').trim();
+            if (!pk) return [];
+            return [
+                { 'ID cha': pk, STT: 1, 'Công việc thực hiện': 'Mức dầu động cơ, két nước', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 2, 'Công việc thực hiện': 'Kiểm tra bổ sung', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 3, 'Công việc thực hiện': 'Ổ bi chuyển động + bạc', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 4, 'Công việc thực hiện': 'Kiểm tra và bơm mỡ', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 5, 'Công việc thực hiện': 'Dây đai quạt gió', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 6, 'Công việc thực hiện': 'Kiểm tra tăng chỉnh độ căng', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 7, 'Công việc thực hiện': 'Lọc gió', 'Trạng thái': 'Hoàn thành' },
+                { 'ID cha': pk, STT: 8, 'Công việc thực hiện': 'Kiểm tra vệ sinh máy nếu bụi bẩn', 'Trạng thái': 'Hoàn thành' }
+            ];
+        }
 
         let appSheetData = []; // Biến lưu trữ toàn bộ dữ liệu để chọn lại
         let appSheetDetailData = []; // Chi tiết công việc (ID cha → phiếu cha)
+        let appSheetNlData = []; // Chi tiết nhiên liệu phụ (ID phiếu → phiếu Nhật trình máy)
+        let appSheetCvBdData = []; // CV bảo dưỡng (ID cha ↔ ID / ID phát hiện phiếu NT máy)
 
         /** ID phiếu từ query string: ...?id=... */
         function getRequestedRecordIdFromUrl() {
@@ -456,12 +493,60 @@
             }
         }
 
+        /** Chuẩn hóa ID/Ref: không phân biệt hoa thường, bỏ dấu gạch UUID, bỏ khoảng trắng */
+        function normalizeKeyPart(s) {
+            return String(s ?? '')
+                .trim()
+                .toLowerCase()
+                .replace(/-/g, '')
+                .replace(/\s/g, '');
+        }
+
+        /**
+         * So khớp ID phiếu hoặc Ref AppSheet (có thể là UUID đầy đủ hoặc chỉ 8 ký tự đầu như a981ad18).
+         */
+        function parentIdsMatch(ref, parentId) {
+            const a0 = String(ref == null ? '' : ref).trim();
+            const b0 = String(parentId == null ? '' : parentId).trim();
+            if (!a0 || !b0) return false;
+            if (a0.toLowerCase() === b0.toLowerCase()) return true;
+            const na = normalizeKeyPart(a0);
+            const nb = normalizeKeyPart(b0);
+            if (na === nb) return true;
+            const MIN = 8;
+            if (na.length >= MIN && nb.length >= MIN && (na.includes(nb) || nb.includes(na))) return true;
+            if (nb.length >= MIN && na.length < nb.length && nb.includes(na)) return true;
+            if (na.length >= MIN && nb.length < na.length && na.includes(nb)) return true;
+
+            const lastA = a0.lastIndexOf('_');
+            const lastB = b0.lastIndexOf('_');
+            const tailA = lastA >= 0 ? normalizeKeyPart(a0.slice(lastA + 1)) : na;
+            const tailB = lastB >= 0 ? normalizeKeyPart(b0.slice(lastB + 1)) : nb;
+            if (tailA && tailB) {
+                if (tailA === tailB) return true;
+                if (tailA.length >= MIN && tailB.length >= MIN && (tailA.includes(tailB) || tailB.includes(tailA))) return true;
+            }
+
+            const ax = a0.toLowerCase();
+            const bx = b0.toLowerCase();
+            if (ax.includes(bx) || bx.includes(ax)) {
+                if (Math.min(ax.length, bx.length) >= 6) return true;
+            }
+            return false;
+        }
+
         function findRecordIndexById(data, wantedId) {
             if (wantedId == null || data == null || !data.length) return -1;
             const w = String(wantedId).trim();
             for (let i = 0; i < data.length; i++) {
-                const rid = data[i]['ID'];
-                if (rid != null && String(rid).trim() === w) return i;
+                const row = data[i];
+                const candidates = [row['ID'], row['Row ID']].filter((x) => x != null);
+                for (const rid of candidates) {
+                    const r = String(rid).trim();
+                    if (!r) continue;
+                    if (r === w || r.toLowerCase() === w.toLowerCase()) return i;
+                    if (parentIdsMatch(r, w)) return i;
+                }
             }
             return -1;
         }
@@ -489,7 +574,9 @@
                 throw new Error(`${tableName}: ${response.status} ${errDetail}`);
             }
             const data = await response.json();
-            return Array.isArray(data) ? data : [];
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.Rows)) return data.Rows;
+            return [];
         }
 
         /** Id ô theo ca: công việc, KL, TG bắt đầu / kết thúc / tổng (từ bảng CT) */
@@ -528,8 +615,524 @@
             return '';
         }
 
-        function parentIdsMatch(ref, parentId) {
-            return String(ref).trim() === String(parentId == null ? '' : parentId).trim();
+        /** Mọi giá trị có thể là liên kết tới phiếu «Nhật trình máy» (AppSheet đặt tên cột khác nhau). */
+        function getNlParentRefCandidates(row) {
+            if (!row || typeof row !== 'object') return [];
+            const orderedKeys = [
+                'ID phiếu',
+                'ID phieu',
+                'Id phieu',
+                'ID Phiếu',
+                'Ref',
+                'REF',
+                'Nhật trình máy',
+                'Nhat trinh may',
+                'ID cha',
+                'ID Cha',
+                'Id cha'
+            ];
+            const found = [];
+            const seen = new Set();
+            for (const k of orderedKeys) {
+                const v = row[k];
+                if (v == null || String(v).trim() === '') continue;
+                const t = String(v).trim();
+                if (!seen.has(t)) {
+                    seen.add(t);
+                    found.push(t);
+                }
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (v == null || String(v).trim() === '') continue;
+                if (/phiếu|phieu|ref|nhật trình máy|id cha|related/i.test(k)) {
+                    const t = String(v).trim();
+                    if (!seen.has(t)) {
+                        seen.add(t);
+                        found.push(t);
+                    }
+                }
+            }
+            return found;
+        }
+
+        function parseNumericCell(raw) {
+            if (raw == null || raw === '') return null;
+            if (typeof raw === 'number' && !isNaN(raw)) return raw;
+            const s0 = String(raw).trim();
+            const m = s0.match(/-?[\d.,]+/);
+            if (!m) return null;
+            let s = m[0];
+            const comma = s.indexOf(',');
+            const dot = s.indexOf('.');
+            if (comma !== -1 && dot !== -1) {
+                if (comma > dot) s = s.replace(/\./g, '').replace(',', '.');
+                else s = s.replace(/,/g, '');
+            } else if (comma !== -1) {
+                s = s.replace(',', '.');
+            } else if (dot !== -1 && s.indexOf('.', dot + 1) !== -1) {
+                s = s.replace(/\./g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? null : n;
+        }
+
+        function parseNlQuantity(row) {
+            /* Tổng theo cột «SL nhập» (ưu tiên đúng tên trên AppSheet) */
+            const keys = [
+                'SL nhập',
+                'SL nhap',
+                'Sl nhập',
+                'Số lượng nhập',
+                'So luong nhap',
+                'Số lượng',
+                'So luong',
+                'Lượng',
+                'Luong',
+                'Khối lượng',
+                'Khoi luong',
+                'SL',
+                'Số Lượng',
+                'Giá trị',
+                'Gia tri',
+                'Tiêu thụ',
+                'Tieu thu',
+                'Lít',
+                'Lit'
+            ];
+            for (const k of keys) {
+                const q = parseNumericCell(row[k]);
+                if (q != null) return q;
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (!/sl\s*nh[aạ]p|lượng|luong|^\s*sl\s*$/i.test(k)) continue;
+                const q = parseNumericCell(v);
+                if (q != null) return q;
+            }
+            return null;
+        }
+
+        /**
+         * Gán loại theo cột «Tên nhiên liệu» → ô trên form (thứ tự ưu tiên: thủy lực / cầu trước từ khóa chung «dầu»).
+         */
+        function classifyNlByTen(tenRaw) {
+            const s = (tenRaw == null ? '' : String(tenRaw)).trim().toLowerCase();
+            if (!s) return null;
+            const noAccent = s.normalize('NFD').replace(/\u0300-\u036f/g, '');
+            if (noAccent.includes('thuy luc') || s.includes('thủy lực')) return 'thuyluc';
+            /* Dầu Diezel / Diesel / Dầu DO — tiêu hao NL trong ngày (ưu tiên trước dầu cầu, v.v.) */
+            if (noAccent.includes('diezel') || noAccent.includes('diesel')) return 'diesel';
+            if ((noAccent.includes('dau') || s.includes('dầu')) && /\bdo\b/i.test(noAccent)) return 'diesel';
+            if (noAccent.includes('dau cau') || (s.includes('cầu') && s.includes('dầu'))) return 'cau';
+            if (noAccent.includes('nhot') || s.includes('nhớt')) return 'nhot';
+            if (s.includes('mỡ')) return 'mo';
+            return null;
+        }
+
+        function formatNlNumber(n) {
+            if (n == null || isNaN(n)) return '';
+            return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 4 }).format(n);
+        }
+
+        function clearNlPhuCells() {
+            ['val-nl-phu', 'val-nl-thuyluc', 'val-nl-nhot', 'val-nl-cau', 'val-nl-mo', 'val-nl-tieuhao-diezel'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
+
+        function fillNhienLieuPhuFromNL(record) {
+            clearNlPhuCells();
+            const statusEl = document.getElementById('nl-load-status');
+            const parentId = String(record['ID'] ?? record['Row ID'] ?? '').trim();
+            const nlTotal = (appSheetNlData && appSheetNlData.length) || 0;
+
+            if (!parentId) {
+                if (statusEl) {
+                    statusEl.textContent =
+                        'Nhật trình NL: không có ID phiếu trên bản ghi «Nhật trình máy» (cột ID).';
+                    statusEl.style.color = '#b45309';
+                }
+                return;
+            }
+            if (!nlTotal) {
+                if (statusEl) {
+                    statusEl.textContent =
+                        'Nhật trình NL: chưa có dòng nào (kiểm tra tên bảng «Nhật trình NL», quyền API, hoặc F12 → Console).';
+                    statusEl.style.color = '#b45309';
+                }
+                return;
+            }
+
+            const matched = appSheetNlData.filter((d) =>
+                getNlParentRefCandidates(d).some((c) => parentIdsMatch(c, parentId))
+            );
+            const sum = { thuyluc: 0, nhot: 0, cau: 0, mo: 0, diesel: 0 };
+            const counted = { thuyluc: false, nhot: false, cau: false, mo: false, diesel: false };
+            let skippedNoKind = 0;
+            let skippedNoQty = 0;
+
+            matched.forEach((row) => {
+                const tenNl =
+                    row['Tên nhiên liệu'] ??
+                    row['Ten nhien lieu'] ??
+                    row['Tên NL'] ??
+                    row['Loại nhiên liệu'] ??
+                    row['Loai nhien lieu'] ??
+                    row['Tên'] ??
+                    '';
+                const kind = classifyNlByTen(tenNl);
+                const q = parseNlQuantity(row);
+                if (!kind) {
+                    skippedNoKind++;
+                    return;
+                }
+                if (q == null) {
+                    skippedNoQty++;
+                    return;
+                }
+                sum[kind] += q;
+                counted[kind] = true;
+            });
+
+            const set = (id, val, used) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = used ? formatNlNumber(val) : '';
+            };
+            set('val-nl-thuyluc', sum.thuyluc, counted.thuyluc);
+            set('val-nl-nhot', sum.nhot, counted.nhot);
+            set('val-nl-cau', sum.cau, counted.cau);
+            set('val-nl-mo', sum.mo, counted.mo);
+            set('val-nl-tieuhao-diezel', sum.diesel, counted.diesel);
+
+            if (statusEl) {
+                statusEl.style.color = '#444';
+                let msg = `Nhật trình NL: đã tải ${nlTotal} dòng. Phiếu này (${parentId.slice(0, 36)}${parentId.length > 36 ? '…' : ''}): ${matched.length} dòng khớp ID.`;
+                if (matched.length === 0) {
+                    msg +=
+                        ' Không khớp Ref/ID phiếu — kiểm tra trên AppSheet cột trỏ về phiếu (thường là Ref hoặc ID phiếu).';
+                    statusEl.style.color = '#b45309';
+                } else if (skippedNoKind || skippedNoQty) {
+                    msg += ` (Bỏ qua: ${skippedNoKind} dòng không nhận loại từ «Tên nhiên liệu», ${skippedNoQty} dòng không đọc được số lượng.)`;
+                }
+                statusEl.textContent = msg;
+            }
+        }
+
+        /** Các ID trên phiếu «Nhật trình máy» để khớp với «ID cha» bảng CV bảo dưỡng */
+        function getNtParentMatchIds(record) {
+            const ids = [];
+            const add = (v) => {
+                if (v == null || String(v).trim() === '') return;
+                const t = String(v).trim();
+                if (!ids.includes(t)) ids.push(t);
+            };
+            if (!record) return ids;
+            add(record['ID']);
+            add(record['Row ID']);
+            add(record['ID phát hiện']);
+            add(record['Id phat hien']);
+            add(record['ID phát hiện ']);
+            return ids;
+        }
+
+        function getCvBdParentRefCandidates(row) {
+            if (!row || typeof row !== 'object') return [];
+            const orderedKeys = [
+                'ID cha',
+                'ID Cha',
+                'Id cha',
+                'ID phiếu',
+                'ID phieu',
+                'Ref',
+                'Nhật trình máy',
+                'Nhat trinh may',
+                'ID phát hiện'
+            ];
+            const found = [];
+            const seen = new Set();
+            for (const k of orderedKeys) {
+                const v = row[k];
+                const t = cellString(v).trim();
+                if (t === '') continue;
+                if (!seen.has(t)) {
+                    seen.add(t);
+                    found.push(t);
+                }
+            }
+            for (const [k, v] of Object.entries(row)) {
+                const t = cellString(v).trim();
+                if (t === '') continue;
+                if (/id cha|phiếu|phieu|ref|nhật trình máy|phát hiện|phat hien/i.test(k)) {
+                    if (!seen.has(t)) {
+                        seen.add(t);
+                        found.push(t);
+                    }
+                }
+            }
+            return found;
+        }
+
+        /** Giá trị ô AppSheet (Ref / enum có thể là object) */
+        function cellString(v) {
+            if (v == null) return '';
+            if (typeof v === 'object' && v !== null && 'Value' in v) return String(v.Value);
+            if (typeof v === 'object' && v !== null && 'value' in v) return String(v.value);
+            return String(v);
+        }
+
+        function normalizeBdText(s) {
+            return String(s ?? '')
+                .trim()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/\u0300-\u036f/g, '');
+        }
+
+        function isTrangThaiHoanThanh(raw) {
+            if (raw === true || raw === 1) return true;
+            let s0 = cellString(raw).trim();
+            s0 = s0.replace(/\u00a0/g, ' ').replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!s0) return false;
+
+            /* Cột «Trạng thái» = «Đã hoàn thành» (và biến thể AppSheet) → coi là đã xong */
+            if (/chưa\s+hoàn\s*thành|chua\s+hoan\s+thanh/i.test(s0)) return false;
+            if (/\b(đã\s+)?hoàn\s*thành\b/i.test(s0) || /đã\s+hoàn\s*thành/i.test(s0)) return true;
+            if (/\bda\s+hoan\s+thanh\b/i.test(s0)) return true;
+            if (/^(đã\s+)?hoàn\s*thành$/iu.test(s0)) return true;
+            if (/^da\s+hoan\s+thanh$/iu.test(s0)) return true;
+            if (/^hoàn\s*thành$/iu.test(s0)) return true;
+            if (/^đã\s+ht$/iu.test(s0)) return true;
+
+            const s = normalizeBdText(s0);
+            if (!s) return false;
+            if (s.includes('chua hoan thanh') || s.includes('chưa hoàn thành')) return false;
+            if (s.includes('khong dat') || s.includes('không đạt')) return false;
+            if (s.includes('chua xong') || s.includes('chưa xong')) return false;
+            if (s === 'false' || s === '0' || s === 'no' || s === 'k') return false;
+            /* Sau khi bỏ dấu: chuỗi thường chứa «hoan thanh» */
+            if (s.includes('hoan thanh')) return true;
+            if (s === 'ht' || s === 'xong' || s.includes('da xong') || s.includes('đã xong')) return true;
+            if (s.includes('dat') || s.includes('đạt')) return true;
+            if (s === 'yes' || s === 'ok' || s === 'y' || s === 'v') return true;
+            if (s === 'co' || s === 'có') return true;
+            if (s === '1' || s === 'true' || s0.toUpperCase() === 'TRUE') return true;
+            if (s.includes('complete') || s.includes('done')) return true;
+            if (s.includes('tich') || s.includes('tích') || s.includes('da check')) return true;
+            return false;
+        }
+
+        /** Lấy nội dung công việc từ nhiều tên cột có thể có trên AppSheet */
+        function pickCvBdTaskText(row) {
+            const keys = [
+                'Công việc thực hiện',
+                'Cong viec thuc hien',
+                'Công việc',
+                'Cong viec',
+                'Nội dung',
+                'Noi dung',
+                'Mô tả',
+                'Mo ta',
+                'Tên CV',
+                'Ten CV',
+                'Diễn giải',
+                'Dien giai'
+            ];
+            for (const k of keys) {
+                const v = row[k];
+                if (v != null && cellString(v).trim() !== '') return cellString(v);
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (v == null || cellString(v).trim() === '') continue;
+                if (/công việc|cong viec|nội dung|noi dung|mô tả|mo ta|diễn giải/i.test(k)) return cellString(v);
+            }
+            return '';
+        }
+
+        /** Lấy trạng thái từ nhiều tên cột */
+        function pickCvBdStatus(row) {
+            const keys = [
+                'Trạng thái',
+                'Trang thai',
+                'Tình trạng',
+                'Tinh trang',
+                'Hoàn thành',
+                'Hoan thanh',
+                'Kết quả',
+                'Ket qua',
+                'Status'
+            ];
+            for (const k of keys) {
+                if (row[k] !== undefined && row[k] !== null && cellString(row[k]).trim() !== '') return row[k];
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (v === undefined || v === null) continue;
+                if (/trạng thái|trang thai|tình trạng|hoàn thành|kết quả|status/i.test(k)) return v;
+            }
+            return '';
+        }
+
+        /** STT 1…8 → ô tích (khi tên CV trên sheet không trùng chữ trên form) */
+        const BD_STT_TO_ID = {
+            1: 'bd-r1-cat',
+            2: 'bd-r1-act',
+            3: 'bd-r2-cat',
+            4: 'bd-r2-act',
+            5: 'bd-r3-cat',
+            6: 'bd-r3-act',
+            7: 'bd-r4-cat',
+            8: 'bd-r4-act'
+        };
+
+        function sttToCheckboxId(row) {
+            const raw = row['STT'] ?? row['Stt'] ?? row['Thứ tự'] ?? row['Thu tu'] ?? row['Mục'] ?? row['Muc'] ?? row['Dòng'] ?? row['Dong'];
+            const n = parseInt(cellString(raw), 10);
+            if (isNaN(n) || n < 1 || n > 8) return null;
+            return BD_STT_TO_ID[n] || null;
+        }
+
+        /**
+         * Ánh xạ «Công việc thực hiện» → id ô tích (ưu tiên cụm dài; thêm từ khóa ngắn).
+         */
+        function mapCongViecToCheckboxId(taskRaw) {
+            const t = normalizeBdText(taskRaw);
+            if (!t) return null;
+            const rules = [
+                { id: 'bd-r2-act', needles: ['kiem tra va bom mo', 'kiểm tra và bơm mỡ', 'bom mo', 'bơm mỡ', 'bo mo'] },
+                { id: 'bd-r3-act', needles: ['tang chinh do cang', 'tăng chỉnh độ căng', 'tang chinh', 'do cang'] },
+                {
+                    id: 'bd-r4-act',
+                    needles: ['ve sinh may', 'vệ sinh máy', 'bui ban', 'bụi bẩn', 've sinh', 'vệ sinh']
+                },
+                { id: 'bd-r1-act', needles: ['kiem tra bo sung', 'kiểm tra bổ sung', 'bo sung', 'bổ sung'] },
+                {
+                    id: 'bd-r1-cat',
+                    needles: ['muc dau dong co', 'mức dầu động cơ', 'ket nuoc', 'két nước', 'dong co', 'động cơ', 'ket nuoc']
+                },
+                { id: 'bd-r2-cat', needles: ['o bi chuyen dong', 'ổ bi chuyển động', 'o bi', 'ổ bi'] },
+                { id: 'bd-r3-cat', needles: ['day dai quat gio', 'dây đai quạt gió', 'day dai', 'dây đai', 'quat gio', 'quạt gió'] },
+                { id: 'bd-r4-cat', needles: ['loc gio', 'lọc gió', 'loc khi', 'lọc khí'] }
+            ];
+            for (const { id, needles } of rules) {
+                for (const n of needles) {
+                    const nn = normalizeBdText(n);
+                    if (nn && t.includes(nn)) return id;
+                }
+            }
+            return null;
+        }
+
+        const BD_CHECKBOX_IDS = ['bd-r1-cat', 'bd-r1-act', 'bd-r2-cat', 'bd-r2-act', 'bd-r3-cat', 'bd-r3-act', 'bd-r4-cat', 'bd-r4-act'];
+
+        function clearBaoduongCheckboxes() {
+            BD_CHECKBOX_IDS.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
+
+        function fillBaoduongChecklistFromCvBd(record) {
+            clearBaoduongCheckboxes();
+            const statusEl = document.getElementById('cv-bd-load-status');
+            const setCvBdStatus = (text, opts = {}) => {
+                if (!statusEl) return;
+                statusEl.textContent = text;
+                statusEl.style.color = opts.color || '#444';
+            };
+
+            if (!record) {
+                if (statusEl) statusEl.textContent = '';
+                return;
+            }
+
+            const parentId = String(record['ID'] ?? record['Row ID'] ?? '').trim();
+            const idLabel = parentId
+                ? `${parentId.slice(0, 36)}${parentId.length > 36 ? '…' : ''}`
+                : '(chưa có ID)';
+            const apiTotal = (appSheetCvBdData && appSheetCvBdData.length) || 0;
+
+            let sourceRows = appSheetCvBdData || [];
+            const useDemo = !sourceRows.length && wantsCvBdSampleFallback();
+
+            if (useDemo) {
+                sourceRows = buildDemoCvBdRows(record['ID'] ?? record['Row ID'] ?? '');
+            }
+
+            if (!sourceRows.length) {
+                if (!parentId) {
+                    setCvBdStatus(
+                        'CV bảo dưỡng NT máy: không có ID phiếu trên bản ghi «Nhật trình máy» (cột ID).',
+                        { color: '#b45309' }
+                    );
+                } else if (apiTotal === 0 && !wantsCvBdSampleFallback()) {
+                    setCvBdStatus(
+                        `CV bảo dưỡng NT máy: đã tải 0 dòng. Phiếu (${idLabel}): không có dữ liệu — bạn đã tắt mẫu (?bdSample=0). Kiểm tra tên bảng «CV bảo dưỡng NT máy» hoặc bỏ tham số bdSample.`,
+                        { color: '#b45309' }
+                    );
+                } else {
+                    setCvBdStatus(
+                        'CV bảo dưỡng NT máy: chưa có dòng nào (kiểm tra tên bảng, quyền API, hoặc F12 → Console).',
+                        { color: '#b45309' }
+                    );
+                }
+                return;
+            }
+
+            const parentIds = getNtParentMatchIds(record);
+            const matched = sourceRows.filter((d) =>
+                getCvBdParentRefCandidates(d).some((ref) => parentIds.some((pid) => parentIdsMatch(cellString(ref), pid)))
+            );
+
+            matched.sort((a, b) => {
+                const oa = parseInt(cellString(a['STT'] ?? a['Thứ tự'] ?? a['Thu tu'] ?? 0), 10);
+                const ob = parseInt(cellString(b['STT'] ?? b['Thứ tự'] ?? b['Thu tu'] ?? 0), 10);
+                return (isNaN(oa) ? 0 : oa) - (isNaN(ob) ? 0 : ob);
+            });
+
+            let ticked = 0;
+            let skippedNotDone = 0;
+            let skippedNoBox = 0;
+
+            matched.forEach((row) => {
+                const task = pickCvBdTaskText(row);
+                const trangThai = pickCvBdStatus(row);
+                if (!isTrangThaiHoanThanh(trangThai)) {
+                    skippedNotDone++;
+                    return;
+                }
+                let boxId = mapCongViecToCheckboxId(task);
+                if (!boxId) boxId = sttToCheckboxId(row);
+                if (!boxId) {
+                    skippedNoBox++;
+                    return;
+                }
+                const el = document.getElementById(boxId);
+                if (el) {
+                    el.textContent = '\u2713';
+                    ticked++;
+                }
+            });
+
+            let msg = '';
+            let warn = false;
+            if (useDemo) {
+                msg = `CV bảo dưỡng NT máy: AppSheet ${apiTotal} dòng. Phiếu (${idLabel}): ${matched.length} dòng khớp ID — đang dùng dữ liệu mẫu (8 mục «Hoàn thành») vì bảng chưa có dòng. Đã tích ${ticked} ô. Tắt mẫu: ?bdSample=0.`;
+                setCvBdStatus(msg, { color: '#0369a1' });
+                return;
+            }
+
+            msg = `CV bảo dưỡng NT máy: đã tải ${apiTotal} dòng. Phiếu này (${idLabel}): ${matched.length} dòng khớp ID.`;
+            if (matched.length === 0) {
+                msg +=
+                    ' Không khớp Ref/ID cha — kiểm tra trên AppSheet cột trỏ về phiếu «Nhật trình máy» (thường là ID cha, Ref hoặc ID phiếu).';
+                warn = true;
+            } else {
+                msg += ` Đã tích ${ticked} ô.`;
+                if (skippedNotDone || skippedNoBox) {
+                    msg += ` (Bỏ qua: ${skippedNotDone} dòng chưa hoàn thành, ${skippedNoBox} dòng không gán được ô.)`;
+                }
+            }
+            setCvBdStatus(msg, { color: warn ? '#b45309' : '#444' });
         }
 
         function formatKhoiLuongVaDvt(row) {
@@ -620,14 +1223,24 @@
 
         async function fetchAppSheetData() {
             try {
-                const [data, detailRows] = await Promise.all([
+                const [data, detailRows, nlRows, cvBdRows] = await Promise.all([
                     fetchTableRows(TABLE_NAME),
                     fetchTableRows(TABLE_CT_NAME).catch(err => {
                         console.warn('Không tải được bảng chi tiết:', err);
                         return [];
+                    }),
+                    fetchTableRows(TABLE_NL_NAME).catch((err) => {
+                        console.warn('Không tải được bảng Nhật trình NL:', err);
+                        return [];
+                    }),
+                    fetchTableRows(TABLE_CV_BD_NAME).catch((err) => {
+                        console.warn('Không tải được bảng CV bảo dưỡng NT máy:', err);
+                        return [];
                     })
                 ]);
                 appSheetDetailData = detailRows;
+                appSheetNlData = Array.isArray(nlRows) ? nlRows : [];
+                appSheetCvBdData = Array.isArray(cvBdRows) ? cvBdRows : [];
                 
                 if (data && data.length > 0) {
                     appSheetData = data; // Lưu dữ liệu vào biến toàn cục
@@ -702,6 +1315,8 @@
             if (laiMayCuoi) laiMayCuoi.innerText = tenLaiMay || '';
 
             fillCongViecFromChiTiet(record);
+            fillNhienLieuPhuFromNL(record);
+            fillBaoduongChecklistFromCvBd(record);
         }
 
         // Tự động kéo dữ liệu khi tải trang xong

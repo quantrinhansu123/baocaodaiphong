@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Tổng Hợp Tiêu Hao Nhiên Liệu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+        
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo styling */
+        .logo-container {
+            width: 100px;
+            text-align: center;
+        }
+        .logo-ellipse {
+            width: 90px;
+            height: 45px;
+            border: 2px solid black;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto;
+        }
+        .logo-ellipse::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 100%;
+            border-left: 2px solid black;
+            border-right: 2px solid black;
+        }
+        .logo-text {
+            font-size: 10px;
+            font-weight: bold;
+            background: white;
+            z-index: 10;
+            padding: 0 2px;
+            letter-spacing: 1px;
+        }
+        
+        /* Input mockups */
+        .mock-input {
+            background-color: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-radius: 9999px; /* full rounded */
+            height: 22px;
+            width: 100%;
+            max-width: 350px;
+        }
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 28px;
+            width: 100%;
+            max-width: 350px;
+            padding: 0 12px;
+            font-size: 12px;
+            outline: none;
+        }
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+        .action-btn {
+            height: 30px;
+            border-radius: 9999px;
+            padding: 0 16px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+        .action-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .status-line {
+            min-height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        /* Table specific styling */
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif; /* Spreadsheet mostly uses Arial */
+            font-size: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            white-space: normal;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 2px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+        thead th {
+            background-color: #4a8694; /* Teal-ish blue header */
+            color: white;
+            font-weight: normal;
+            line-height: 1.1;
+            font-size: 9px;
+        }
+        .number-row th {
+            background-color: white;
+            color: black;
+            font-weight: bold;
+            padding: 1px;
+        }
+        
+        /* Row highlighting */
+        .group-a-row td {
+            background-color: #ffeb9c; /* Light yellow */
+            font-weight: bold;
+        }
+        .sub-group-row td {
+            background-color: #f4cccc; /* Light pink/red */
+            font-weight: bold;
+        }
+        
+        /* Utility */
+        .text-left { text-align: left !important; padding-left: 6px; }
+        .text-right { text-align: right !important; padding-right: 6px; }
+        .font-bold-val { font-weight: bold; }
+
+        @media (max-width: 1280px) {
+            body { padding: 4px; }
+            .table-wrapper { font-size: 9px; }
+            th, td { padding: 2px; }
+            thead th { font-size: 8px; }
+            .filter-input { height: 24px; font-size: 11px; }
+            .action-btn { height: 26px; padding: 0 10px; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- HEADER SECTION -->
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="https://www.appsheet.com/template/gettablefileurl?appName=Appsheet-325045268&tableName=Kho%20%E1%BA%A3nh&fileName=Kho%20%E1%BA%A3nh_Images%2F2e80b981.%E1%BA%A2nh.121832.png" alt="Logo Đại Phong" class="w-full max-w-[90px] mx-auto h-auto object-contain">
+                <div class="font-bold text-sm mt-1">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px]">
+                    <p class="w-1/2">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TITLE BANNER -->
+        <div class="bg-[#2b7132] text-white text-center py-2">
+            <h1 class="text-base font-bold uppercase mb-1">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
+            <p class="italic text-xs">(Từ 26/11/2025 đến 25/12/2025)</p>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="p-2 bg-white">
+            <div class="flex flex-wrap justify-between gap-2 font-bold text-[#2b7132] text-xs">
+                <div class="w-full lg:w-[49%] space-y-2">
+                    <div class="flex items-center">
+                        <span class="w-[180px]">TÊN CÔNG TRÌNH:</span>
+                        <input id="filter-project" class="filter-input" placeholder="Nhập tên công trình">
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-[180px]">NHÓM XE MÁY THIẾT BỊ:</span>
+                        <input id="filter-group" class="filter-input" placeholder="Nhập nhóm thiết bị">
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-[180px]">TÊN LÁI MÁY:</span>
+                        <input id="filter-driver" class="filter-input" placeholder="Nhập tên lái máy">
+                    </div>
+                </div>
+                <div class="w-full lg:w-[49%] space-y-2 flex flex-col items-end lg:pr-4">
+                    <div class="flex items-center w-full lg:w-[340px]">
+                        <span class="w-[100px]">TỪ NGÀY</span>
+                        <input id="filter-from-date" type="date" class="filter-input flex-1">
+                    </div>
+                    <div class="flex items-center w-full lg:w-[340px]">
+                        <span class="w-[100px]">ĐẾN NGÀY</span>
+                        <input id="filter-to-date" type="date" class="filter-input flex-1">
+                    </div>
+                    <div class="flex items-center gap-2 w-full lg:w-[340px] justify-end">
+                        <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
+                        <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
+                    </div>
+                </div>
+            </div>
+            <div id="appsheet-status" class="status-line text-[#2b7132]"></div>
+        </div>
+
+        <!-- TABLE SECTION -->
+        <div class="table-wrapper bg-white">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 2%;">TT</th>
+                        <th rowspan="2" style="width: 10%;">Tên thiết bị</th>
+                        <th rowspan="2" style="width: 6%;">Biển số<br>/Nhãn hiệu</th>
+                        <th rowspan="2" style="width: 7%;">Tên Lái Máy</th>
+                        <th rowspan="2" style="width: 3.5%;">Giờ làm<br>hành chính<br>(h)</th>
+                        <th rowspan="2" style="width: 3.5%;">Giờ làm<br>tăng ca (h)</th>
+                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động<br>T12 (h)</th>
+                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động<br>T11 (h)</th>
+                        <th rowspan="2" style="width: 4%;">Số ngày<br>thực tế<br>làm việc<br>(ngày)</th>
+                        <th rowspan="2" style="width: 4.5%;">Tồn đầu<br>kỳ (lít)</th>
+                        <th rowspan="2" style="width: 4.5%;">Lượng<br>dầu nhập<br>trong<br>tháng (lít)</th>
+                        <th rowspan="2" style="width: 4.5%;">Tồn cuối<br>kỳ (lít)</th>
+                        <th rowspan="2" style="width: 4.5%;">Lượng dầu<br>tiêu hao<br>(L)</th>
+                        <th colspan="4">Nhiên liệu phụ</th>
+                        <th rowspan="2" style="width: 3.5%;">Tiêu<br>hao<br>thực tế<br>T12<br>(l/h)</th>
+                        <th rowspan="2" style="width: 3.5%;">Tiêu<br>hao<br>thực tế<br>T11<br>(l/h)</th>
+                        <th rowspan="2" style="width: 3.5%;">Định<br>mức<br>dầu<br>trung<br>bình</th>
+                        <th rowspan="2" style="width: 3.5%;">Định mức<br>tiêu hao<br>(l/h)</th>
+                        <th rowspan="2" style="width: 5%;">Chênh lệch<br>(>=0: trong<br>Định mức<br>cho phép;<br>&lt;0: vượt<br>định mức)</th>
+                        <th rowspan="2" style="width: 6%;">Công việc</th>
+                        <th rowspan="2" style="width: 6%;">Công trường</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 2.5%;">Tổng<br>mỡ<br>(kg)</th>
+                        <th style="width: 2.5%;">Tổng<br>nhớt<br>(L)</th>
+                        <th style="width: 2.5%;">Dầu<br>thủy lực<br>(L)</th>
+                        <th style="width: 2.5%;">Dầu<br>cầu (L)</th>
+                    </tr>
+                    <tr class="number-row">
+                        <th>(1)</th>
+                        <th>(2)</th>
+                        <th>(3)</th>
+                        <th>(4)</th>
+                        <th>(5)</th>
+                        <th>(6)</th>
+                        <th>(7)</th>
+                        <th>(8)</th>
+                        <th>(9)</th>
+                        <th>(10)</th>
+                        <th>(11)</th>
+                        <th>(12)</th>
+                        <th>(13)</th>
+                        <th>(14)</th>
+                        <th>(15)</th>
+                        <th>(16)</th>
+                        <th>(17)</th>
+                        <th>(18)</th>
+                        <th>(19)</th>
+                        <th>(20)</th>
+                        <th>(21)</th>
+                        <th></th> <!-- Empty for Chênh lệch -->
+                        <th>(22)</th>
+                        <th>(23)</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            // Dữ liệu báo cáo lấy từ bảng Nhật trình máy (cùng app với sổ theo dõi máy/thiết bị)
+            tableName: "Nhật trình máy",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+
+        /** Cột ngày trên bảng Nhật trình máy (đổi thành «Ngày» nếu trên app chỉ có cột đó) */
+        const NT_FILTER_DATE_COLUMN = "Ngày làm việc";
+
+        const REPORT_COLUMNS = [
+            "TT", "TenThietBi", "BienSoNhanHieu", "TenLaiMay", "GioLamHanhChinh", "GioLamTangCa",
+            "TongGioHoatDongT12", "TongGioHoatDongT11", "SoNgayThucTe", "TonDauKy", "LuongDauNhap",
+            "TonCuoiKy", "LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
+            "TieuHaoThucTeT12", "TieuHaoThucTeT11", "DinhMucDauTrungBinh", "DinhMucTieuHao",
+            "ChenhLech", "CongViec", "CongTruong"
+        ];
+
+        /**
+         * Bộ lọc: mỗi ô form map tới một hoặc nhiều tên cột (ưu tiên tên phổ biến trên «Nhật trình máy»,
+         * kèm tên cũ nếu virtual column vẫn dùng khóa tiếng Anh).
+         */
+        const FILTER_FIELDS_BY_INPUT = {
+            project: ["Tên công trình", "TenCongTrinh"],
+            group: ["Nhóm xe máy thiết bị", "NhomXeMayThietBi"],
+            driver: ["Tên lái máy", "TenLaiMay"]
+        };
+
+        /**
+         * Ánh xạ từ dòng API → khóa hiển thị (hỗ trợ tên cột tiếng Anh của bảng tổng hợp cũ và tên tiếng Việt).
+         * Một số cột có thể trùng nguồn (ví dụ tổng giờ ngày → cột T12).
+         */
+        const REPORT_FIELD_ALIASES = {
+            TT: ["TT", "STT", "Stt"],
+            TenThietBi: ["TenThietBi", "Tên thiết bị", "Ten thiet bi"],
+            BienSoNhanHieu: ["BienSoNhanHieu", "Biển số/Nhãn hiệu", "Biển số", "Bien so", "Nhãn hiệu"],
+            TenLaiMay: ["TenLaiMay", "Tên lái máy", "Ten lai may"],
+            GioLamHanhChinh: ["GioLamHanhChinh", "Giờ làm hành chính", "Gio lam hanh chinh"],
+            GioLamTangCa: ["GioLamTangCa", "Giờ làm tăng ca", "Gio lam tang ca"],
+            TongGioHoatDongT12: [
+                "TongGioHoatDongT12",
+                "Tổng giờ hoạt động T12",
+                "Tong gio hoat dong T12",
+                "TongGioHoatDong"
+            ],
+            TongGioHoatDongT11: ["TongGioHoatDongT11", "Tổng giờ hoạt động T11", "Tong gio hoat dong T11"],
+            SoNgayThucTe: ["SoNgayThucTe", "Số ngày thực tế", "So ngay thuc te"],
+            TonDauKy: ["TonDauKy", "Tồn đầu kỳ", "Ton dau ky"],
+            LuongDauNhap: ["LuongDauNhap", "Lượng dầu nhập", "Luong dau nhap"],
+            TonCuoiKy: ["TonCuoiKy", "Tồn cuối kỳ", "Ton cuoi ky"],
+            LuongDauTieuHao: ["LuongDauTieuHao", "Lượng dầu tiêu hao", "Luong dau tieu hao"],
+            TongMo: ["TongMo", "Tổng mỡ", "Tong mo"],
+            TongNhot: ["TongNhot", "Tổng nhớt", "Tong nhot"],
+            DauThuyLuc: ["DauThuyLuc", "Dầu thủy lực", "Dau thuy luc"],
+            DauCau: ["DauCau", "Dầu cầu", "Dau cau"],
+            TieuHaoThucTeT12: ["TieuHaoThucTeT12", "Tiêu hao thực tế T12", "Tieu hao thuc te T12"],
+            TieuHaoThucTeT11: ["TieuHaoThucTeT11", "Tiêu hao thực tế T11", "Tieu hao thuc te T11"],
+            DinhMucDauTrungBinh: ["DinhMucDauTrungBinh", "Định mức dầu trung bình", "Dinh muc dau trung binh"],
+            DinhMucTieuHao: ["DinhMucTieuHao", "Định mức tiêu hao", "Dinh muc tieu hao"],
+            ChenhLech: ["ChenhLech", "Chênh lệch", "Chenh lech"],
+            CongViec: ["CongViec", "Công việc", "Cong viec"],
+            CongTruong: ["CongTruong", "Công trường", "Cong truong", "Tên công trình"]
+        };
+
+        function pickField(raw, columnKey) {
+            const keys = REPORT_FIELD_ALIASES[columnKey] || [columnKey];
+            for (const k of keys) {
+                const v = raw[k];
+                if (v === undefined || v === null) continue;
+                if (typeof v === "string" && v.trim() === "") continue;
+                return v;
+            }
+            return "";
+        }
+
+        function normalizeRowsFromAppSheet(rows) {
+            return rows.map((raw) => {
+                const out = {};
+                REPORT_COLUMNS.forEach((col) => {
+                    out[col] = pickField(raw, col);
+                });
+                if (raw.groupRow) out.groupRow = true;
+                if (raw.subGroupRow) out.subGroupRow = true;
+                return out;
+            });
+        }
+
+        const reportBody = document.getElementById("report-body");
+        const statusLine = document.getElementById("appsheet-status");
+        const loadButton = document.getElementById("load-appsheet");
+        const resetButton = document.getElementById("reset-filter");
+
+        const seedRows = [
+            { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
+            { TT: "1", TenThietBi: "NHÓM MÁY XÚC:", subGroupRow: true },
+            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", BienSoNhanHieu: "18XA-0062", TenLaiMay: "Cù Như Phan", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongT12: "115,0", TongGioHoatDongT11: "146,0", SoNgayThucTe: "13,0", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT12: "8,4", TieuHaoThucTeT11: "9,3", DinhMucDauTrungBinh: "4,5", DinhMucTieuHao: "10,8", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", BienSoNhanHieu: "18XA-0013", TenLaiMay: "Phạm V Hoàng", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongT12: "254,5", TongGioHoatDongT11: "205,5", SoNgayThucTe: "25,0", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT12: "10,3", TieuHaoThucTeT11: "9,0", DinhMucDauTrungBinh: "4,9", DinhMucTieuHao: "11,0", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "B", TenThietBi: "NHÓM MÁY THUÊ:", groupRow: true }
+        ];
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function setStatus(message, isError = false) {
+            statusLine.textContent = message;
+            statusLine.className = `status-line ${isError ? "text-red-600" : "text-[#2b7132]"}`;
+        }
+
+        function getFilters() {
+            return {
+                project: document.getElementById("filter-project").value.trim(),
+                group: document.getElementById("filter-group").value.trim(),
+                driver: document.getElementById("filter-driver").value.trim(),
+                fromDate: document.getElementById("filter-from-date").value,
+                toDate: document.getElementById("filter-to-date").value
+            };
+        }
+
+        function buildFindCondition(filters) {
+            const conditions = [];
+            Object.entries(FILTER_FIELDS_BY_INPUT).forEach(([filterKey, columnNames]) => {
+                const value = filters[filterKey];
+                if (!value) return;
+                const safeValue = value.replaceAll("'", "''");
+                const containsParts = columnNames.map(
+                    (fieldName) => `CONTAINS(LOWER([${fieldName}]), LOWER('${safeValue}'))`
+                );
+                conditions.push(containsParts.length === 1 ? containsParts[0] : `OR(${containsParts.join(",")})`);
+            });
+
+            if (filters.fromDate) {
+                conditions.push(`[${NT_FILTER_DATE_COLUMN}] >= DATE('${filters.fromDate}')`);
+            }
+            if (filters.toDate) {
+                conditions.push(`[${NT_FILTER_DATE_COLUMN}] <= DATE('${filters.toDate}')`);
+            }
+
+            return conditions.length ? `AND(${conditions.join(",")})` : "";
+        }
+
+        function renderRows(rows) {
+            if (!rows.length) {
+                reportBody.innerHTML = `
+                    <tr>
+                        <td colspan="24" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            reportBody.innerHTML = rows.map((row) => {
+                if (row.groupRow) {
+                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="22"></td></tr>`;
+                }
+                if (row.subGroupRow) {
+                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="22"></td></tr>`;
+                }
+
+                const cells = REPORT_COLUMNS.map((column, index) => {
+                    const cssClass = index === 1 || index === 3 ? "text-left" : "";
+                    return `<td class="${cssClass}">${escapeHtml(row[column] ?? "")}</td>`;
+                }).join("");
+
+                return `<tr>${cells}</tr>`;
+            }).join("");
+        }
+
+        async function loadFromAppSheet() {
+            loadButton.disabled = true;
+            setStatus("Đang tải dữ liệu từ AppSheet...");
+
+            try {
+                const filters = getFilters();
+                const condition = buildFindCondition(filters);
+                const endpoint = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(APPSHEET_CONFIG.tableName)}/Action`;
+
+                const payload = {
+                    Action: "Find",
+                    Properties: {
+                        Locale: "vi-VN",
+                        Timezone: "Asia/Ho_Chi_Minh"
+                    },
+                    Rows: condition ? [{ _RowFilter: condition }] : []
+                };
+
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "ApplicationAccessKey": APPSHEET_CONFIG.accessKey
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawText = await response.text();
+                if (!response.ok) {
+                    throw new Error(`AppSheet trả về lỗi ${response.status}: ${rawText || "(empty body)"}`);
+                }
+
+                let result = null;
+                if (rawText && rawText.trim() !== "") {
+                    try {
+                        result = JSON.parse(rawText);
+                    } catch (parseError) {
+                        throw new Error(`API trả về không phải JSON hợp lệ: ${rawText.slice(0, 180)}`);
+                    }
+                }
+
+                const rows = Array.isArray(result)
+                    ? result
+                    : Array.isArray(result?.Rows)
+                        ? result.Rows
+                        : [];
+                renderRows(normalizeRowsFromAppSheet(rows));
+                setStatus(`Đã tải ${rows.length} dòng từ bảng «Nhật trình máy».`);
+            } catch (error) {
+                console.error(error);
+                setStatus(`Không tải được dữ liệu AppSheet: ${error.message}`, true);
+            } finally {
+                loadButton.disabled = false;
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById("filter-project").value = "";
+            document.getElementById("filter-group").value = "";
+            document.getElementById("filter-driver").value = "";
+            document.getElementById("filter-from-date").value = "";
+            document.getElementById("filter-to-date").value = "";
+            renderRows(seedRows);
+            setStatus("Đã xóa bộ lọc, hiển thị dữ liệu mẫu.");
+        }
+
+        loadButton.addEventListener("click", loadFromAppSheet);
+        resetButton.addEventListener("click", resetFilters);
+
+        renderRows(seedRows);
+        setStatus("Sẵn sàng: tải dữ liệu từ bảng «Nhật trình máy» (AppSheet API).");
+    </script>
+</body>
+</html>
