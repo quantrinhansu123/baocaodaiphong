@@ -230,16 +230,13 @@
                         <th rowspan="2" style="width: 7%;">Tên Lái Máy</th>
                         <th rowspan="2" style="width: 3.5%;">Giờ làm<br>hành chính<br>(h)</th>
                         <th rowspan="2" style="width: 3.5%;">Giờ làm<br>tăng ca (h)</th>
-                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động<br>T12 (h)</th>
-                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động<br>T11 (h)</th>
+                        <th rowspan="2" style="width: 4%;">Tổng giờ<br>hoạt động(h)</th>
                         <th rowspan="2" style="width: 4%;">Số ngày<br>thực tế<br>làm việc<br>(ngày)</th>
                         <th rowspan="2" style="width: 4.5%;">Tồn đầu<br>kỳ (lít)</th>
                         <th rowspan="2" style="width: 4.5%;">Lượng<br>dầu nhập<br>trong<br>tháng (lít)</th>
                         <th rowspan="2" style="width: 4.5%;">Tồn cuối<br>kỳ (lít)</th>
                         <th rowspan="2" style="width: 4.5%;">Lượng dầu<br>tiêu hao<br>(L)</th>
                         <th colspan="4">Nhiên liệu phụ</th>
-                        <th rowspan="2" style="width: 3.5%;">Tiêu<br>hao<br>thực tế<br>T12<br>(l/h)</th>
-                        <th rowspan="2" style="width: 3.5%;">Tiêu<br>hao<br>thực tế<br>T11<br>(l/h)</th>
                         <th rowspan="2" style="width: 3.5%;">Định<br>mức<br>dầu<br>trung<br>bình</th>
                         <th rowspan="2" style="width: 3.5%;">Định mức<br>tiêu hao<br>(l/h)</th>
                         <th rowspan="2" style="width: 5%;">Chênh lệch<br>(>=0: trong<br>Định mức<br>cho phép;<br>&lt;0: vượt<br>định mức)</th>
@@ -271,12 +268,9 @@
                         <th>(16)</th>
                         <th>(17)</th>
                         <th>(18)</th>
+                        <th></th> <!-- Empty for Chênh lệch -->
                         <th>(19)</th>
                         <th>(20)</th>
-                        <th>(21)</th>
-                        <th></th> <!-- Empty for Chênh lệch -->
-                        <th>(22)</th>
-                        <th>(23)</th>
                     </tr>
                 </thead>
                 <tbody id="report-body"></tbody>
@@ -291,14 +285,20 @@
             accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
         };
 
+        /** Chi tiết ca — «Giờ làm hành chính» = tổng «Tổng giờ lv» (Loại = Trong giờ HC), gom theo Tên tài sản */
+        const TABLE_NT_CT = "Nhật trình máy CT";
+
+        /** Nhập nhiên liệu — «Lượng dầu nhập» = tổng từ «Nhật trình NL» (Dầu Diezel), gom theo Tên tài sản */
+        const TABLE_NT_NL = "Nhật trình NL";
+
         /** Cột ngày trên bảng Nhật trình máy (đổi thành «Ngày» nếu trên app chỉ có cột đó) */
         const NT_FILTER_DATE_COLUMN = "Ngày làm việc";
 
         const REPORT_COLUMNS = [
             "TT", "TenThietBi", "BienSoNhanHieu", "TenLaiMay", "GioLamHanhChinh", "GioLamTangCa",
-            "TongGioHoatDongT12", "TongGioHoatDongT11", "SoNgayThucTe", "TonDauKy", "LuongDauNhap",
+            "TongGioHoatDongT12", "SoNgayThucTe", "TonDauKy", "LuongDauNhap",
             "TonCuoiKy", "LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
-            "TieuHaoThucTeT12", "TieuHaoThucTeT11", "DinhMucDauTrungBinh", "DinhMucTieuHao",
+            "DinhMucDauTrungBinh", "DinhMucTieuHao",
             "ChenhLech", "CongViec", "CongTruong"
         ];
 
@@ -318,9 +318,11 @@
          */
         const REPORT_FIELD_ALIASES = {
             TT: ["TT", "STT", "Stt"],
-            TenThietBi: ["TenThietBi", "Tên thiết bị", "Ten thiet bi"],
+            /* Ưu tiên «Tên tài sản» (Nhật trình máy), sau đó «Tên thiết bị» */
+            TenThietBi: ["Tên tài sản", "Ten tai san", "TenThietBi", "Tên thiết bị", "Ten thiet bi"],
             BienSoNhanHieu: ["BienSoNhanHieu", "Biển số/Nhãn hiệu", "Biển số", "Bien so", "Nhãn hiệu"],
             TenLaiMay: ["TenLaiMay", "Tên lái máy", "Ten lai may"],
+            /* Giờ HC: tổng Tổng giờ lv (Trong giờ HC) gom theo Tên tài sản; không có thì lấy từ phiếu */
             GioLamHanhChinh: ["GioLamHanhChinh", "Giờ làm hành chính", "Gio lam hanh chinh"],
             GioLamTangCa: ["GioLamTangCa", "Giờ làm tăng ca", "Gio lam tang ca"],
             TongGioHoatDongT12: [
@@ -329,9 +331,16 @@
                 "Tong gio hoat dong T12",
                 "TongGioHoatDong"
             ],
-            TongGioHoatDongT11: ["TongGioHoatDongT11", "Tổng giờ hoạt động T11", "Tong gio hoat dong T11"],
-            SoNgayThucTe: ["SoNgayThucTe", "Số ngày thực tế", "So ngay thuc te"],
+            /* Ưu tiên tổng «Số ngày lv thực tế» từ bảng CT (gom theo Tên tài sản); trên phiếu dùng các tên dưới — không map trực tiếp cột lv từ phiếu */
+            SoNgayThucTe: [
+                "Số ngày thực tế làm việc (ngày)",
+                "So ngay thuc te lam viec (ngay)",
+                "SoNgayThucTe",
+                "Số ngày thực tế",
+                "So ngay thuc te"
+            ],
             TonDauKy: ["TonDauKy", "Tồn đầu kỳ", "Ton dau ky"],
+            /* Tổng từ «Nhật trình NL» theo Tên nhiên liệu (Diezel→nhập dầu; Mỡ/Nhớt/TL/Cầu→4 cột phụ); không có thì lấy từ phiếu */
             LuongDauNhap: ["LuongDauNhap", "Lượng dầu nhập", "Luong dau nhap"],
             TonCuoiKy: ["TonCuoiKy", "Tồn cuối kỳ", "Ton cuoi ky"],
             LuongDauTieuHao: ["LuongDauTieuHao", "Lượng dầu tiêu hao", "Luong dau tieu hao"],
@@ -339,12 +348,11 @@
             TongNhot: ["TongNhot", "Tổng nhớt", "Tong nhot"],
             DauThuyLuc: ["DauThuyLuc", "Dầu thủy lực", "Dau thuy luc"],
             DauCau: ["DauCau", "Dầu cầu", "Dau cau"],
-            TieuHaoThucTeT12: ["TieuHaoThucTeT12", "Tiêu hao thực tế T12", "Tieu hao thuc te T12"],
-            TieuHaoThucTeT11: ["TieuHaoThucTeT11", "Tiêu hao thực tế T11", "Tieu hao thuc te T11"],
             DinhMucDauTrungBinh: ["DinhMucDauTrungBinh", "Định mức dầu trung bình", "Dinh muc dau trung binh"],
             DinhMucTieuHao: ["DinhMucTieuHao", "Định mức tiêu hao", "Dinh muc tieu hao"],
             ChenhLech: ["ChenhLech", "Chênh lệch", "Chenh lech"],
-            CongViec: ["CongViec", "Công việc", "Cong viec"],
+            /* Cột báo cáo «Công việc» lấy từ «Nội dung» trên Nhật trình máy */
+            CongViec: ["Nội dung", "Noi dung", "CongViec", "Công việc", "Cong viec"],
             CongTruong: ["CongTruong", "Công trường", "Cong truong", "Tên công trình"]
         };
 
@@ -359,6 +367,401 @@
             return "";
         }
 
+        function cellString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value);
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value);
+            return String(v);
+        }
+
+        function normalizeKeyPart(s) {
+            return String(s ?? "")
+                .trim()
+                .toLowerCase()
+                .replace(/-/g, "")
+                .replace(/\s/g, "");
+        }
+
+        function parentIdsMatch(ref, parentId) {
+            const a0 = String(ref == null ? "" : ref).trim();
+            const b0 = String(parentId == null ? "" : parentId).trim();
+            if (!a0 || !b0) return false;
+            if (a0.toLowerCase() === b0.toLowerCase()) return true;
+            const na = normalizeKeyPart(a0);
+            const nb = normalizeKeyPart(b0);
+            if (na === nb) return true;
+            const MIN = 8;
+            if (na.length >= MIN && nb.length >= MIN && (na.includes(nb) || nb.includes(na))) return true;
+            if (nb.length >= MIN && na.length < nb.length && nb.includes(na)) return true;
+            if (na.length >= MIN && nb.length < na.length && na.includes(nb)) return true;
+            const lastA = a0.lastIndexOf("_");
+            const lastB = b0.lastIndexOf("_");
+            const tailA = lastA >= 0 ? normalizeKeyPart(a0.slice(lastA + 1)) : na;
+            const tailB = lastB >= 0 ? normalizeKeyPart(b0.slice(lastB + 1)) : nb;
+            if (tailA && tailB) {
+                if (tailA === tailB) return true;
+                if (tailA.length >= MIN && tailB.length >= MIN && (tailA.includes(tailB) || tailB.includes(tailA)))
+                    return true;
+            }
+            const ax = a0.toLowerCase();
+            const bx = b0.toLowerCase();
+            if (ax.includes(bx) || bx.includes(ax)) {
+                if (Math.min(ax.length, bx.length) >= 6) return true;
+            }
+            return false;
+        }
+
+        /** Mọi chuỗi Ref/ID cha có thể trỏ về phiếu «Nhật trình máy» (AppSheet đặt tên cột khác nhau). */
+        function getCtParentRefCandidates(row) {
+            if (!row || typeof row !== "object") return [];
+            const orderedKeys = [
+                "ID cha",
+                "ID Cha",
+                "Id cha",
+                "ID phiếu",
+                "ID phieu",
+                "Id phieu",
+                "ID Phiếu",
+                "Ref",
+                "REF",
+                "Nhật trình máy",
+                "Nhat trinh may"
+            ];
+            const found = [];
+            const seen = new Set();
+            for (const k of orderedKeys) {
+                const t = cellString(row[k]).trim();
+                if (t === "" || seen.has(t)) continue;
+                seen.add(t);
+                found.push(t);
+            }
+            for (const [k, v] of Object.entries(row)) {
+                const t = cellString(v).trim();
+                if (t === "") continue;
+                if (/phiếu|phieu|ref|nhật trình máy|id cha|related/i.test(k)) {
+                    if (!seen.has(t)) {
+                        seen.add(t);
+                        found.push(t);
+                    }
+                }
+            }
+            return found;
+        }
+
+        /** Mọi khóa có thể là ID dòng trên phiếu «Nhật trình máy» để khớp với Ref bảng CT */
+        function getNtParentMatchIds(record) {
+            const ids = [];
+            const seen = new Set();
+            const add = (v) => {
+                const t = cellString(v).trim();
+                if (t === "" || seen.has(t)) return;
+                seen.add(t);
+                ids.push(t);
+            };
+            if (!record || typeof record !== "object") return ids;
+            for (const k of [
+                "ID",
+                "Row ID",
+                "RowId",
+                "_RowNumber",
+                "ID phát hiện",
+                "Id phat hien",
+                "ID phát hiện ",
+                "KEY",
+                "Key"
+            ]) {
+                add(record[k]);
+            }
+            return ids;
+        }
+
+        /** Ref từ dòng «Nhật trình NL» → phiếu «Nhật trình máy» */
+        function getNlParentRefCandidates(row) {
+            if (!row || typeof row !== "object") return [];
+            const orderedKeys = [
+                "ID phiếu",
+                "ID phieu",
+                "Id phieu",
+                "ID Phiếu",
+                "Ref",
+                "REF",
+                "Nhật trình máy",
+                "Nhat trinh may",
+                "ID cha",
+                "ID Cha",
+                "Id cha"
+            ];
+            const found = [];
+            const seen = new Set();
+            for (const k of orderedKeys) {
+                const t = cellString(row[k]).trim();
+                if (t === "" || seen.has(t)) continue;
+                seen.add(t);
+                found.push(t);
+            }
+            for (const [k, v] of Object.entries(row)) {
+                const t = cellString(v).trim();
+                if (t === "") continue;
+                if (/phiếu|phieu|ref|nhật trình máy|id cha|related/i.test(k)) {
+                    if (!seen.has(t)) {
+                        seen.add(t);
+                        found.push(t);
+                    }
+                }
+            }
+            return found;
+        }
+
+        function parseNumericForLiters(raw) {
+            if (raw == null || raw === "") return null;
+            if (typeof raw === "number" && !isNaN(raw)) return raw;
+            const s0 = cellString(raw).trim();
+            const m = s0.match(/-?[\d.,]+/);
+            if (!m) return null;
+            let s = m[0];
+            const comma = s.indexOf(",");
+            const dot = s.indexOf(".");
+            if (comma !== -1 && dot !== -1) {
+                if (comma > dot) s = s.replace(/\./g, "").replace(",", ".");
+                else s = s.replace(/,/g, "");
+            } else if (comma !== -1) {
+                s = s.replace(",", ".");
+            } else if (dot !== -1 && s.indexOf(".", dot + 1) !== -1) {
+                s = s.replace(/\./g, "");
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? null : n;
+        }
+
+        function parseNlQuantityCell(row) {
+            const keys = [
+                "SL nhập",
+                "SL nhap",
+                "Sl nhập",
+                "Số lượng nhập",
+                "So luong nhap",
+                "Số lượng",
+                "So luong",
+                "Lượng",
+                "Luong",
+                "Khối lượng",
+                "Khoi luong",
+                "SL",
+                "Số Lượng",
+                "Giá trị",
+                "Gia tri",
+                "Tiêu thụ",
+                "Tieu thu",
+                "Lít",
+                "Lit"
+            ];
+            for (const k of keys) {
+                const q = parseNumericForLiters(row[k]);
+                if (q != null) return q;
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (!/sl\s*nh[aạ]p|lượng|luong|^\s*sl\s*$/i.test(k)) continue;
+                const q = parseNumericForLiters(v);
+                if (q != null) return q;
+            }
+            return null;
+        }
+
+        /**
+         * «Tên nhiên liệu» trên «Nhật trình NL» → cột báo cáo (thứ tự giống maubaocaovattu: TL / Diezel / cầu / nhớt / mỡ).
+         * LuongDauNhap ← Dầu Diezel, Diesel, Dầu DO.
+         */
+        function classifyNlTenToFuelColumn(tenRaw) {
+            const s = String(tenRaw ?? "").trim();
+            if (!s) return null;
+            const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
+
+            if (noAccent.includes("thuy luc") || s.includes("thủy lực")) return "DauThuyLuc";
+            if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
+            if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
+            if (noAccent.includes("dau cau") || (s.includes("cầu") && s.includes("dầu"))) return "DauCau";
+            if (noAccent.includes("nhot") || s.includes("nhớt")) return "TongNhot";
+            if (s.includes("mỡ")) return "TongMo";
+            return null;
+        }
+
+        function getNlTaiSanCell(r) {
+            return (
+                r["Tên tài sản"] ??
+                r["Ten tai san"] ??
+                r["TenTaiSan"] ??
+                r["Tên thiết bị"] ??
+                ""
+            );
+        }
+
+        function isLoaiTrongGioHC(val) {
+            const s = String(val ?? "")
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "");
+            if (!s) return false;
+            if (s.includes("trong gio hc")) return true;
+            if (/trong.*\bhc\b/.test(s)) return true;
+            if (s.includes("trong") && s.includes("hanh chinh")) return true;
+            return false;
+        }
+
+        /** Đọc số giờ từ ô AppSheet (thập phân . hoặc ,; không làm hỏng «8.5» như bản cũ). */
+        function parseHourCell(raw) {
+            if (raw == null || raw === "") return null;
+            if (typeof raw === "number" && !isNaN(raw)) return raw;
+            const s0 = cellString(raw).trim();
+            if (!s0) return null;
+            const timeM = s0.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+            if (timeM) {
+                const h = parseInt(timeM[1], 10);
+                const m = parseInt(timeM[2], 10);
+                if (!isNaN(h) && !isNaN(m)) return h + m / 60;
+            }
+            const m = s0.match(/-?[\d.,]+/);
+            if (!m) return null;
+            let s = m[0];
+            const comma = s.indexOf(",");
+            const dot = s.indexOf(".");
+            if (comma !== -1 && dot !== -1) {
+                if (comma > dot) s = s.replace(/\./g, "").replace(",", ".");
+                else s = s.replace(/,/g, "");
+            } else if (comma !== -1) {
+                s = s.replace(",", ".");
+            } else if (dot !== -1 && s.indexOf(".", dot + 1) !== -1) {
+                s = s.replace(/\./g, "");
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? null : n;
+        }
+
+        function formatHourDisplay(n) {
+            if (n == null || isNaN(n)) return "";
+            return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(n);
+        }
+
+        /** Khóa gom theo «Tên tài sản» (đồng nhất với pickField TenThietBi) */
+        function assetKeyFromName(name) {
+            return normalizeKeyPart(String(name ?? "").trim());
+        }
+
+        /**
+         * Với mỗi dòng CT (Loại = Trong giờ HC): khớp Ref → phiếu «Nhật trình máy», lấy Tên tài sản của phiếu,
+         * cộng dồn «Tổng giờ lv». Mọi phiếu cùng tài sản dùng chung một tổng (hiển thị ở cột Giờ HC).
+         */
+        function buildGioHanhChinhSumByTaiSan(mainRows, ctRows) {
+            const byKey = new Map();
+            if (!ctRows?.length || !mainRows?.length) return byKey;
+
+            const parents = [];
+            for (const raw of mainRows) {
+                if (raw?.groupRow || raw?.subGroupRow) continue;
+                const ids = getNtParentMatchIds(raw);
+                if (!ids.length) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                parents.push({ ids, key });
+            }
+
+            for (const r of ctRows) {
+                const loai = r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "";
+                if (!isLoaiTrongGioHC(loai)) continue;
+                const tg = r["Tổng giờ lv"] ?? r["Tong gio lv"] ?? r["Tổng giờ LV"] ?? r["Tong gio LV"];
+                const n = parseHourCell(tg);
+                if (n == null) continue;
+
+                let matchedParent = false;
+                for (const rref of getCtParentRefCandidates(r)) {
+                    if (!rref) continue;
+                    for (const { ids, key } of parents) {
+                        for (const pid of ids) {
+                            if (parentIdsMatch(rref, pid)) {
+                                byKey.set(key, (byKey.get(key) ?? 0) + n);
+                                matchedParent = true;
+                                break;
+                            }
+                        }
+                        if (matchedParent) break;
+                    }
+                    if (matchedParent) break;
+                }
+
+                if (!matchedParent) {
+                    const onCt = String(
+                        r["Tên tài sản"] ?? r["Ten tai san"] ?? r["TenTaiSan"] ?? ""
+                    ).trim();
+                    const k = assetKeyFromName(onCt);
+                    if (k) byKey.set(k, (byKey.get(k) ?? 0) + n);
+                }
+            }
+            return byKey;
+        }
+
+        function getCtSoNgayLvThucTeCell(r) {
+            return (
+                r["Số ngày lv thực tế"] ??
+                r["So ngay lv thuc te"] ??
+                r["SoNgayLvThucTe"] ??
+                r["Số ngày LV thực tế"] ??
+                r["So ngay LV thuc te"] ??
+                ""
+            );
+        }
+
+        /**
+         * Tổng «Số ngày lv thực tế» trên «Nhật trình máy CT», gom theo Tên tài sản (cùng cách khớp Ref như giờ HC).
+         */
+        function buildSoNgayLvThucTeSumByTaiSan(mainRows, ctRows) {
+            const byKey = new Map();
+            if (!ctRows?.length || !mainRows?.length) return byKey;
+
+            const parents = [];
+            for (const raw of mainRows) {
+                if (raw?.groupRow || raw?.subGroupRow) continue;
+                const ids = getNtParentMatchIds(raw);
+                if (!ids.length) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                parents.push({ ids, key });
+            }
+
+            for (const r of ctRows) {
+                const n = parseHourCell(getCtSoNgayLvThucTeCell(r));
+                if (n == null) continue;
+
+                let matchedParent = false;
+                for (const rref of getCtParentRefCandidates(r)) {
+                    if (!rref) continue;
+                    for (const { ids, key } of parents) {
+                        for (const pid of ids) {
+                            if (parentIdsMatch(rref, pid)) {
+                                byKey.set(key, (byKey.get(key) ?? 0) + n);
+                                matchedParent = true;
+                                break;
+                            }
+                        }
+                        if (matchedParent) break;
+                    }
+                    if (matchedParent) break;
+                }
+
+                if (!matchedParent) {
+                    const onCt = String(
+                        r["Tên tài sản"] ?? r["Ten tai san"] ?? r["TenTaiSan"] ?? ""
+                    ).trim();
+                    const k = assetKeyFromName(onCt);
+                    if (k) byKey.set(k, (byKey.get(k) ?? 0) + n);
+                }
+            }
+            return byKey;
+        }
+
         function normalizeRowsFromAppSheet(rows) {
             return rows.map((raw) => {
                 const out = {};
@@ -371,6 +774,169 @@
             });
         }
 
+        function applyGioLamHanhChinhFromNtCt(mainRows, normalizedRows, sumByTaiSan) {
+            if (!sumByTaiSan || !sumByTaiSan.size) return normalizedRows;
+
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi);
+                if (!key || !sumByTaiSan.has(key)) return out;
+                out.GioLamHanhChinh = formatHourDisplay(sumByTaiSan.get(key));
+                return out;
+            });
+        }
+
+        function applySoNgayThucTeFromNtCt(mainRows, normalizedRows, sumNgayByTaiSan) {
+            if (!sumNgayByTaiSan || !sumNgayByTaiSan.size) return normalizedRows;
+
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi);
+                if (!key || !sumNgayByTaiSan.has(key)) return out;
+                out.SoNgayThucTe = formatHourDisplay(sumNgayByTaiSan.get(key));
+                return out;
+            });
+        }
+
+        function formatLitersDisplay(n) {
+            if (n == null || isNaN(n)) return "";
+            return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 4, minimumFractionDigits: 0 }).format(n);
+        }
+
+        function emptyNlFuelSumsByTaiSan() {
+            return {
+                LuongDauNhap: new Map(),
+                TongMo: new Map(),
+                TongNhot: new Map(),
+                DauThuyLuc: new Map(),
+                DauCau: new Map()
+            };
+        }
+
+        /**
+         * Tổng từ «Nhật trình NL»: mỗi dòng theo «Tên nhiên liệu» → một trong 5 cột (Mỡ, Nhớt, TL, Cầu, Diezel), gom theo Tên tài sản.
+         */
+        function buildNlFuelSumsByTaiSan(mainRows, nlRows) {
+            const sums = emptyNlFuelSumsByTaiSan();
+            if (!nlRows?.length) return sums;
+
+            const parents = [];
+            if (mainRows?.length) {
+                for (const raw of mainRows) {
+                    if (raw?.groupRow || raw?.subGroupRow) continue;
+                    const ids = getNtParentMatchIds(raw);
+                    if (!ids.length) continue;
+                    const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                    if (!asset) continue;
+                    const key = assetKeyFromName(asset);
+                    if (!key) continue;
+                    parents.push({ ids, key });
+                }
+            }
+
+            function addToMap(targetMap, assetKey, q) {
+                targetMap.set(assetKey, (targetMap.get(assetKey) ?? 0) + q);
+            }
+
+            for (const r of nlRows) {
+                const tenNl =
+                    r["Tên nhiên liệu"] ??
+                    r["Ten nhien lieu"] ??
+                    r["Tên NL"] ??
+                    r["Loại nhiên liệu"] ??
+                    r["Loai nhien lieu"] ??
+                    "";
+                const col = classifyNlTenToFuelColumn(tenNl);
+                if (!col) continue;
+                const q = parseNlQuantityCell(r);
+                if (q == null) continue;
+
+                const targetMap = sums[col];
+                const assetDirect = cellString(getNlTaiSanCell(r)).trim();
+                if (assetDirect) {
+                    const k = assetKeyFromName(assetDirect);
+                    if (k) {
+                        addToMap(targetMap, k, q);
+                        continue;
+                    }
+                }
+
+                let matchedParent = false;
+                for (const rref of getNlParentRefCandidates(r)) {
+                    if (!rref) continue;
+                    for (const { ids, key } of parents) {
+                        for (const pid of ids) {
+                            if (parentIdsMatch(rref, pid)) {
+                                addToMap(targetMap, key, q);
+                                matchedParent = true;
+                                break;
+                            }
+                        }
+                        if (matchedParent) break;
+                    }
+                    if (matchedParent) break;
+                }
+            }
+            return sums;
+        }
+
+        const NL_FUEL_COLUMN_KEYS = ["LuongDauNhap", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
+
+        function applyNlFuelColumnsFromNl(mainRows, normalizedRows, nlSums) {
+            if (!nlSums) return normalizedRows;
+            const hasAny = NL_FUEL_COLUMN_KEYS.some((c) => nlSums[c]?.size > 0);
+            if (!hasAny) return normalizedRows;
+
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi);
+                if (!key) return out;
+                for (const c of NL_FUEL_COLUMN_KEYS) {
+                    const m = nlSums[c];
+                    if (m?.has(key)) out[c] = formatLitersDisplay(m.get(key));
+                }
+                return out;
+            });
+        }
+
+        function countCtRowsTrongGioHC(ctRows) {
+            if (!ctRows?.length) return 0;
+            return ctRows.filter((r) =>
+                isLoaiTrongGioHC(r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "")
+            ).length;
+        }
+
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const err = await response.text();
+                throw new Error(`${tableName}: ${response.status} ${err}`);
+            }
+            const data = await response.json();
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.Rows)) return data.Rows;
+            return [];
+        }
+
         const reportBody = document.getElementById("report-body");
         const statusLine = document.getElementById("appsheet-status");
         const loadButton = document.getElementById("load-appsheet");
@@ -379,8 +945,8 @@
         const seedRows = [
             { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
             { TT: "1", TenThietBi: "NHÓM MÁY XÚC:", subGroupRow: true },
-            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", BienSoNhanHieu: "18XA-0062", TenLaiMay: "Cù Như Phan", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongT12: "115,0", TongGioHoatDongT11: "146,0", SoNgayThucTe: "13,0", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT12: "8,4", TieuHaoThucTeT11: "9,3", DinhMucDauTrungBinh: "4,5", DinhMucTieuHao: "10,8", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
-            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", BienSoNhanHieu: "18XA-0013", TenLaiMay: "Phạm V Hoàng", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongT12: "254,5", TongGioHoatDongT11: "205,5", SoNgayThucTe: "25,0", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", TieuHaoThucTeT12: "10,3", TieuHaoThucTeT11: "9,0", DinhMucDauTrungBinh: "4,9", DinhMucTieuHao: "11,0", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "1.1", TenThietBi: "Máy xúc PC 200-6/062", BienSoNhanHieu: "18XA-0062", TenLaiMay: "Cù Như Phan", GioLamHanhChinh: "68,5", GioLamTangCa: "46,5", TongGioHoatDongT12: "115,0", SoNgayThucTe: "13,0", TonDauKy: "247,5", LuongDauNhap: "1.005", TonCuoiKy: "283,5", LuongDauTieuHao: "969,0", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", DinhMucDauTrungBinh: "4,5", DinhMucTieuHao: "10,8", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
+            { TT: "1.2", TenThietBi: "Máy xúc PC 200-8/013", BienSoNhanHieu: "18XA-0013", TenLaiMay: "Phạm V Hoàng", GioLamHanhChinh: "163,00", GioLamTangCa: "91,5", TongGioHoatDongT12: "254,5", SoNgayThucTe: "25,0", TonDauKy: "156,2", LuongDauNhap: "2.585", TonCuoiKy: "126,9", LuongDauTieuHao: "2.614,3", TongMo: "-", TongNhot: "20,0", DauThuyLuc: "20,0", DauCau: "-", DinhMucDauTrungBinh: "4,9", DinhMucTieuHao: "11,0", ChenhLech: "", CongViec: "Thi công kè", CongTruong: "Kè Thịnh Long" },
             { TT: "B", TenThietBi: "NHÓM MÁY THUÊ:", groupRow: true }
         ];
 
@@ -434,7 +1000,7 @@
             if (!rows.length) {
                 reportBody.innerHTML = `
                     <tr>
-                        <td colspan="24" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
+                        <td colspan="21" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
                     </tr>
                 `;
                 return;
@@ -442,10 +1008,10 @@
 
             reportBody.innerHTML = rows.map((row) => {
                 if (row.groupRow) {
-                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="22"></td></tr>`;
+                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="19"></td></tr>`;
                 }
                 if (row.subGroupRow) {
-                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="22"></td></tr>`;
+                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td colspan="19"></td></tr>`;
                 }
 
                 const cells = REPORT_COLUMNS.map((column, index) => {
@@ -503,8 +1069,62 @@
                     : Array.isArray(result?.Rows)
                         ? result.Rows
                         : [];
-                renderRows(normalizeRowsFromAppSheet(rows));
-                setStatus(`Đã tải ${rows.length} dòng từ bảng «Nhật trình máy».`);
+
+                let ctRows = [];
+                let ctLoadError = null;
+                try {
+                    ctRows = await fetchAppSheetTable(TABLE_NT_CT);
+                } catch (e) {
+                    ctLoadError = e;
+                    console.warn("Nhật trình máy CT:", e);
+                }
+
+                let nlRows = [];
+                let nlLoadError = null;
+                try {
+                    nlRows = await fetchAppSheetTable(TABLE_NT_NL);
+                } catch (e) {
+                    nlLoadError = e;
+                    console.warn("Nhật trình NL:", e);
+                }
+
+                const sumHcByTaiSan = buildGioHanhChinhSumByTaiSan(rows, ctRows);
+                const sumNgayLvByTaiSan = buildSoNgayLvThucTeSumByTaiSan(rows, ctRows);
+                const nlFuelSumsByTaiSan = buildNlFuelSumsByTaiSan(rows, nlRows);
+                let normalized = normalizeRowsFromAppSheet(rows);
+                normalized = applyGioLamHanhChinhFromNtCt(rows, normalized, sumHcByTaiSan);
+                normalized = applySoNgayThucTeFromNtCt(rows, normalized, sumNgayLvByTaiSan);
+                normalized = applyNlFuelColumnsFromNl(rows, normalized, nlFuelSumsByTaiSan);
+                renderRows(normalized);
+
+                let ctPart = "";
+                if (ctLoadError) {
+                    ctPart = ` — không tải được «${TABLE_NT_CT}»: ${ctLoadError.message} (giờ HC theo phiếu nếu có)`;
+                } else if (ctRows.length) {
+                    ctPart = `; giờ HC = tổng «Tổng giờ lv» (Trong giờ HC); số ngày làm việc = tổng «Số ngày lv thực tế» — gom theo Tên tài sản`;
+                    const nHc = countCtRowsTrongGioHC(ctRows);
+                    if (nHc > 0 && sumHcByTaiSan.size === 0) {
+                        ctPart +=
+                            " — Chưa ghép được giờ: kiểm tra cột Ref/ID cha trên CT và ID/Row ID phiếu, hoặc tên cột «Tổng giờ lv» / «Loại công việc».";
+                    } else if (sumHcByTaiSan.size > 0) {
+                        ctPart += ` (${sumHcByTaiSan.size} tài sản có tổng giờ HC`;
+                        if (sumNgayLvByTaiSan.size > 0) {
+                            ctPart += `; ${sumNgayLvByTaiSan.size} tài sản có tổng «Số ngày lv thực tế»`;
+                        }
+                        ctPart += ").";
+                    } else if (sumNgayLvByTaiSan.size > 0) {
+                        ctPart += ` (${sumNgayLvByTaiSan.size} tài sản có tổng «Số ngày lv thực tế»).`;
+                    }
+                }
+                if (nlLoadError) {
+                    ctPart += ` — không tải «${TABLE_NT_NL}»: ${nlLoadError.message}`;
+                } else if (nlRows.length && nlFuelSumsByTaiSan) {
+                    const nTypes = NL_FUEL_COLUMN_KEYS.filter((c) => nlFuelSumsByTaiSan[c].size > 0).length;
+                    if (nTypes > 0) {
+                        ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
+                    }
+                }
+                setStatus(`Đã tải ${rows.length} dòng từ bảng «Nhật trình máy»${ctPart}.`);
             } catch (error) {
                 console.error(error);
                 setStatus(`Không tải được dữ liệu AppSheet: ${error.message}`, true);
@@ -527,7 +1147,9 @@
         resetButton.addEventListener("click", resetFilters);
 
         renderRows(seedRows);
-        setStatus("Sẵn sàng: tải dữ liệu từ bảng «Nhật trình máy» (AppSheet API).");
+        setStatus(
+            "Sẵn sàng: «Nhật trình máy» + CT + «Nhật trình NL» (mỡ, nhớt, TL, cầu, Diezel — theo Tên nhiên liệu & Tên tài sản)."
+        );
     </script>
 </body>
 </html>
