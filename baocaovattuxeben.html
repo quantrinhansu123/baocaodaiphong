@@ -47,6 +47,13 @@
             text-transform: uppercase;
         }
 
+        .company-group-line {
+            margin-top: 4px;
+            font-size: 13px;
+            text-transform: none;
+            font-weight: normal;
+        }
+
         .form-code {
             text-align: right;
         }
@@ -223,13 +230,14 @@
         <div class="header">
             <div class="company-name">
                 CÔNG TY CPXDHT ĐẠI PHONG
+                <div class="company-group-line"><span id="val-ten-cong-trinh"></span></div>
             </div>
             <div class="form-code">
                 VT - TB.03.04b
             </div>
         </div>
 
-        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG XE NGÀY <span id="val-ngay">26/01/2026</span></h1>
+        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG XE <span id="val-ten-xe"></span> - NGÀY <span id="val-ngay">26/01/2026</span></h1>
 
         <div class="pre-table-info">
             <span>Ký xác nhận kiểm tra nhiên liệu đầu ngày:</span>
@@ -1996,6 +2004,52 @@
             }
         }
 
+        /** Tên xe hiển thị trên tiêu đề — ưu tiên «Tên xe», sau đó tên tài sản / biển số / thiết bị */
+        function getTenXeFromRecord(record) {
+            if (!record || typeof record !== 'object') return '';
+            const keys = [
+                'Tên xe',
+                'Ten xe',
+                'TenXe',
+                'Biển số xe',
+                'Bien so xe',
+                'Tên tài sản',
+                'Ten tai san',
+                'TenTaiSan',
+                'Tên thiết bị',
+                'Ten thiet bi',
+                'TenThietBi'
+            ];
+            for (const k of keys) {
+                const v = record[k];
+                if (v == null) continue;
+                const t = String(v).trim();
+                if (t) return t;
+            }
+            return '';
+        }
+
+        /** Dòng dưới tên công ty: tên công trình — ưu tiên «Tên công trình», tương thích «Nhóm nơi quản lý» như mẫu cũ */
+        function getTenCongTrinhFromRecord(record) {
+            if (!record || typeof record !== 'object') return '';
+            const keys = [
+                'Tên công trình',
+                'Ten cong trinh',
+                'TenCongTrinh',
+                'Nhóm nơi quản lý',
+                'Nhom noi quan ly',
+                'Nhóm quản lý',
+                'Nhom quan ly'
+            ];
+            for (const k of keys) {
+                const v = record[k];
+                if (v == null) continue;
+                const t = cellString(v).trim();
+                if (t) return t;
+            }
+            return '';
+        }
+
         // Hàm tách rời để xử lý việc đổ dữ liệu
         function fillDataToForm(record) {
             if (!record) return;
@@ -2005,6 +2059,10 @@
             
             const ngayLamViec = record['Ngày làm việc'] ?? record['Ngay'];
             document.getElementById('val-ngay').innerText = formatNgayTieuDeDdMmYyyy(ngayLamViec) || '...';
+            const tenXeEl = document.getElementById('val-ten-xe');
+            if (tenXeEl) tenXeEl.textContent = getTenXeFromRecord(record);
+            const tenCtEl = document.getElementById('val-ten-cong-trinh');
+            if (tenCtEl) tenCtEl.textContent = getTenCongTrinhFromRecord(record);
             const tenLaiMay = record['Tên lái máy'] ?? record['TenLaiMay'];
             document.getElementById('val-laimay').innerText = tenLaiMay || '';
             document.getElementById('val-baove').innerText = record['TenBaoVe'] || '';
