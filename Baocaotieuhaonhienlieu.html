@@ -248,6 +248,18 @@
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">NGUỒN GỐC:</span>
+                        <select id="filter-origin" class="filter-select" title="Chọn nguồn gốc">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN LOẠI:</span>
+                        <select id="filter-type" class="filter-select" title="Chọn tên loại">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="w-full lg:w-[49%] space-y-1 flex flex-col items-end lg:pr-2">
                     <div class="flex items-center gap-1 w-full lg:w-[280px]">
@@ -333,6 +345,7 @@
                 <tbody id="report-body"></tbody>
             </table>
         </div>
+        <div id="group-summary" class="bg-white px-2 pb-3 text-[12px] leading-5"></div>
     </div>
     <script>
         const APPSHEET_CONFIG = {
@@ -381,7 +394,9 @@
                 "Cong truong"
             ],
             group: ["Nhóm xe máy thiết bị", "NhomXeMayThietBi"],
-            driver: ["Tên lái máy", "TenLaiMay", "Tên lái xe", "Ten lai xe", "Ten lai may"]
+            driver: ["Tên lái máy", "TenLaiMay", "Tên lái xe", "Ten lai xe", "Ten lai may"],
+            origin: ["Nguồn gốc", "Nguon goc", "Nguồn gốc xe", "Nguon goc xe", "Origin"],
+            type: ["Tên loại", "Ten loai", "Loại", "Loai", "Loại xe", "Loai xe", "Tên nhóm", "Ten nhom"]
         };
 
         /**
@@ -1694,6 +1709,7 @@
 
         const reportBody = document.getElementById("report-body");
         const statusLine = document.getElementById("appsheet-status");
+        const groupSummary = document.getElementById("group-summary");
         const loadButton = document.getElementById("load-appsheet");
         const resetButton = document.getElementById("reset-filter");
         const dateRangeEl = document.getElementById("report-date-range");
@@ -1728,6 +1744,8 @@
                 [...drv].sort((a, b) => a.localeCompare(b, "vi")),
                 false
             );
+            fillFilterSelectElement("filter-origin", [], false);
+            fillFilterSelectElement("filter-type", [], false);
         }
 
         function escapeHtml(value) {
@@ -1788,6 +1806,8 @@
             fillFilterSelectElement("filter-project", uniqueSortedFromRaw(rawRows, "project"), true);
             fillFilterSelectElement("filter-group", uniqueSortedFromRaw(rawRows, "group"), true);
             fillFilterSelectElement("filter-driver", uniqueSortedFromRaw(rawRows, "driver"), true);
+            fillFilterSelectElement("filter-origin", uniqueSortedFromRaw(rawRows, "origin"), true);
+            fillFilterSelectElement("filter-type", uniqueSortedFromRaw(rawRows, "type"), true);
         }
 
         function getFilters() {
@@ -1799,6 +1819,8 @@
                 project: document.getElementById("filter-project").value.trim(),
                 group: document.getElementById("filter-group").value.trim(),
                 driver: document.getElementById("filter-driver").value.trim(),
+                origin: document.getElementById("filter-origin").value.trim(),
+                type: document.getElementById("filter-type").value.trim(),
                 fromDate,
                 toDate
             };
@@ -1976,12 +1998,57 @@
         }
 
         function rawRowMatchesTextFilters(raw, filters) {
-            for (const fk of ["project", "group", "driver"]) {
+            for (const fk of ["project", "group", "driver", "origin", "type"]) {
                 const needle = (filters[fk] ?? "").trim();
                 if (!needle) continue;
                 if (!rawCellMatchesNeedle(raw, fk, needle)) return false;
             }
             return true;
+        }
+
+        function pickAssetNameForGroupSummary(raw) {
+            return String(
+                raw?.["Tên tài sản"] ??
+                raw?.["Ten tai san"] ??
+                raw?.["Tên thiết bị"] ??
+                raw?.["Ten thiet bi"] ??
+                ""
+            ).trim();
+        }
+
+        function renderGroupSummary(rawRows) {
+            if (!groupSummary) return;
+            const rows = rawRows || [];
+            if (!rows.length) {
+                groupSummary.innerHTML = "";
+                return;
+            }
+
+            const grouped = new Map();
+            for (const r of rows) {
+                const groupName = pickRawFilterDropdownValue(r, "group") || "Nhóm khác";
+                const assetName = pickAssetNameForGroupSummary(r);
+                if (!assetName) continue;
+                if (!grouped.has(groupName)) grouped.set(groupName, new Set());
+                grouped.get(groupName).add(assetName);
+            }
+
+            if (!grouped.size) {
+                groupSummary.innerHTML = "";
+                return;
+            }
+
+            const parts = [...grouped.entries()]
+                .sort((a, b) => a[0].localeCompare(b[0], "vi"))
+                .map(([groupName, assets]) => {
+                    const items = [...assets]
+                        .sort((a, b) => a.localeCompare(b, "vi"))
+                        .map((name) => `- ${escapeHtml(name)}`)
+                        .join("<br>");
+                    return `<div style="margin-top:6px;"><strong>Nhóm ${escapeHtml(groupName)}:</strong><br>${items}</div>`;
+                });
+
+            groupSummary.innerHTML = parts.join("");
         }
 
         function applyRawTextFilters(rows, filters) {
@@ -2068,6 +2135,7 @@
                 const afterDate = applyNgayLamViecFilter(allRows, filters);
                 populateFilterDropdownsFromRawRows(afterDate);
                 const rows = applyRawTextFilters(afterDate, filters);
+                renderGroupSummary(rows);
 
                 let ctRows = [];
                 let ctLoadError = null;
@@ -2207,9 +2275,12 @@
         function resetFilters() {
             document.getElementById("filter-from-date").value = "";
             document.getElementById("filter-to-date").value = "";
+            document.getElementById("filter-origin").value = "";
+            document.getElementById("filter-type").value = "";
             cachedRawRowsForBanner = [];
             populateFilterDropdownsFromSeedDemo();
             renderRows(seedRows);
+            renderGroupSummary([]);
             syncReportPeriodUi({}, []);
             setStatus("Đã xóa bộ lọc, hiển thị dữ liệu mẫu.");
         }
@@ -2244,6 +2315,11 @@
         }
 
         for (const id of ["filter-project", "filter-group", "filter-driver"]) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            el.addEventListener("change", scheduleAutoLoadFromFilters);
+        }
+        for (const id of ["filter-origin", "filter-type"]) {
             const el = document.getElementById(id);
             if (!el) continue;
             el.addEventListener("change", scheduleAutoLoadFromFilters);
