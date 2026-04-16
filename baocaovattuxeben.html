@@ -228,8 +228,24 @@
                 size: A4 landscape;
                 margin: 0;
             }
-            body { background: none; padding: 0; }
-            .document { box-shadow: none; width: 100%; max-width: none; height: auto; padding: 15mm;}
+            html, body {
+                width: 297mm;
+                height: 210mm;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .document {
+                box-shadow: none;
+                width: 297mm;
+                max-width: 297mm;
+                min-height: 210mm;
+                height: 210mm;
+                padding: 10mm 12mm;
+                overflow: hidden;
+            }
         }
     </style>
 </head>

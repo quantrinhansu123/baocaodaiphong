@@ -206,10 +206,26 @@
             }
             @page {
                 size: A4 landscape;
-                margin: 5mm; /* Đặt lề in sát viền giấy (khoảng 5mm) */
+                margin: 0;
             }
-            body { background: none; padding: 0; }
-            .document { box-shadow: none; width: 100%; max-width: none; height: auto; padding: 0;} /* Bỏ padding của document khi in vì @page đã có lề */
+            html, body {
+                width: 297mm;
+                height: 210mm;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .document {
+                box-shadow: none;
+                width: 297mm;
+                max-width: 297mm;
+                min-height: 210mm;
+                height: 210mm;
+                padding: 10mm 12mm;
+                overflow: hidden;
+            }
         }
     </style>
 </head>
