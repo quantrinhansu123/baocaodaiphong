@@ -121,6 +121,12 @@
             overflow-wrap: normal;
             word-wrap: normal;
         }
+        .th-cu-ly-sl {
+            font-size: 12px;
+            line-height: 1.1;
+            overflow-wrap: normal;
+            word-break: keep-all;
+        }
         .checklist-row td {
             height: 15px; /* giảm thêm ~30% từ mức 21px trước đó */
             padding-top: 2px;
@@ -280,12 +286,12 @@
                 <col style="width: 5.5%;"> <!-- (3) Bắt đầu -->
                 <col style="width: 5.5%;"> <!-- (4) Kết thúc -->
                 <col style="width: 5%;">   <!-- (5) Tổng TG -->
-                <col style="width: 10%;">  <!-- (6) Từ -->
-                <col style="width: 10%;">  <!-- (7) Đến -->
-                <col style="width: 4%;">   <!-- (8) Km/chuyến -->
-                <col style="width: 4%;">   <!-- (9) KL/chuyến -->
-                <col style="width: 4%;">   <!-- (10) Số chuyến -->
-                <col style="width: 4%;">   <!-- (11) Tổng Km -->
+                <col style="width: 9%;">   <!-- (6) Từ -->
+                <col style="width: 9%;">   <!-- (7) Đến -->
+                <col style="width: 4.5%;"> <!-- (8) Km/chuyến -->
+                <col style="width: 4.5%;"> <!-- (9) KL/chuyến -->
+                <col style="width: 4.5%;"> <!-- (10) Số chuyến -->
+                <col style="width: 4.5%;"> <!-- (11) Tổng Km -->
                 <col style="width: 6%;">   <!-- (12) Nhập -->
                 <col style="width: 6%;">   <!-- (13) Đo bình trước -->
                 <col style="width: 6%;">   <!-- (14) Đo bình sau -->
@@ -314,10 +320,10 @@
                     <th>Tổng</th>
                     <th>Từ</th>
                     <th>Đến</th>
-                    <th>Km/<br>chuyến</th>
-                    <th>KL/<br>chuyến</th>
-                    <th>Số<br>chuyến</th>
-                    <th>Tổng<br>Km</th>
+                    <th class="th-cu-ly-sl">Km/<br>chuyến</th>
+                    <th class="th-cu-ly-sl">KL/<br>chuyến</th>
+                    <th class="th-cu-ly-sl">Số<br>chuyến</th>
+                    <th class="th-cu-ly-sl">Tổng<br>Km</th>
                     <th>Nhập</th>
                     <th>Đo bình dầu<br>trước nhập</th>
                     <th>Đo bình dầu<br>sau nhập</th>

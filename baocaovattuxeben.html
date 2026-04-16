@@ -112,6 +112,12 @@
             overflow-wrap: normal;
             word-wrap: normal;
         }
+        .th-cu-ly-sl {
+            font-size: 12px;
+            line-height: 1.1;
+            overflow-wrap: normal;
+            word-break: keep-all;
+        }
         .checklist-row td {
             height: 15px; /* giảm thêm ~30% từ mức 21px trước đó */
             padding-top: 2px;
@@ -266,20 +272,20 @@
         <table>
             <colgroup>
                 <col style="width: 4%;">   <!-- (1) STT — cùng tỷ lệ mẫu TB.03.04c -->
-                <col style="width: 5%;">   <!-- (2) Công việc — hẹp, dãn cột số liệu -->
+                <col style="width: 6.25%;"> <!-- (2) Công việc — nới để giảm xuống dòng -->
                 <col style="width: 6.6%;"> <!-- (3) Bắt đầu -->
                 <col style="width: 6.6%;"> <!-- (4) Kết thúc -->
                 <col style="width: 6%;">   <!-- (5) Tổng TG -->
-                <col style="width: 10%;">  <!-- (6) Từ km -->
-                <col style="width: 10%;">  <!-- (7) Đến km -->
-                <col style="width: 5%;">   <!-- (8) Km/chuyến -->
-                <col style="width: 5%;">   <!-- (9) KL/chuyến -->
-                <col style="width: 5%;">   <!-- (10) Số chuyến -->
-                <col style="width: 5%;">   <!-- (11) Tổng Km -->
-                <col style="width: 7%;">  <!-- (12) Nhập -->
-                <col style="width: 7%;">  <!-- (13) Đo bình trước nhập -->
-                <col style="width: 7%;">  <!-- (14) Đo bình sau nhập -->
-                <col style="width: 10%;">  <!-- (15) Sửa chữa -->
+                <col style="width: 9.2%;"> <!-- (6) Từ km -->
+                <col style="width: 9.2%;"> <!-- (7) Đến km -->
+                <col style="width: 6.6%;"> <!-- (8) Km/chuyến -->
+                <col style="width: 6.6%;"> <!-- (9) KL/chuyến -->
+                <col style="width: 6.6%;"> <!-- (10) Số chuyến -->
+                <col style="width: 6.6%;"> <!-- (11) Tổng Km -->
+                <col style="width: 6.2%;"> <!-- (12) Nhập -->
+                <col style="width: 6%;">   <!-- (13) Đo bình trước nhập -->
+                <col style="width: 6%;">   <!-- (14) Đo bình sau nhập -->
+                <col style="width: 6.75%;"> <!-- (15) Sửa chữa -->
                 <col style="width: 4.5%;"> <!-- (16) CB phụ trách -->
             </colgroup>
             <thead>
@@ -298,10 +304,10 @@
                     <th>Tổng</th>
                     <th>Từ</th>
                     <th>Đến</th>
-                    <th>Km/<br>chuyến</th>
-                    <th>KL/<br>chuyến</th>
-                    <th>Số<br>chuyến</th>
-                    <th>Tổng Km</th>
+                    <th class="th-cu-ly-sl">Km/<br>chuyến</th>
+                    <th class="th-cu-ly-sl">KL/<br>chuyến</th>
+                    <th class="th-cu-ly-sl">Số<br>chuyến</th>
+                    <th class="th-cu-ly-sl">Tổng Km</th>
                     <th>Nhập</th>
                     <th>Đo bình dầu<br>trước nhập</th>
                     <th>Đo bình dầu<br>sau nhập</th>
