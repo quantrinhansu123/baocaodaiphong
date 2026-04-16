@@ -18,7 +18,7 @@
             font-family: 'Times New Roman', Times, serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Giảm khoảng cách ngoài của body */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,7 +29,7 @@
             width: 100%;
             max-width: 297mm; /* Mở rộng tối đa theo khổ A4 ngang */
             min-height: 210mm; /* Chiều cao A4 ngang */
-            padding: 15mm 20mm;
+            padding: 8mm 12mm; /* Giảm mạnh lề trong của văn bản để tăng không gian ngang/dọc */
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             box-sizing: border-box;
             position: relative;
@@ -82,16 +82,18 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 13px; /* Giảm nhẹ cỡ chữ của bảng để vừa vặn hơn */
             margin-bottom: 15px;
             table-layout: fixed; /* Helps control precise widths */
         }
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 6px;
+            padding: 4px 2px; /* Giảm padding ngang để có thêm không gian cho chữ */
             text-align: center;
             vertical-align: middle;
+            word-wrap: break-word; /* Tự động ngắt dòng nếu từ quá dài */
+            overflow-wrap: break-word;
         }
 
         th {
@@ -204,10 +206,10 @@
             }
             @page {
                 size: A4 landscape;
-                margin: 0;
+                margin: 5mm; /* Đặt lề in sát viền giấy (khoảng 5mm) */
             }
             body { background: none; padding: 0; }
-            .document { box-shadow: none; width: 100%; max-width: none; height: auto; padding: 15mm;}
+            .document { box-shadow: none; width: 100%; max-width: none; height: auto; padding: 0;} /* Bỏ padding của document khi in vì @page đã có lề */
         }
     </style>
 </head>
@@ -250,18 +252,18 @@
         <table>
             <colgroup>
                 <col style="width: 4%;">  <!-- (1) STT -->
-                <col style="width: 19%;"> <!-- (2) Công việc -->
-                <col style="width: 6%;">  <!-- (3) Khối lượng -->
-                <col style="width: 5%;">  <!-- (4) Từ km -->
-                <col style="width: 5%;">  <!-- (5) Đến km -->
-                <col style="width: 7%;">  <!-- (6) Bắt đầu -->
-                <col style="width: 7%;">  <!-- (7) Kết thúc -->
-                <col style="width: 5%;">  <!-- (8) Tổng -->
-                <col style="width: 5%;">  <!-- (9) Nhập -->
-                <col style="width: 7%;">  <!-- (10) Đo bình trước nhập -->
-                <col style="width: 7%;">  <!-- (11) Đo bình sau nhập -->
-                <col style="width: 6%;">  <!-- (12) Sửa chữa -->
-                <col style="width: 17%;"> <!-- (13) CB phụ trách -->
+                <col style="width: 8%;">  <!-- (2) Công việc — hẹp thêm -->
+                <col style="width: 7%;">  <!-- (3) Khối lượng -->
+                <col style="width: 7%;">  <!-- (4) Từ km -->
+                <col style="width: 7%;">  <!-- (5) Đến km -->
+                <col style="width: 8%;">  <!-- (6) Bắt đầu -->
+                <col style="width: 8%;">  <!-- (7) Kết thúc -->
+                <col style="width: 6%;">  <!-- (8) Tổng -->
+                <col style="width: 6%;">  <!-- (9) Nhập -->
+                <col style="width: 11%;"> <!-- (10) Đo bình trước nhập -->
+                <col style="width: 11%;"> <!-- (11) Đo bình sau nhập -->
+                <col style="width: 8%;">  <!-- (12) Sửa chữa -->
+                <col style="width: 9%;">  <!-- (13) CB phụ trách -->
             </colgroup>
             <thead>
                 <tr>
@@ -439,43 +441,45 @@
                 </tr>
                 
                 <tr>
-                    <td colspan="5" class="text-left font-bold" id="val-nl-tieuhao-diezel"></td>
-                    <td colspan="4" class="font-bold">Xác nhận của lái máy</td>
-                    <td colspan="4" class="font-bold">Xác nhận của B.thanh tra</td>
+                    <td colspan="9" class="text-left font-bold" id="val-nl-tieuhao-diezel"></td>
+                    <td colspan="2" class="font-bold">Xác nhận của lái máy</td>
+                    <td colspan="2" class="font-bold">Xác nhận của B.thanh tra</td>
                 </tr>
 
                 <!-- Checklist Rows (ô tích: bảng «CV bảo dưỡng NT máy», ID cha ↔ ID / ID phát hiện phiếu) -->
                 <tr>
                     <td rowspan="4" class="col-stt"><div class="vertical-text">Công việc bảo dưỡng sau 1 ngày</div></td>
-                    <td class="text-left col-desc">Mức dầu động cơ, két nước</td>
+                    <td colspan="2" class="text-left col-desc">Mức dầu động cơ, két nước</td>
                     <td class="col-vol"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra bổ sung</td>
+                    <td colspan="4" class="text-left">Kiểm tra bổ sung</td>
                     <td class="col-fuel1"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-act"></div></div></td>
                     
-                    <td colspan="3" rowspan="4" class="big-sig-box">
-                        <div class="big-sig-content"></div>
-                    </td>
-                    <td rowspan="4" class="big-sig-box">
-                        <div class="big-sig-content"></div>
-                    </td>
+                    <td colspan="2"></td>
+                    <td colspan="2"></td>
                 </tr>
                 <tr>
-                    <td class="text-left">Ổ bi chuyển động + bạc</td>
+                    <td colspan="2" class="text-left">Ổ bi chuyển động + bạc</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra và bơm mỡ</td>
+                    <td colspan="4" class="text-left">Kiểm tra và bơm mỡ</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-act"></div></div></td>
+                    <td colspan="2"></td>
+                    <td colspan="2"></td>
                 </tr>
                 <tr>
-                    <td class="text-left">Dây đai quạt gió</td>
+                    <td colspan="2" class="text-left">Dây đai quạt gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
+                    <td colspan="4" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-act"></div></div></td>
+                    <td colspan="2"></td>
+                    <td colspan="2"></td>
                 </tr>
                 <tr>
-                    <td class="text-left">Lọc gió</td>
+                    <td colspan="2" class="text-left">Lọc gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
+                    <td colspan="4" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-act"></div></div></td>
+                    <td colspan="2"></td>
+                    <td colspan="2"></td>
                 </tr>
             </tbody>
         </table>
