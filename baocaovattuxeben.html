@@ -98,7 +98,6 @@
         td.text-right { text-align: right; padding-right: 8px;}
         td.font-bold { font-weight: bold; }
         .nowrap { white-space: nowrap; }
-        .dobinh-line { line-height: 1.25; }
         #val-sang-dobinh-truoc,
         #val-sang-dobinh-sau,
         #val-chieu-dobinh-truoc,
@@ -222,16 +221,16 @@
                 CÔNG TY CPXDHT ĐẠI PHONG
             </div>
             <div class="form-code">
-                VT - TB.03.04c
+                VT - TB.03.04b
             </div>
         </div>
 
-        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG XE BEN - BÁO CÁO XE BEN NGÀY <span id="val-ngay">26/01/2026</span></h1>
+        <h1 id="doc-title">SỔ THEO DÕI HOẠT ĐỘNG VÀ BẢO DƯỠNG XE NGÀY <span id="val-ngay">26/01/2026</span></h1>
 
         <div class="pre-table-info">
             <span>Ký xác nhận kiểm tra nhiên liệu đầu ngày:</span>
             <span class="dotted-line" style="width: 80px;" id="val-nl-daungay"></span>
-            <span>Lái máy:</span>
+            <span>Lái xe:</span>
             <span class="dotted-line" style="width: 120px;" id="val-laimay"></span>
             <span>Bảo vệ:</span>
             <span class="dotted-line" style="width: 120px;" id="val-baove"></span>
@@ -241,40 +240,46 @@
 
         <table>
             <colgroup>
-                <col style="width: 4%;">  <!-- (1) STT -->
-                <col style="width: 19%;"> <!-- (2) Công việc -->
-                <col style="width: 6%;">  <!-- (3) Khối lượng -->
-                <col style="width: 5%;">  <!-- (4) Từ km -->
-                <col style="width: 5%;">  <!-- (5) Đến km -->
-                <col style="width: 7%;">  <!-- (6) Bắt đầu -->
-                <col style="width: 7%;">  <!-- (7) Kết thúc -->
-                <col style="width: 5%;">  <!-- (8) Tổng -->
-                <col style="width: 5%;">  <!-- (9) Nhập -->
-                <col style="width: 7%;">  <!-- (10) Đo bình trước nhập -->
-                <col style="width: 7%;">  <!-- (11) Đo bình sau nhập -->
-                <col style="width: 6%;">  <!-- (12) Sửa chữa -->
-                <col style="width: 17%;"> <!-- (13) CB phụ trách -->
+                <col style="width: 3%;">   <!-- (1) STT -->
+                <col style="width: 14%;">  <!-- (2) Công việc -->
+                <col style="width: 5%;">   <!-- (3) Bắt đầu -->
+                <col style="width: 5%;">   <!-- (4) Kết thúc -->
+                <col style="width: 4%;">   <!-- (5) Tổng TG -->
+                <col style="width: 4%;">   <!-- (6) Từ km -->
+                <col style="width: 4%;">   <!-- (7) Đến km -->
+                <col style="width: 5%;">   <!-- (8) Km/chuyến -->
+                <col style="width: 5%;">   <!-- (9) KL/chuyến -->
+                <col style="width: 4%;">   <!-- (10) Số chuyến -->
+                <col style="width: 5%;">   <!-- (11) Tổng Km -->
+                <col style="width: 4%;">   <!-- (12) Nhập -->
+                <col style="width: 3.5%;"> <!-- (13) Đo bình trước nhập -->
+                <col style="width: 3.5%;"> <!-- (14) Đo bình sau nhập -->
+                <col style="width: 10%;">  <!-- (15) Sửa chữa -->
+                <col style="width: 10%;">  <!-- (16) CB phụ trách -->
             </colgroup>
             <thead>
                 <tr>
                     <th rowspan="2">STT</th>
                     <th rowspan="2">Công việc/ Mô tả công việc thực hiện</th>
-                    <th rowspan="2">Khối<br>lượng<br>(m3)</th>
-                    <th colspan="2">Lý trình</th>
-                    <th colspan="3">Thời gian làm việc (h)</th>
-                    <th colspan="4">Nhiên liệu (Lít)</th>
+                    <th colspan="3">Thời gian làm việc</th>
+                    <th colspan="6">Cự ly (Km)</th>
+                    <th colspan="3">Nhiên liệu (Lít)</th>
+                    <th rowspan="2">Sửa chữa<br>(Ký)</th>
                     <th rowspan="2"><span class="nowrap">CB phụ trách (ký)</span></th>
                 </tr>
                 <tr>
-                    <th>Từ km</th>
-                    <th>Đến km</th>
                     <th>Bắt đầu</th>
                     <th>Kết thúc</th>
                     <th>Tổng</th>
+                    <th>Từ</th>
+                    <th>Đến</th>
+                    <th>Km/<br>chuyến</th>
+                    <th>KL/<br>chuyến</th>
+                    <th>Số<br>chuyến</th>
+                    <th>Tổng Km</th>
                     <th>Nhập</th>
                     <th>Đo bình dầu<br>trước nhập</th>
                     <th>Đo bình dầu<br>sau nhập</th>
-                    <th>Sửa chữa<br>(lít)</th>
                 </tr>
                 <tr>
                     <th>(1)</th>
@@ -290,6 +295,9 @@
                     <th>(11)</th>
                     <th>(12)</th>
                     <th>(13)</th>
+                    <th>(14)</th>
+                    <th>(15)</th>
+                    <th>(16)</th>
                 </tr>
             </thead>
             <tbody>
@@ -297,38 +305,47 @@
                 <tr class="data-row shift-detail-row" data-shift="sang" data-slot="0">
                     <td rowspan="3" id="td-stt-sang">Sáng</td>
                     <td class="text-left" id="val-sang-cv"></td>
-                    <td id="val-sang-kl"></td>
-                    <td id="val-sang-kmtu"></td>
-                    <td id="val-sang-kmden"></td>
                     <td id="val-sang-bd"></td>
                     <td id="val-sang-kt"></td>
                     <td id="val-sang-tong"></td>
+                    <td id="val-sang-kmtu"></td>
+                    <td id="val-sang-kmden"></td>
+                    <td id="val-sang-kmchuyen"></td>
+                    <td id="val-sang-kl"></td>
+                    <td id="val-sang-sochuyen"></td>
+                    <td id="val-sang-tongkm"></td>
                     <td id="val-sang-nhap"></td>
-                    <td rowspan="3" id="val-sang-dobinh-truoc"></td>
-                    <td rowspan="3" id="val-sang-dobinh-sau"></td>
+                    <td rowspan="3" class="text-center" id="val-sang-dobinh-truoc"></td>
+                    <td rowspan="3" class="text-center" id="val-sang-dobinh-sau"></td>
                     <td id="val-sang-sua"></td>
                     <td id="val-sang-cbsig"></td>
                 </tr>
                 <tr class="data-row shift-detail-row" data-shift="sang" data-slot="1">
                     <td class="text-left" id="val-sang-cv-2"></td>
-                    <td id="val-sang-kl-2"></td>
-                    <td id="val-sang-kmtu-2"></td>
-                    <td id="val-sang-kmden-2"></td>
                     <td id="val-sang-bd-2"></td>
                     <td id="val-sang-kt-2"></td>
                     <td id="val-sang-tong-2"></td>
+                    <td id="val-sang-kmtu-2"></td>
+                    <td id="val-sang-kmden-2"></td>
+                    <td id="val-sang-kmchuyen-2"></td>
+                    <td id="val-sang-kl-2"></td>
+                    <td id="val-sang-sochuyen-2"></td>
+                    <td id="val-sang-tongkm-2"></td>
                     <td></td>
                     <td></td>
                     <td></td>
                 </tr>
-                 <tr class="data-row shift-detail-row" data-shift="sang" data-slot="2">
+                <tr class="data-row shift-detail-row" data-shift="sang" data-slot="2">
                     <td class="text-left" id="val-sang-cv-3"></td>
-                    <td id="val-sang-kl-3"></td>
-                    <td id="val-sang-kmtu-3"></td>
-                    <td id="val-sang-kmden-3"></td>
                     <td id="val-sang-bd-3"></td>
                     <td id="val-sang-kt-3"></td>
                     <td id="val-sang-tong-3"></td>
+                    <td id="val-sang-kmtu-3"></td>
+                    <td id="val-sang-kmden-3"></td>
+                    <td id="val-sang-kmchuyen-3"></td>
+                    <td id="val-sang-kl-3"></td>
+                    <td id="val-sang-sochuyen-3"></td>
+                    <td id="val-sang-tongkm-3"></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -338,38 +355,47 @@
                 <tr class="data-row shift-detail-row" data-shift="chieu" data-slot="0">
                     <td rowspan="3" id="td-stt-chieu">Chiều</td>
                     <td class="text-left" id="val-chieu-cv"></td>
-                    <td id="val-chieu-kl"></td>
-                    <td id="val-chieu-kmtu"></td>
-                    <td id="val-chieu-kmden"></td>
                     <td id="val-chieu-bd"></td>
                     <td id="val-chieu-kt"></td>
                     <td id="val-chieu-tong"></td>
+                    <td id="val-chieu-kmtu"></td>
+                    <td id="val-chieu-kmden"></td>
+                    <td id="val-chieu-kmchuyen"></td>
+                    <td id="val-chieu-kl"></td>
+                    <td id="val-chieu-sochuyen"></td>
+                    <td id="val-chieu-tongkm"></td>
                     <td id="val-chieu-nhap"></td>
-                    <td rowspan="3" id="val-chieu-dobinh-truoc"></td>
-                    <td rowspan="3" id="val-chieu-dobinh-sau"></td>
+                    <td rowspan="3" class="text-center" id="val-chieu-dobinh-truoc"></td>
+                    <td rowspan="3" class="text-center" id="val-chieu-dobinh-sau"></td>
                     <td id="val-chieu-sua"></td>
                     <td id="val-chieu-cbsig"></td>
                 </tr>
                 <tr class="data-row shift-detail-row" data-shift="chieu" data-slot="1">
                     <td class="text-left" id="val-chieu-cv-2"></td>
-                    <td id="val-chieu-kl-2"></td>
-                    <td id="val-chieu-kmtu-2"></td>
-                    <td id="val-chieu-kmden-2"></td>
                     <td id="val-chieu-bd-2"></td>
                     <td id="val-chieu-kt-2"></td>
                     <td id="val-chieu-tong-2"></td>
+                    <td id="val-chieu-kmtu-2"></td>
+                    <td id="val-chieu-kmden-2"></td>
+                    <td id="val-chieu-kmchuyen-2"></td>
+                    <td id="val-chieu-kl-2"></td>
+                    <td id="val-chieu-sochuyen-2"></td>
+                    <td id="val-chieu-tongkm-2"></td>
                     <td></td>
                     <td></td>
                     <td></td>
                 </tr>
                 <tr class="data-row shift-detail-row" data-shift="chieu" data-slot="2">
                     <td class="text-left" id="val-chieu-cv-3"></td>
-                    <td id="val-chieu-kl-3"></td>
-                    <td id="val-chieu-kmtu-3"></td>
-                    <td id="val-chieu-kmden-3"></td>
                     <td id="val-chieu-bd-3"></td>
                     <td id="val-chieu-kt-3"></td>
                     <td id="val-chieu-tong-3"></td>
+                    <td id="val-chieu-kmtu-3"></td>
+                    <td id="val-chieu-kmden-3"></td>
+                    <td id="val-chieu-kmchuyen-3"></td>
+                    <td id="val-chieu-kl-3"></td>
+                    <td id="val-chieu-sochuyen-3"></td>
+                    <td id="val-chieu-tongkm-3"></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -379,26 +405,32 @@
                 <tr class="data-row shift-detail-row" data-shift="toi" data-slot="0">
                     <td rowspan="2" id="td-stt-toi">Tối</td>
                     <td class="text-left" id="val-toi-cv"></td>
-                    <td id="val-toi-kl"></td>
-                    <td id="val-toi-kmtu"></td>
-                    <td id="val-toi-kmden"></td>
                     <td id="val-toi-bd"></td>
                     <td id="val-toi-kt"></td>
                     <td id="val-toi-tong"></td>
+                    <td id="val-toi-kmtu"></td>
+                    <td id="val-toi-kmden"></td>
+                    <td id="val-toi-kmchuyen"></td>
+                    <td id="val-toi-kl"></td>
+                    <td id="val-toi-sochuyen"></td>
+                    <td id="val-toi-tongkm"></td>
                     <td id="val-toi-nhap"></td>
-                    <td rowspan="2" id="val-toi-dobinh-truoc"></td>
-                    <td rowspan="2" id="val-toi-dobinh-sau"></td>
+                    <td rowspan="2" class="text-center" id="val-toi-dobinh-truoc"></td>
+                    <td rowspan="2" class="text-center" id="val-toi-dobinh-sau"></td>
                     <td id="val-toi-sua"></td>
                     <td id="val-toi-cbsig"></td>
                 </tr>
                 <tr class="data-row shift-detail-row" data-shift="toi" data-slot="1">
                     <td class="text-left" id="val-toi-cv-2"></td>
-                    <td id="val-toi-kl-2"></td>
-                    <td id="val-toi-kmtu-2"></td>
-                    <td id="val-toi-kmden-2"></td>
                     <td id="val-toi-bd-2"></td>
                     <td id="val-toi-kt-2"></td>
                     <td id="val-toi-tong-2"></td>
+                    <td id="val-toi-kmtu-2"></td>
+                    <td id="val-toi-kmden-2"></td>
+                    <td id="val-toi-kmchuyen-2"></td>
+                    <td id="val-toi-kl-2"></td>
+                    <td id="val-toi-sochuyen-2"></td>
+                    <td id="val-toi-tongkm-2"></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -406,11 +438,19 @@
 
                 <!-- CỘNG -->
                 <tr class="data-row">
-                    <td colspan="7" class="text-right font-bold">Cộng</td>
+                    <td colspan="2" class="text-right font-bold">Cộng</td>
+                    <td></td>
+                    <td></td>
                     <td class="font-bold" id="val-cong-tong"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="font-bold" id="val-cong-tongkm"></td>
                     <td class="font-bold" id="val-cong-nhap"></td>
-                    <td class="font-bold" id="val-cong-dobinh-truoc"></td>
-                    <td class="font-bold" id="val-cong-dobinh-sau"></td>
+                    <td class="font-bold text-center" id="val-cong-dobinh-truoc"></td>
+                    <td class="font-bold text-center" id="val-cong-dobinh-sau"></td>
                     <td class="font-bold" id="val-cong-sua"></td>
                     <td id="val-cong-cbsig"></td>
                 </tr>
@@ -422,13 +462,13 @@
                     <td colspan="2" class="text-left nl-phu-cell" id="val-nl-nhot"></td>
                     <td colspan="2" class="text-left nl-phu-cell" id="val-nl-cau"></td>
                     <td colspan="2" class="text-left nl-phu-cell" id="val-nl-mo"></td>
-                    <td colspan="3"></td>
+                    <td colspan="6"></td>
                 </tr>
                 
                 <tr>
                     <td colspan="5" class="text-left font-bold" id="val-nl-tieuhao-diezel"></td>
-                    <td colspan="4" class="font-bold">Xác nhận của lái máy</td>
-                    <td colspan="4" class="font-bold">Xác nhận của B.thanh tra</td>
+                    <td colspan="5" class="font-bold">Xác nhận của lái máy</td>
+                    <td colspan="6" class="font-bold">Xác nhận của B.thanh tra</td>
                 </tr>
 
                 <!-- Checklist Rows (ô tích: bảng «CV bảo dưỡng NT máy», ID cha ↔ ID / ID phát hiện phiếu) -->
@@ -436,7 +476,7 @@
                     <td rowspan="4" class="col-stt"><div class="vertical-text">Công việc bảo dưỡng sau 1 ngày</div></td>
                     <td class="text-left col-desc">Mức dầu động cơ, két nước</td>
                     <td class="col-vol"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra bổ sung</td>
+                    <td colspan="8" class="text-left">Kiểm tra bổ sung</td>
                     <td class="col-fuel1"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-act"></div></div></td>
                     
                     <td colspan="3" rowspan="4" class="big-sig-box">
@@ -449,19 +489,19 @@
                 <tr>
                     <td class="text-left">Ổ bi chuyển động + bạc</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra và bơm mỡ</td>
+                    <td colspan="8" class="text-left">Kiểm tra và bơm mỡ</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-act"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-left">Dây đai quạt gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
+                    <td colspan="8" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-act"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-left">Lọc gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-cat"></div></div></td>
-                    <td colspan="5" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
+                    <td colspan="8" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-act"></div></div></td>
                 </tr>
             </tbody>
@@ -469,14 +509,14 @@
 
         <div class="post-table-info">
             <div class="sign-row">
-                <span>Tổng giờ hoạt động:</span>
+                <span>Tổng km hoạt động:</span>
                 <span class="dotted-line" style="width: 200px;" id="val-tong-gio"></span>
             </div>
             
             <div class="sign-row">
                 <span>Ký xác nhận tồn nhiên liệu cuối ngày:</span>
                 <span class="dotted-line" style="width: 100px;" id="val-nl-cuoingay"></span>
-                <span>Lái máy:</span>
+                <span>Lái xe:</span>
                 <span class="dotted-line" style="width: 150px;" id="val-laimay-cuoi"></span>
                 <span>Bảo vệ:</span>
                 <span class="dotted-line" style="width: 150px;" id="val-baove-cuoi"></span>
@@ -642,18 +682,106 @@
         /** Id ô theo ca: công việc, KL, TG bắt đầu / kết thúc / tổng (từ bảng CT) */
         const SHIFT_CELL_IDS = {
             sang: [
-                { cv: 'val-sang-cv', kl: 'val-sang-kl', kmtu: 'val-sang-kmtu', kmden: 'val-sang-kmden', bd: 'val-sang-bd', kt: 'val-sang-kt', tong: 'val-sang-tong' },
-                { cv: 'val-sang-cv-2', kl: 'val-sang-kl-2', kmtu: 'val-sang-kmtu-2', kmden: 'val-sang-kmden-2', bd: 'val-sang-bd-2', kt: 'val-sang-kt-2', tong: 'val-sang-tong-2' },
-                { cv: 'val-sang-cv-3', kl: 'val-sang-kl-3', kmtu: 'val-sang-kmtu-3', kmden: 'val-sang-kmden-3', bd: 'val-sang-bd-3', kt: 'val-sang-kt-3', tong: 'val-sang-tong-3' }
+                {
+                    cv: 'val-sang-cv',
+                    bd: 'val-sang-bd',
+                    kt: 'val-sang-kt',
+                    tong: 'val-sang-tong',
+                    kmtu: 'val-sang-kmtu',
+                    kmden: 'val-sang-kmden',
+                    kmchuyen: 'val-sang-kmchuyen',
+                    kl: 'val-sang-kl',
+                    sochuyen: 'val-sang-sochuyen',
+                    tongkm: 'val-sang-tongkm'
+                },
+                {
+                    cv: 'val-sang-cv-2',
+                    bd: 'val-sang-bd-2',
+                    kt: 'val-sang-kt-2',
+                    tong: 'val-sang-tong-2',
+                    kmtu: 'val-sang-kmtu-2',
+                    kmden: 'val-sang-kmden-2',
+                    kmchuyen: 'val-sang-kmchuyen-2',
+                    kl: 'val-sang-kl-2',
+                    sochuyen: 'val-sang-sochuyen-2',
+                    tongkm: 'val-sang-tongkm-2'
+                },
+                {
+                    cv: 'val-sang-cv-3',
+                    bd: 'val-sang-bd-3',
+                    kt: 'val-sang-kt-3',
+                    tong: 'val-sang-tong-3',
+                    kmtu: 'val-sang-kmtu-3',
+                    kmden: 'val-sang-kmden-3',
+                    kmchuyen: 'val-sang-kmchuyen-3',
+                    kl: 'val-sang-kl-3',
+                    sochuyen: 'val-sang-sochuyen-3',
+                    tongkm: 'val-sang-tongkm-3'
+                }
             ],
             chieu: [
-                { cv: 'val-chieu-cv', kl: 'val-chieu-kl', kmtu: 'val-chieu-kmtu', kmden: 'val-chieu-kmden', bd: 'val-chieu-bd', kt: 'val-chieu-kt', tong: 'val-chieu-tong' },
-                { cv: 'val-chieu-cv-2', kl: 'val-chieu-kl-2', kmtu: 'val-chieu-kmtu-2', kmden: 'val-chieu-kmden-2', bd: 'val-chieu-bd-2', kt: 'val-chieu-kt-2', tong: 'val-chieu-tong-2' },
-                { cv: 'val-chieu-cv-3', kl: 'val-chieu-kl-3', kmtu: 'val-chieu-kmtu-3', kmden: 'val-chieu-kmden-3', bd: 'val-chieu-bd-3', kt: 'val-chieu-kt-3', tong: 'val-chieu-tong-3' }
+                {
+                    cv: 'val-chieu-cv',
+                    bd: 'val-chieu-bd',
+                    kt: 'val-chieu-kt',
+                    tong: 'val-chieu-tong',
+                    kmtu: 'val-chieu-kmtu',
+                    kmden: 'val-chieu-kmden',
+                    kmchuyen: 'val-chieu-kmchuyen',
+                    kl: 'val-chieu-kl',
+                    sochuyen: 'val-chieu-sochuyen',
+                    tongkm: 'val-chieu-tongkm'
+                },
+                {
+                    cv: 'val-chieu-cv-2',
+                    bd: 'val-chieu-bd-2',
+                    kt: 'val-chieu-kt-2',
+                    tong: 'val-chieu-tong-2',
+                    kmtu: 'val-chieu-kmtu-2',
+                    kmden: 'val-chieu-kmden-2',
+                    kmchuyen: 'val-chieu-kmchuyen-2',
+                    kl: 'val-chieu-kl-2',
+                    sochuyen: 'val-chieu-sochuyen-2',
+                    tongkm: 'val-chieu-tongkm-2'
+                },
+                {
+                    cv: 'val-chieu-cv-3',
+                    bd: 'val-chieu-bd-3',
+                    kt: 'val-chieu-kt-3',
+                    tong: 'val-chieu-tong-3',
+                    kmtu: 'val-chieu-kmtu-3',
+                    kmden: 'val-chieu-kmden-3',
+                    kmchuyen: 'val-chieu-kmchuyen-3',
+                    kl: 'val-chieu-kl-3',
+                    sochuyen: 'val-chieu-sochuyen-3',
+                    tongkm: 'val-chieu-tongkm-3'
+                }
             ],
             toi: [
-                { cv: 'val-toi-cv', kl: 'val-toi-kl', kmtu: 'val-toi-kmtu', kmden: 'val-toi-kmden', bd: 'val-toi-bd', kt: 'val-toi-kt', tong: 'val-toi-tong' },
-                { cv: 'val-toi-cv-2', kl: 'val-toi-kl-2', kmtu: 'val-toi-kmtu-2', kmden: 'val-toi-kmden-2', bd: 'val-toi-bd-2', kt: 'val-toi-kt-2', tong: 'val-toi-tong-2' }
+                {
+                    cv: 'val-toi-cv',
+                    bd: 'val-toi-bd',
+                    kt: 'val-toi-kt',
+                    tong: 'val-toi-tong',
+                    kmtu: 'val-toi-kmtu',
+                    kmden: 'val-toi-kmden',
+                    kmchuyen: 'val-toi-kmchuyen',
+                    kl: 'val-toi-kl',
+                    sochuyen: 'val-toi-sochuyen',
+                    tongkm: 'val-toi-tongkm'
+                },
+                {
+                    cv: 'val-toi-cv-2',
+                    bd: 'val-toi-bd-2',
+                    kt: 'val-toi-kt-2',
+                    tong: 'val-toi-tong-2',
+                    kmtu: 'val-toi-kmtu-2',
+                    kmden: 'val-toi-kmden-2',
+                    kmchuyen: 'val-toi-kmchuyen-2',
+                    kl: 'val-toi-kl-2',
+                    sochuyen: 'val-toi-sochuyen-2',
+                    tongkm: 'val-toi-tongkm-2'
+                }
             ]
         };
 
@@ -934,7 +1062,7 @@
                 nhot: 'Nhớt(L):',
                 cau: 'Dầu Cầu(L):',
                 mo: 'Mỡ (kg):',
-                diesel: 'Tiêu hao nhiên liệu trong ngày (Dầu Diezel, L):'
+                diesel: 'Tiêu hao dầu diezel trong ngày:'
             };
 
             const nlPhuEl = document.getElementById('val-nl-phu');
@@ -1461,9 +1589,88 @@
         function kmTuDenFromCtRow(row) {
             const t = (v) => (v == null || v === '' ? '' : String(v).trim());
             return {
-                tu: t(row['Từ km'] ?? row['Tu km'] ?? row['KM đầu'] ?? row['Km dau'] ?? row['Km bắt đầu'] ?? row['Km bat dau']),
-                den: t(row['Đến km'] ?? row['Den km'] ?? row['KM cuối'] ?? row['Km cuoi'] ?? row['Km kết thúc'] ?? row['Km ket thuc'])
+                tu: t(
+                    row['Từ km'] ??
+                        row['Tu km'] ??
+                        row['Tu_km'] ??
+                        row['KM đầu'] ??
+                        row['Km dau'] ??
+                        row['Km bắt đầu'] ??
+                        row['Km bat dau']
+                ),
+                den: t(
+                    row['Đến km'] ??
+                        row['Den km'] ??
+                        row['Den_km'] ??
+                        row['KM cuối'] ??
+                        row['Km cuoi'] ??
+                        row['Km kết thúc'] ??
+                        row['Km ket thuc']
+                )
             };
+        }
+        /** Cự ly: Km/chuyến, KL/chuyến, Số chuyến, Tổng Km — từ «Nhật trình máy CT» (tên cột linh hoạt) */
+        function curLyFromCtRow(row) {
+            const t = (v) => (v == null || v === '' ? '' : String(v).trim());
+            return {
+                kmChuyen: t(
+                    row['Km_chuyến'] ??
+                        row['Km_chuyen'] ??
+                        row['KM_chuyến'] ??
+                        row['KM_chuyen'] ??
+                        row['Km/chuyến'] ??
+                        row['Km/ chuyến'] ??
+                        row['Km chuyến'] ??
+                        row['Km chuyen'] ??
+                        row['KM/chuyến'] ??
+                        ''
+                ),
+                klChuyen: t(
+                    row['KL_chuyến'] ??
+                        row['KL_chuyen'] ??
+                        row['Kl_chuyến'] ??
+                        row['KL/ chuyến'] ??
+                        row['KL/chuyến'] ??
+                        row['Khối lượng/ chuyến'] ??
+                        row['Khoi luong/ chuyen'] ??
+                        ''
+                ),
+                soChuyen: t(
+                    row['Số chuyến'] ??
+                        row['So_chuyến'] ??
+                        row['So_chuyen'] ??
+                        row['So chuyen'] ??
+                        row['Số CH'] ??
+                        ''
+                ),
+                tongKm: t(
+                    row['Tổng số Km'] ??
+                        row['Tong so Km'] ??
+                        row['Tổng số km'] ??
+                        row['Tong_so_Km'] ??
+                        row['Tổng Km'] ??
+                        row['Tong Km'] ??
+                        row['Tổng km'] ??
+                        row['Tong km'] ??
+                        ''
+                )
+            };
+        }
+
+        /** Giá trị «Tổng Km» / «Tổng số Km» trên dòng CT — dùng khi cộng dồi dòng Cộng */
+        function ctRowTongKmNumeric(row) {
+            if (!row) return null;
+            return parseNumericCell(
+                row['Tổng số Km'] ??
+                    row['Tong so Km'] ??
+                    row['Tổng số km'] ??
+                    row['Tong_so_Km'] ??
+                    row['Tổng Km'] ??
+                    row['Tong Km'] ??
+                    row['Tổng km'] ??
+                    row['Tong km'] ??
+                    ''
+            );
         }
 
         function ctSuaChuaLitFromRow(row) {
@@ -1490,7 +1697,7 @@
             if (el) el.textContent = text == null ? '' : String(text);
         }
         function clearCongRowTotals() {
-            ['val-cong-tong', 'val-cong-nhap', 'val-cong-dobinh-truoc', 'val-cong-dobinh-sau', 'val-cong-sua'].forEach((id) =>
+            ['val-cong-tong', 'val-cong-tongkm', 'val-cong-nhap', 'val-cong-dobinh-truoc', 'val-cong-dobinh-sau', 'val-cong-sua'].forEach((id) =>
                 setCongRowText(id, '')
             );
         }
@@ -1573,7 +1780,7 @@
         function clearShiftCongViecCells() {
             Object.values(SHIFT_CELL_IDS).forEach((pairs) => {
                 pairs.forEach((ids) => {
-                    ['cv', 'kl', 'kmtu', 'kmden', 'bd', 'kt', 'tong'].forEach((key) => {
+                    ['cv', 'bd', 'kt', 'tong', 'kmtu', 'kmden', 'kmchuyen', 'kl', 'sochuyen', 'tongkm'].forEach((key) => {
                         const id = ids[key];
                         if (!id) return;
                         const el = document.getElementById(id);
@@ -1613,6 +1820,7 @@
                     fillShiftNhienLieuFromCt([], shift);
                 });
                 setCongRowText('val-cong-tong', '');
+                setCongRowText('val-cong-tongkm', '');
                 setCongRowText('val-cong-sua', '');
                 const nlNhapFallback = sumNlDauDiezelSlNhapForPhieu(record);
                 setCongRowText('val-cong-nhap', nlNhapFallback.any ? formatNlNumber(nlNhapFallback.sum) : '');
@@ -1638,28 +1846,38 @@
                 pairs.forEach((ids, i) => {
                     const row = list[i];
                     const ec = document.getElementById(ids.cv);
-                    const ek = document.getElementById(ids.kl);
                     const ebd = document.getElementById(ids.bd);
                     const ekt = document.getElementById(ids.kt);
                     const etong = document.getElementById(ids.tong);
                     const ekmtu = document.getElementById(ids.kmtu);
                     const ekmden = document.getElementById(ids.kmden);
+                    const ekmch = document.getElementById(ids.kmchuyen);
+                    const ekl = document.getElementById(ids.kl);
+                    const esoch = document.getElementById(ids.sochuyen);
+                    const etkm = document.getElementById(ids.tongkm);
                     if (!ec) return;
                     if (row) {
                         ec.innerText = (row['Công việc thực hiện'] ?? row['Cong viec thuc hien'] ?? '').toString();
-                        if (ek) ek.innerText = formatKhoiLuongVaDvt(row);
                         const km = kmTuDenFromCtRow(row);
+                        const cur = curLyFromCtRow(row);
                         if (ekmtu) ekmtu.innerText = km.tu;
                         if (ekmden) ekmden.innerText = km.den;
+                        if (ekmch) ekmch.innerText = cur.kmChuyen;
+                        if (ekl) ekl.innerText = cur.klChuyen || formatKhoiLuongVaDvt(row);
+                        if (esoch) esoch.innerText = cur.soChuyen;
+                        if (etkm) etkm.innerText = cur.tongKm;
                         const tg = thoiGianTuDongCT(row);
                         if (ebd) ebd.innerText = tg.bd;
                         if (ekt) ekt.innerText = tg.kt;
                         if (etong) etong.innerText = formatTongGio1Decimal(tg.tong);
                     } else {
                         ec.innerText = '';
-                        if (ek) ek.innerText = '';
                         if (ekmtu) ekmtu.innerText = '';
                         if (ekmden) ekmden.innerText = '';
+                        if (ekmch) ekmch.innerText = '';
+                        if (ekl) ekl.innerText = '';
+                        if (esoch) esoch.innerText = '';
+                        if (etkm) etkm.innerText = '';
                         if (ebd) ebd.innerText = '';
                         if (ekt) ekt.innerText = '';
                         if (etong) etong.innerText = '';
@@ -1670,6 +1888,8 @@
             });
             let tongGioSum = 0;
             let tongGioCount = 0;
+            let tongKmSum = 0;
+            let tongKmCount = 0;
             let suaChuaSum = 0;
             let suaChuaCount = 0;
             matched.forEach((row) => {
@@ -1679,6 +1899,11 @@
                 if (tg != null) {
                     tongGioSum += tg;
                     tongGioCount++;
+                }
+                const tkm = ctRowTongKmNumeric(row);
+                if (tkm != null) {
+                    tongKmSum += tkm;
+                    tongKmCount++;
                 }
                 const sua = parseNumericCell(
                     row['Sửa chữa (lít)'] ?? row['Sua chua (lit)'] ?? row['Sửa chữa'] ?? row['Sua chua'] ?? ''
@@ -1690,6 +1915,7 @@
             });
             const nlNhapCong = sumNlDauDiezelSlNhapForPhieu(record);
             setCongRowText('val-cong-tong', tongGioCount ? tongGioSum.toFixed(1) : '');
+            setCongRowText('val-cong-tongkm', tongKmCount ? formatNlNumber(tongKmSum) : '');
             setCongRowText('val-cong-nhap', nlNhapCong.any ? formatNlNumber(nlNhapCong.sum) : '');
             setCongRowText('val-cong-sua', suaChuaCount ? formatNlNumber(suaChuaSum) : '');
         }
@@ -1782,8 +2008,13 @@
             
             // Chi tiết công việc theo ca: chỉ dòng CT có «Công việc…» / mô tả; không có thì ẩn hết dòng chi tiết
 
-            // Tổng giờ
-            document.getElementById('val-tong-gio').innerText = formatTongGio1Decimal(record['TongGioHoatDong'] || '');
+            const tongKmHd =
+                record['Tổng km hoạt động'] ??
+                record['Tong km hoat dong'] ??
+                record['TongKmHoatDong'] ??
+                record['TongGioHoatDong'] ??
+                '';
+            document.getElementById('val-tong-gio').innerText = formatTongGio1Decimal(tongKmHd);
             const laiMayCuoi = document.getElementById('val-laimay-cuoi');
             if (laiMayCuoi) laiMayCuoi.innerText = tenLaiMay || '';
 
