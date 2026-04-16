@@ -1056,14 +1056,14 @@
                     : tonTruocAnyCount > 0
                       ? tonTruocAnySum
                       : null;
-            if (tonDauNgayEl && tonTruocShow != null) tonDauNgayEl.textContent = formatNlNumber(tonTruocShow);
+            if (tonDauNgayEl && tonTruocShow != null) tonDauNgayEl.textContent = formatNlNumber(tonTruocShow) + ' cm';
             const tonCuoiShow =
                 tonSauDieselCount > 0
                     ? tonSauDieselSum
                     : tonSauAnyCount > 0
                       ? tonSauAnySum
                       : null;
-            if (tonCuoiNgayEl && tonCuoiShow != null) tonCuoiNgayEl.textContent = formatNlNumber(tonCuoiShow);
+            if (tonCuoiNgayEl && tonCuoiShow != null) tonCuoiNgayEl.textContent = formatNlNumber(tonCuoiShow) + ' cm';
             const dobinhCm = (v) =>
                 v != null && typeof v === 'number' && !isNaN(v) ? formatNlNumber(v) + ' cm' : '';
             setCongRowText('val-cong-dobinh-truoc', dobinhCm(tonTruocShow));
@@ -1143,6 +1143,47 @@
             if (typeof v === 'object' && v !== null && 'Value' in v) return String(v.Value);
             if (typeof v === 'object' && v !== null && 'value' in v) return String(v.value);
             return String(v);
+        }
+
+        function formatNgayTieuDeDdMmYyyy(raw) {
+            if (raw == null || raw === '') return '';
+            if (raw instanceof Date && !isNaN(raw.getTime())) {
+                const d = raw.getDate();
+                const mo = raw.getMonth() + 1;
+                const y = raw.getFullYear();
+                return `${String(d).padStart(2, '0')}/${String(mo).padStart(2, '0')}/${y}`;
+            }
+            const s = cellString(raw).trim();
+            if (!s) return '';
+            let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) {
+                const y = m[1];
+                const mo = String(parseInt(m[2], 10)).padStart(2, '0');
+                const d = String(parseInt(m[3], 10)).padStart(2, '0');
+                return `${d}/${mo}/${y}`;
+            }
+            m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+            if (m) {
+                const a = parseInt(m[1], 10);
+                const b = parseInt(m[2], 10);
+                let yStr = m[3];
+                let y = parseInt(yStr, 10);
+                if (yStr.length === 2) y += y >= 70 ? 1900 : 2000;
+                let dd;
+                let mo;
+                if (a > 12) {
+                    dd = a;
+                    mo = b;
+                } else if (b > 12) {
+                    mo = a;
+                    dd = b;
+                } else {
+                    mo = a;
+                    dd = b;
+                }
+                return `${String(dd).padStart(2, '0')}/${String(mo).padStart(2, '0')}/${y}`;
+            }
+            return s;
         }
 
         function normalizeBdText(s) {
@@ -1688,7 +1729,8 @@
                         // Lấy cột ID và Ngày để hiển thị
                         const idHienThi = record['ID'] || `Dòng ${index + 1}`; 
                         const ngayLamViec = record['Ngày làm việc'] ?? record['Ngay'];
-                        const ngayHienThi = ngayLamViec ? ` - Ngày: ${ngayLamViec}` : '';
+                        const ngayFmt = formatNgayTieuDeDdMmYyyy(ngayLamViec);
+                        const ngayHienThi = ngayFmt ? ` - Ngày: ${ngayFmt}` : '';
                         
                         option.textContent = `${idHienThi}${ngayHienThi}`;
                         selector.appendChild(option);
@@ -1732,7 +1774,7 @@
             // Đảm bảo các chữ trong ngoặc vuông khớp đúng tên cột trên AppSheet của bạn
             
             const ngayLamViec = record['Ngày làm việc'] ?? record['Ngay'];
-            document.getElementById('val-ngay').innerText = ngayLamViec || '...';
+            document.getElementById('val-ngay').innerText = formatNgayTieuDeDdMmYyyy(ngayLamViec) || '...';
             const tenLaiMay = record['Tên lái máy'] ?? record['TenLaiMay'];
             document.getElementById('val-laimay').innerText = tenLaiMay || '';
             document.getElementById('val-baove').innerText = record['TenBaoVe'] || '';
