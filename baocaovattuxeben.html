@@ -104,6 +104,19 @@
             background-color: #fcfcfc;
             padding: 4px 2px; /* Giảm padding để chữ có thêm không gian */
         }
+        .th-time,
+        td[id*="-bd"],
+        td[id*="-kt"] {
+            font-size: 12px;
+            white-space: nowrap;
+            overflow-wrap: normal;
+            word-wrap: normal;
+        }
+        .checklist-row td {
+            height: 15px; /* giảm thêm ~30% từ mức 21px trước đó */
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
 
         td.text-left { text-align: left; padding-left: 8px;}
         td.text-right { text-align: right; padding-right: 8px;}
@@ -253,12 +266,12 @@
         <table>
             <colgroup>
                 <col style="width: 4%;">   <!-- (1) STT — cùng tỷ lệ mẫu TB.03.04c -->
-                <col style="width: 8%;">   <!-- (2) Công việc — hẹp, dãn cột số liệu -->
-                <col style="width: 6%;">   <!-- (3) Bắt đầu -->
-                <col style="width: 6%;">   <!-- (4) Kết thúc -->
+                <col style="width: 5%;">   <!-- (2) Công việc — hẹp, dãn cột số liệu -->
+                <col style="width: 6.6%;"> <!-- (3) Bắt đầu -->
+                <col style="width: 6.6%;"> <!-- (4) Kết thúc -->
                 <col style="width: 6%;">   <!-- (5) Tổng TG -->
-                <col style="width: 5%;">   <!-- (6) Từ km -->
-                <col style="width: 5%;">   <!-- (7) Đến km -->
+                <col style="width: 10%;">  <!-- (6) Từ km -->
+                <col style="width: 10%;">  <!-- (7) Đến km -->
                 <col style="width: 5%;">   <!-- (8) Km/chuyến -->
                 <col style="width: 5%;">   <!-- (9) KL/chuyến -->
                 <col style="width: 5%;">   <!-- (10) Số chuyến -->
@@ -267,7 +280,7 @@
                 <col style="width: 7%;">  <!-- (13) Đo bình trước nhập -->
                 <col style="width: 7%;">  <!-- (14) Đo bình sau nhập -->
                 <col style="width: 10%;">  <!-- (15) Sửa chữa -->
-                <col style="width: 9%;">  <!-- (16) CB phụ trách -->
+                <col style="width: 4.5%;"> <!-- (16) CB phụ trách -->
             </colgroup>
             <thead>
                 <tr>
@@ -280,8 +293,8 @@
                     <th rowspan="2">CB phụ trách<br>(ký)</th>
                 </tr>
                 <tr>
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
+                    <th class="th-time">Bắt đầu</th>
+                    <th class="th-time">Kết thúc</th>
                     <th>Tổng</th>
                     <th>Từ</th>
                     <th>Đến</th>
@@ -484,7 +497,7 @@
                 </tr>
 
                 <!-- Checklist Rows (ô tích: bảng «CV bảo dưỡng NT máy», ID cha ↔ ID / ID phát hiện phiếu) -->
-                <tr>
+                <tr class="checklist-row">
                     <td rowspan="4" class="col-stt"><div class="vertical-text">Công việc bảo dưỡng sau 1 ngày</div></td>
                     <td class="text-left col-desc">Mức dầu động cơ, két nước</td>
                     <td class="col-vol"><div class="check-box-wrapper"><div class="check-box" id="bd-r1-cat"></div></div></td>
@@ -498,19 +511,19 @@
                         <div class="big-sig-content"></div>
                     </td>
                 </tr>
-                <tr>
+                <tr class="checklist-row">
                     <td class="text-left">Ổ bi chuyển động + bạc</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-cat"></div></div></td>
                     <td colspan="8" class="text-left">Kiểm tra và bơm mỡ</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r2-act"></div></div></td>
                 </tr>
-                <tr>
+                <tr class="checklist-row">
                     <td class="text-left">Dây đai quạt gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-cat"></div></div></td>
                     <td colspan="8" class="text-left">Kiểm tra tăng chỉnh độ căng</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r3-act"></div></div></td>
                 </tr>
-                <tr>
+                <tr class="checklist-row">
                     <td class="text-left">Lọc gió</td>
                     <td><div class="check-box-wrapper"><div class="check-box" id="bd-r4-cat"></div></div></td>
                     <td colspan="8" class="text-left">Kiểm tra vệ sinh máy nếu bụi bẩn</td>
