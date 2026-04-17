@@ -3368,6 +3368,7 @@
         function fillFilterSelectElement(selectId, values, preserveSelection) {
             const sel = document.getElementById(selectId);
             if (!sel) return;
+            sel.disabled = false;
             const prev = preserveSelection ? sel.value : "";
             const valueSet = new Set(values || []);
             sel.innerHTML = "";
@@ -3801,8 +3802,13 @@
             const asset = pickAssetNameForGroupSummary(raw) || String(pickField(raw, "TenThietBi") ?? "").trim();
             const key = assetKeyFromName(asset);
             const fromDs = key && tenLoaiByTaiSan?.get ? tenLoaiByTaiSan.get(key) : "";
-            if (!fromDs) return false;
-            const g = String(fromDs).trim().toLowerCase();
+            const fromMain = String(pickField(raw, "TenLoai") ?? "").trim();
+            const loai = fromDs || fromMain;
+            if (!loai) return false;
+            if (n === "xe ô tô" || n === "xe o to" || n === "oto" || n === "o to") {
+                return tenLoaiIsXeOto(loai);
+            }
+            const g = String(loai).trim().toLowerCase();
             if (g === n) return true;
             if (g.includes(n) || n.includes(g)) return true;
             return false;
@@ -3832,8 +3838,6 @@
                 }
                 const oNeedle = (filters.origin ?? "").trim();
                 if (oNeedle && !rawRowMatchesOriginFilter(r, oNeedle, nguonGocByTaiSan)) return false;
-                const tNeedle = (filters.type ?? "").trim();
-                if (tNeedle && !rawRowMatchesTenLoaiFilter(r, tNeedle, tenLoaiByTaiSan)) return false;
                 const gNeedle = (filters.group ?? "").trim();
                 if (gNeedle && !rawRowMatchesGroupFilter(r, gNeedle, tenNhomByTaiSan)) return false;
                 return true;

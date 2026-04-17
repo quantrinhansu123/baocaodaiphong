@@ -54,6 +54,21 @@
             padding: 0 2px;
             letter-spacing: 1px;
         }
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
         
         /* Input mockups */
         .mock-input {
@@ -210,17 +225,54 @@
         
         /* Row highlighting */
         .group-a-row td {
-            background-color: #ffeb9c;
+            background-color: transparent;
             font-weight: bold;
+            font-size: 11px;
         }
         .sub-group-row td {
-            background-color: #f4cccc;
+            background-color: transparent;
             font-weight: bold;
+            font-size: 11px;
         }
         /** Dòng tổng theo nhóm «Tên nhóm» (Nhật trình máy CT) */
         .nhom-tong-row td {
-            background-color: #bfdbfe;
+            background-color: transparent;
             font-weight: bold;
+            font-size: 11px;
+        }
+        .grand-total-row td {
+            background-color: #e5e7eb;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin: 14px 0 8px;
+            padding: 0 8px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        .signature-date {
+            text-align: right;
+            font-style: italic;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .signature-title {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
         }
         
         /* Utility */
@@ -317,13 +369,13 @@
         </div>
 
         <!-- TITLE BANNER -->
-        <div class="bg-[#2b7132] text-white text-center py-2">
-            <h1 class="text-base font-bold uppercase mb-1">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
-            <p id="report-date-range" class="italic text-xs">(Từ … đến …)</p>
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
+            <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
         </div>
 
         <!-- FILTERS -->
-        <div class="p-1.5 bg-white">
+        <div class="p-1.5 bg-white print-hide">
             <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
                 <div class="w-full lg:w-[32%] space-y-1">
                     <div class="report-filter-row flex items-center gap-1">
@@ -349,6 +401,12 @@
                     <div class="report-filter-row flex items-center gap-1">
                         <span class="w-[118px] shrink-0">NGUỒN GỐC:</span>
                         <select id="filter-origin" class="filter-select" title="Chọn nguồn gốc (ưu tiên «Danh sách tài sản» khớp Tên tài sản; sau đó phiếu)">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN LOẠI:</span>
+                        <select id="filter-type" class="filter-select" title="Chọn Tên loại từ Danh sách tài sản">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
@@ -388,11 +446,9 @@
         <!-- TABLE SECTION -->
         <div class="table-wrapper bg-white">
             <table>
-                <!-- Cột (9) «Tổng giờ HĐ xe bồn» — ẩn khi không có thiết bị nhóm Xe bồn (visibility: collapse) -->
+                <!-- Bảng không hiển thị cột «Tổng giờ HĐ xe bồn» -->
                 <colgroup>
-                    <col span="8" />
-                    <col class="report-col-xe-bon-hd" />
-                    <col span="17" />
+                    <col span="24" />
                 </colgroup>
                 <thead>
                     <!-- Tổng width: 100% -->
@@ -401,19 +457,17 @@
                         <th rowspan="2" style="width: 11.5%;">Tên thiết bị</th>
                         <th rowspan="2" style="width: 3.5%;">Biển số xe</th>
                         <th rowspan="2" style="width: 5.5%;">Tên lái xe</th>
-                        <th rowspan="2" style="width: 4.5%;">Tên loại</th>
                         <th rowspan="2" style="width: 3%;">Số ngày<br>hoạt động</th>
                         <th rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
                         <th rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
                         <th rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
-                        <th rowspan="2" style="width: 3.5%;">Tổng giờ<br>HĐ xe bồn</th>
-                        <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng km</th>
-                        <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng km</th>
+                        <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T12 (h)</th>
+                        <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T11 (h)</th>
                         <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
                         <th rowspan="2" style="width: 4%;">Dầu nhập<br>trong tháng (L)</th>
                         <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
                         <th rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
-                        <th colspan="4">Nhiên liệu phụ</th> <!-- 4 cột con tổng cộng 10% -->
+                        <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
                         <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
                         <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
                         <th rowspan="2" style="width: 3%;">Định mức<br>trong bình</th>
@@ -422,10 +476,10 @@
                         <th rowspan="2" style="width: 6%;">Công trường</th>
                     </tr>
                     <tr>
-                        <th style="width: 2.5%;">Tổng<br>mỡ (kg)</th>
-                        <th style="width: 2.5%;">Tổng<br>nhớt (L)</th>
-                        <th style="width: 2.5%;">Dầu thủy<br>lực (L)</th>
-                        <th style="width: 2.5%;">Dầu<br>cầu (L)</th>
+                        <th style="width: 3.5%;">Tổng<br>mỡ (kg)</th>
+                        <th style="width: 3.5%;">Tổng<br>nhớt (L)</th>
+                        <th style="width: 3.5%;">Dầu thủy<br>lực (L)</th>
+                        <th style="width: 3.5%;">Dầu<br>cầu (L)</th>
                     </tr>
                     <tr class="number-row">
                         <th>(1)</th>
@@ -452,12 +506,27 @@
                         <th>(22)</th>
                         <th>(23)</th>
                         <th>(24)</th>
-                        <th>(25)</th>
-                        <th>(26)</th>
                     </tr>
                 </thead>
                 <tbody id="report-body"></tbody>
             </table>
+        </div>
+        <div class="signature-section">
+            <div id="signature-date" class="signature-date"></div>
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">PHÒNG VẬT TƯ</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">QUẢN LÝ XE- MÁY TB</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -664,8 +733,8 @@
         const CT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
 
         const REPORT_COLUMNS = [
-            "TT", "TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "SoNgayXeHoatDong", "SoChuyenChayThang",
-            "GioLamHanhChinh", "GioLamTangCa", "TongGioHoatDongXeBon",
+            "TT", "TenThietBi", "BienSoXe", "TenLaiMay", "SoNgayXeHoatDong", "SoChuyenChayThang",
+            "GioLamHanhChinh", "GioLamTangCa",
             "TongKmHoatDongT1", "TongKmHoatDongT2",
             "TonDauKy", "LuongDauNhap", "TonCuoiKy", "LuongDauTieuHao",
             "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
@@ -1024,20 +1093,48 @@
         }
 
         function getNxlcTaiSanCell(r) {
-            return (
+            return cellDisplayString(
                 r["Tên tài sản"] ??
                 r["Ten tai san"] ??
                 r["TenTaiSan"] ??
                 r["Tên thiết bị"] ??
                 r["Ten thiet bi"] ??
                 ""
-            );
+            ).trim();
+        }
+
+        /** Tên XMTB trên «Nhập xuất luân chuyển CT» (ưu tiên cho 4 cột nhiên liệu phụ). */
+        function getNxlcTenXmtbCell(r) {
+            const direct = cellDisplayString(
+                r["Tên XMTB"] ??
+                r["Ten XMTB"] ??
+                r["TenXMTB"] ??
+                r["XMTB"] ??
+                r["Tên xe máy thiết bị"] ??
+                r["Ten xe may thiet bi"] ??
+                ""
+            ).trim();
+            if (direct) return direct;
+            for (const [k, v] of Object.entries(r || {})) {
+                const kn = String(k)
+                    .trim()
+                    .normalize("NFD")
+                    .replace(/\u0300-\u036f/g, "")
+                    .toLowerCase();
+                if (!/xmtb|xe\s*may\s*thiet\s*bi|xe\s*may\s*tb/.test(kn)) continue;
+                if (/id|ref|related|key|stt|so\s*luong|sl|nhien\s*lieu/.test(kn)) continue;
+                const t = cellDisplayString(v).trim();
+                if (t) return t;
+            }
+            return "";
         }
 
         function parseNxlcSlCell(row) {
             const keys = [
-                "SL",
-                "Sl",
+                "Số lượng NL",
+                "So luong NL",
+                "Số lượng nhiên liệu",
+                "So luong nhien lieu",
                 "Số lượng",
                 "So luong",
                 "Số lượng xuất",
@@ -1046,13 +1143,21 @@
                 "So luong nhap",
                 "Lượng",
                 "Luong"
+                ,"SL",
+                "Sl"
             ];
             for (const k of keys) {
                 const q = parseNumericForLiters(row[k]);
                 if (q != null) return q;
             }
             for (const [k, v] of Object.entries(row)) {
-                if (!/^\s*sl\s*$|s[oố]\s*l[ưu]ợ?ng|lu[oô]ng/i.test(k)) continue;
+                // Ưu tiên cột có hậu tố NL/nhiên liệu để tránh nhầm với «SL» đếm dòng/chứng từ.
+                if (!/s[oố]\s*l[ưu]ợ?ng(\s*nl|\s*nhi[eê]n\s*li[eê]u)|lu[oô]ng/i.test(k)) continue;
+                const q = parseNumericForLiters(v);
+                if (q != null) return q;
+            }
+            for (const [k, v] of Object.entries(row)) {
+                if (!/^\s*sl\s*$/i.test(k)) continue;
                 const q = parseNumericForLiters(v);
                 if (q != null) return q;
             }
@@ -1060,7 +1165,7 @@
         }
 
         function getNxlcTenNhienLieuCell(r) {
-            return (
+            return cellDisplayString(
                 r["Tên nhiên liệu"] ??
                 r["Ten nhien lieu"] ??
                 r["Tên NL"] ??
@@ -1068,7 +1173,7 @@
                 r["Loại nhiên liệu"] ??
                 r["Loai nhien lieu"] ??
                 ""
-            );
+            ).trim();
         }
 
         /**
@@ -1076,13 +1181,26 @@
          * Diezel/Diesel/DO -> LuongDauTieuHao; các loại còn lại map tương ứng cột phụ.
          */
         function classifyNxlcTenToReportColumn(tenRaw) {
-            const s = String(tenRaw ?? "").trim();
+            const s = cellDisplayString(tenRaw).trim();
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
-            if (s.includes("mỡ")) return "TongMo";
-            if (noAccent.includes("nhot") || s.includes("nhớt")) return "TongNhot";
-            if (noAccent.includes("thuy luc") || s.includes("thủy lực") || /\btl\b/i.test(noAccent)) return "DauThuyLuc";
-            if (noAccent.includes("dau cau") || (s.includes("cầu") && s.includes("dầu"))) return "DauCau";
+            const compact = noAccent.replace(/[^a-z0-9]/g, "");
+            if (
+                s.includes("dầu thủy lực") ||
+                noAccent.includes("dau thuy luc") ||
+                noAccent.includes("thuy luc") ||
+                compact.includes("dauthuyluc") ||
+                compact.includes("thuyluc")
+            ) return "DauThuyLuc";
+            if (
+                s.includes("dầu cầu") ||
+                noAccent.includes("dau cau") ||
+                noAccent.includes("nhot cau") ||
+                compact.includes("daucau") ||
+                compact.includes("nhotcau")
+            ) return "DauCau";
+            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauTieuHao";
             if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
             return null;
@@ -1205,14 +1323,27 @@
          * Thứ tự: cụm cụ thể (mỡ / nhớt / TL / cầu) trước, Diezel/DO sau (tránh nhầm cột).
          */
         function classifyNlTenToFuelColumn(tenRaw) {
-            const s = String(tenRaw ?? "").trim();
+            const s = cellDisplayString(tenRaw).trim();
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
+            const compact = noAccent.replace(/[^a-z0-9]/g, "");
 
-            if (s.includes("mỡ")) return "TongMo";
-            if (noAccent.includes("nhot") || s.includes("nhớt")) return "TongNhot";
-            if (noAccent.includes("thuy luc") || s.includes("thủy lực") || /\btl\b/i.test(noAccent)) return "DauThuyLuc";
-            if (noAccent.includes("dau cau") || (s.includes("cầu") && s.includes("dầu"))) return "DauCau";
+            if (
+                s.includes("dầu thủy lực") ||
+                noAccent.includes("dau thuy luc") ||
+                noAccent.includes("thuy luc") ||
+                compact.includes("dauthuyluc") ||
+                compact.includes("thuyluc")
+            ) return "DauThuyLuc";
+            if (
+                s.includes("dầu cầu") ||
+                noAccent.includes("dau cau") ||
+                noAccent.includes("nhot cau") ||
+                compact.includes("daucau") ||
+                compact.includes("nhotcau")
+            ) return "DauCau";
+            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
             if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
             return null;
@@ -1705,7 +1836,12 @@
                     .normalize("NFD")
                     .replace(/\u0300-\u036f/g, "")
                     .toLowerCase();
-                if (!/tong\s*gio/.test(kn)) continue;
+                const knCompact = kn.replace(/\s+/g, "");
+                if (
+                    !/tong\s*gio/.test(kn) &&
+                    !knCompact.includes("tonggiolv") &&
+                    !knCompact.includes("tonggiolamviec")
+                ) continue;
                 if (/so\s*ngay|ngay\s*lv|stt|ref|id|related/i.test(kn)) continue;
                 const s = cellDisplayString(v).trim();
                 if (s) return v;
@@ -1856,7 +1992,7 @@
         }
 
         /**
-         * Cột «Tổng km HĐ T{tháng}»: lấy từ «Nhật trình máy CT», cột «Tổng số Km»,
+         * Cột «Tổng giờ hoạt động T{tháng}»: lấy từ «Nhật trình máy CT», cột «Tổng giờ lv»,
          * chỉ cộng các dòng có «Ngày làm việc» cùng tháng/năm với «Từ ngày».
          */
         function buildTongKmT1ByTaiSanFromNtCt(mainRows, ctRows, filters) {
@@ -1880,7 +2016,7 @@
                 if (!d || isNaN(d.getTime())) continue;
                 if (d.getFullYear() !== fromD.getFullYear() || d.getMonth() !== fromD.getMonth()) continue;
 
-                const n = parseNumericForLiters(getCtTongSoKmCell(r));
+                const n = parseHourCell(getCtTongGioLvCell(r));
                 if (n == null || isNaN(n)) continue;
 
                 const ctAsset = pickCtTaiSanTen(r);
@@ -1892,7 +2028,7 @@
         }
 
         /**
-         * Cột «Tổng km HĐ T{tháng}» thứ hai: lấy từ «Nhật trình máy CT», cột «Tổng số Km»,
+         * Cột «Tổng giờ hoạt động T{tháng}» thứ hai: lấy từ «Nhật trình máy CT», cột «Tổng giờ lv»,
          * chỉ cộng các dòng có «Ngày làm việc» cùng tháng/năm với «Đến ngày».
          */
         function buildTongKmT2ByTaiSanFromNtCt(mainRows, ctRows, filters) {
@@ -1916,7 +2052,7 @@
                 if (!d || isNaN(d.getTime())) continue;
                 if (d.getFullYear() !== toD.getFullYear() || d.getMonth() !== toD.getMonth()) continue;
 
-                const n = parseNumericForLiters(getCtTongSoKmCell(r));
+                const n = parseHourCell(getCtTongGioLvCell(r));
                 if (n == null || isNaN(n)) continue;
 
                 const ctAsset = pickCtTaiSanTen(r);
@@ -2168,7 +2304,7 @@
                 if (!raw) return out;
                 const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
                 if (!key || !sumKmByTaiSan.has(key)) return out;
-                out.TongKmHoatDongT1 = formatLitersDisplay(sumKmByTaiSan.get(key));
+                out.TongKmHoatDongT1 = formatHourDisplay(sumKmByTaiSan.get(key));
                 return out;
             });
         }
@@ -2181,7 +2317,7 @@
                 if (!raw) return out;
                 const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
                 if (!key || !sumKmByTaiSan.has(key)) return out;
-                out.TongKmHoatDongT2 = formatLitersDisplay(sumKmByTaiSan.get(key));
+                out.TongKmHoatDongT2 = formatHourDisplay(sumKmByTaiSan.get(key));
                 return out;
             });
         }
@@ -2597,7 +2733,7 @@
         }
 
         /** Cột ghi chữ / mã — không ép 2 chữ số thập phân. */
-        const REPORT_TEXT_COLUMNS = new Set(["TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "CongViec", "CongTruong"]);
+        const REPORT_TEXT_COLUMNS = new Set(["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"]);
 
         /**
          * Hiển thị ô số: luôn 2 chữ số sau dấu thập phân (theo vi-VN, thường là dấu phẩy).
@@ -2610,7 +2746,7 @@
             if (column === "TT") {
                 const n = typeof rawVal === "number" ? rawVal : parseNumericForLiters(rawVal);
                 if (n != null && !isNaN(n)) {
-                    return new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+                    return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 }).format(Math.round(n));
                 }
                 return s0;
             }
@@ -2803,6 +2939,7 @@
             const to = parseDateInputYmd(filters?.toDate);
 
             const mainAssetKeys = new Set();
+            const mainAssetPairs = [];
             if (mainRows?.length) {
                 for (const raw of mainRows) {
                     if (raw?.groupRow || raw?.subGroupRow) continue;
@@ -2811,7 +2948,19 @@
                     const key = assetKeyFromName(asset);
                     if (!key) continue;
                     mainAssetKeys.add(key);
+                    mainAssetPairs.push({ key, name: asset });
                 }
+            }
+
+            function resolveMainAssetKeyByName(candidateName) {
+                const t = String(candidateName ?? "").trim();
+                if (!t) return "";
+                const exact = assetKeyFromName(t);
+                if (exact && (!mainAssetKeys.size || mainAssetKeys.has(exact))) return exact;
+                for (const p of mainAssetPairs) {
+                    if (taiSanNamesLooselyEqual(t, p.name)) return p.key;
+                }
+                return "";
             }
 
             const xuatParentIds = [];
@@ -2835,18 +2984,26 @@
             }
 
             for (const r of nxlcCtRows) {
+                const d = parseNxlcCtNgayCell(r);
                 if (from || to) {
-                    const d = parseNxlcCtNgayCell(r);
                     if (!d || isNaN(d.getTime())) continue;
                     if (from && d < from) continue;
                     if (to && d > to) continue;
                 }
-                if (!rowIsLoaiPhieuXuat(r)) continue;
                 const reportCol = classifyNxlcTenToReportColumn(getNxlcTenNhienLieuCell(r));
                 if (!reportCol) continue;
-                const asset = cellString(getNxlcTaiSanCell(r)).trim();
+                // Chỉ «Lượng dầu tiêu hao» buộc theo phiếu Xuất.
+                // 4 cột phụ (Mỡ/Nhớt/Thủy lực/Cầu) lấy theo tên nhiên liệu + ngày, không chặn theo Loại phiếu.
+                if (reportCol === "LuongDauTieuHao" && !rowIsLoaiPhieuXuat(r)) continue;
+                let asset = "";
+                if (NXLC_AUX_FUEL_COLUMNS.includes(reportCol)) {
+                    // 4 cột phụ chỉ lấy theo «Tên XMTB», không fallback «Tên tài sản».
+                    asset = cellString(getNxlcTenXmtbCell(r)).trim();
+                } else {
+                    asset = cellString(getNxlcTaiSanCell(r)).trim();
+                }
                 if (!asset) continue;
-                const key = assetKeyFromName(asset);
+                const key = resolveMainAssetKeyByName(asset);
                 if (!key || (mainAssetKeys.size && !mainAssetKeys.has(key))) continue;
                 const q = parseNxlcSlCell(r);
                 if (q == null) continue;
@@ -2966,8 +3123,8 @@
         }
 
         /**
-         * «Tiêu hao thực tế T{tháng}» = «Lượng dầu tiêu hao (L)» / «Tổng km HĐ T{tháng} (km)».
-         * T1 dùng TongKmHoatDongT1; T2 dùng TongKmHoatDongT2.
+         * «Tiêu hao thực tế T{tháng}» = «Lượng dầu tiêu hao (L)» / «Tổng giờ hoạt động T{tháng} (h)».
+         * T1 dùng TongKmHoatDongT1; T2 dùng TongKmHoatDongT2 (hai cột này hiện lưu tổng giờ theo tháng).
          */
         function applyTieuHaoThucTeFromTongKm(mainRows, normalizedRows) {
             if (!normalizedRows?.length) return normalizedRows;
@@ -2979,10 +3136,10 @@
                 const nTieuHao = parseNumericForLiters(out.LuongDauTieuHao);
                 if (nTieuHao == null || isNaN(nTieuHao)) return out;
 
-                const km1 = parseNumericForLiters(out.TongKmHoatDongT1);
-                const km2 = parseNumericForLiters(out.TongKmHoatDongT2);
-                out.TieuHaoThucTeT1 = km1 != null && !isNaN(km1) && km1 !== 0 ? formatLitersDisplay(nTieuHao / km1) : "";
-                out.TieuHaoThucTeT12 = km2 != null && !isNaN(km2) && km2 !== 0 ? formatLitersDisplay(nTieuHao / km2) : "";
+                const gio1 = parseHourCell(out.TongKmHoatDongT1);
+                const gio2 = parseHourCell(out.TongKmHoatDongT2);
+                out.TieuHaoThucTeT1 = gio1 != null && !isNaN(gio1) && gio1 !== 0 ? formatLitersDisplay(nTieuHao / gio1) : "";
+                out.TieuHaoThucTeT12 = gio2 != null && !isNaN(gio2) && gio2 !== 0 ? formatLitersDisplay(nTieuHao / gio2) : "";
                 return out;
             });
         }
@@ -3150,6 +3307,7 @@
         const loadButton = document.getElementById("load-appsheet");
         const resetButton = document.getElementById("reset-filter");
         const dateRangeEl = document.getElementById("report-date-range");
+        const signatureDateEl = document.getElementById("signature-date");
 
         const seedRows = [
             { TT: "A", TenThietBi: "NHÓM MÁY CÔNG TY:", groupRow: true },
@@ -3182,6 +3340,7 @@
                 false
             );
             fillFilterSelectElement("filter-origin", [], false);
+            fillFilterSelectElement("filter-type", [], false);
         }
 
         function escapeHtml(value) {
@@ -3249,6 +3408,7 @@
             const fromNtOrigin = uniqueSortedFromRaw(rawRows, "origin");
             const originMerged = [...new Set([...fromDsOrigin, ...fromNtOrigin])].sort((a, b) => a.localeCompare(b, "vi"));
             fillFilterSelectElement("filter-origin", originMerged, true);
+            fillFilterSelectElement("filter-type", uniqueTenLoaiFromDanhSachTaiSan(dsTaiSanRows || []), true);
         }
 
         function getFilters() {
@@ -3261,6 +3421,7 @@
                 group: document.getElementById("filter-group").value.trim(),
                 driver: document.getElementById("filter-driver").value.trim(),
                 origin: document.getElementById("filter-origin").value.trim(),
+                type: document.getElementById("filter-type").value.trim(),
                 fromDate,
                 toDate
             };
@@ -3545,11 +3706,11 @@
             if (!th1 || !th2) return;
             const { line1, line2 } = getKmMonthLabelsFromFiltersOrRows(filters);
             th1.innerHTML = line1
-                ? `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`
-                : "Tổng km";
+                ? `Tổng giờ hoạt động<br>${escapeHtml(line1)} (h)`
+                : "Tổng giờ hoạt động";
             th2.innerHTML = line2
-                ? `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`
-                : "Tổng km";
+                ? `Tổng giờ hoạt động<br>${escapeHtml(line2)} (h)`
+                : "Tổng giờ hoạt động";
 
             if (thTieuHao1) {
                 thTieuHao1.innerHTML = line1
@@ -3567,6 +3728,17 @@
         function syncReportPeriodUi(filters, rows) {
             updateDateRangeBanner(filters, rows);
             updateKmColumnHeaders(filters);
+            updateSignatureDate(filters);
+        }
+
+        function updateSignatureDate(filters) {
+            if (!signatureDateEl) return;
+            const d = parseDateInputYmd(filters?.toDate) || new Date();
+            if (!d || isNaN(d.getTime())) {
+                signatureDateEl.textContent = "";
+                return;
+            }
+            signatureDateEl.textContent = `Ý Yên, ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
         }
 
         /** Dùng khi đổi «Từ/Đến ngày» mà chưa bấm tải lại — vẫn cập nhật nhãn. */
@@ -3608,6 +3780,16 @@
             if (!dsRows?.length) return [];
             for (const r of dsRows) {
                 const v = pickDanhSachNguonGoc(r);
+                if (v) set.add(v);
+            }
+            return [...set].sort((a, b) => a.localeCompare(b, "vi"));
+        }
+
+        function uniqueTenLoaiFromDanhSachTaiSan(dsRows) {
+            const set = new Set();
+            if (!dsRows?.length) return [];
+            for (const r of dsRows) {
+                const v = pickDanhSachTenLoai(r);
                 if (v) set.add(v);
             }
             return [...set].sort((a, b) => a.localeCompare(b, "vi"));
@@ -3661,8 +3843,7 @@
             "SoNgayXeHoatDong",
             "SoChuyenChayThang",
             "GioLamHanhChinh",
-            "GioLamTangCa",
-            "TongGioHoatDongXeBon"
+            "GioLamTangCa"
         ]);
         const NHOM_TONG_SUM_LITER_COLS = new Set([
             "TongKmHoatDongT1",
@@ -3781,27 +3962,71 @@
             return out;
         }
 
+        function buildGrandTotalRow(rows) {
+            const dataRows = (rows || []).filter((r) => !r.groupRow && !r.subGroupRow && !r.nhomTongRow);
+            if (!dataRows.length) return null;
+            const out = {
+                TT: "",
+                TenThietBi: "Cộng",
+                BienSoXe: "",
+                TenLaiMay: "",
+                NguonGoc: "",
+                CongViec: "",
+                CongTruong: ""
+            };
+            for (const col of NHOM_TONG_SUM_HOUR_COLS) {
+                let s = 0;
+                let any = false;
+                for (const r of dataRows) {
+                    const q = parseCellForNhomTongSum(col, r[col]);
+                    if (q != null && !isNaN(q)) {
+                        s += q;
+                        any = true;
+                    }
+                }
+                out[col] = any ? formatNhomTongSum(col, s) : "";
+            }
+            for (const col of NHOM_TONG_SUM_LITER_COLS) {
+                let s = 0;
+                let any = false;
+                for (const r of dataRows) {
+                    const q = parseCellForNhomTongSum(col, r[col]);
+                    if (q != null && !isNaN(q)) {
+                        s += q;
+                        any = true;
+                    }
+                }
+                out[col] = any ? formatNhomTongSum(col, s) : "";
+            }
+            out.TieuHaoThucTeT1 = "";
+            out.TieuHaoThucTeT12 = "";
+            out.DinhMucTrongBinh = "";
+            out.DinhMucTieuHao = "";
+            return out;
+        }
+
         function renderRows(rows, options = {}) {
             if (options.showXeBonHdColumn !== undefined) {
                 setReportXeBonHdColumnVisible(options.showXeBonHdColumn);
             }
+            const totalCols = REPORT_COLUMNS.length;
+            const trailingCols = Math.max(totalCols - 3, 0);
             if (!rows.length) {
                 reportBody.innerHTML = `
                     <tr>
-                        <td colspan="25" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
+                        <td colspan="${totalCols}" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
                     </tr>
                 `;
                 return;
             }
 
             let sttAuto = 0;
-            reportBody.innerHTML = rows.map((row) => {
+            let bodyHtml = rows.map((row) => {
                 if (row.nhomTongRow) {
-                    const cells = REPORT_COLUMNS.map((column, index) => {
-                        const cssClass =
-                            index === 1 || index === 2 || index === 3 || index === 23 || index === 24
-                                ? "text-left"
-                                : "";
+                    const cells = REPORT_COLUMNS.map((column) => {
+                        const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column)
+                            ? "text-left"
+                            : "";
                         const rawVal = column === "TT" ? "" : (row[column] ?? "");
                         const displayVal = column === "TT" ? "" : formatReportCellDisplay(column, rawVal);
                         return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
@@ -3809,15 +4034,15 @@
                     return `<tr class="nhom-tong-row">${cells}</tr>`;
                 }
                 if (row.groupRow) {
-                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="23"></td></tr>`;
+                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="${trailingCols}"></td></tr>`;
                 }
                 if (row.subGroupRow) {
-                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="23"></td></tr>`;
+                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="${trailingCols}"></td></tr>`;
                 }
 
                 sttAuto += 1;
-                const cells = REPORT_COLUMNS.map((column, index) => {
-                    const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "CongViec", "CongTruong"].includes(column)
+                const cells = REPORT_COLUMNS.map((column) => {
+                    const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column)
                         ? "text-left"
                         : "";
                     const rawVal = column === "TT" ? sttAuto : (row[column] ?? "");
@@ -3827,11 +4052,28 @@
 
                 return `<tr>${cells}</tr>`;
             }).join("");
+            const grand = buildGrandTotalRow(rows);
+            if (grand) {
+                const cells = REPORT_COLUMNS.map((column) => {
+                    const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column)
+                        ? "text-left"
+                        : "";
+                    const rawVal = column === "TT" ? "" : (grand[column] ?? "");
+                    const displayVal = column === "TT" ? "" : formatReportCellDisplay(column, rawVal);
+                    return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
+                }).join("");
+                bodyHtml += `<tr class="grand-total-row">${cells}</tr>`;
+            }
+            reportBody.innerHTML = bodyHtml;
         }
 
         async function loadFromAppSheet(options = {}) {
             const forceRefresh = options.forceRefresh === true;
             loadButton.disabled = true;
+            const exportExcelIdle = document.getElementById("export-excel");
+            const exportPdfIdle = document.getElementById("export-pdf");
+            if (exportExcelIdle) exportExcelIdle.disabled = true;
+            if (exportPdfIdle) exportPdfIdle.disabled = true;
 
             let usedNtCache = false;
             let usedAuxCache = false;
@@ -4039,6 +4281,8 @@
                 lastNormalizedRowsForExport = [];
             } finally {
                 loadButton.disabled = false;
+                if (exportExcelIdle) exportExcelIdle.disabled = false;
+                if (exportPdfIdle) exportPdfIdle.disabled = false;
             }
         }
 
@@ -4050,6 +4294,7 @@
             if (pFrom) pFrom.value = "";
             if (pTo) pTo.value = "";
             document.getElementById("filter-origin").value = "";
+            document.getElementById("filter-type").value = "";
             cachedRawRowsForBanner = [];
             lastTenNhomByTaiSan = null;
             lastNormalizedRowsForExport = [];
@@ -4541,7 +4786,7 @@
             if (!el) continue;
             el.addEventListener("change", scheduleAutoLoadFromFilters);
         }
-        for (const id of ["filter-origin"]) {
+        for (const id of ["filter-origin", "filter-type"]) {
             const el = document.getElementById(id);
             if (!el) continue;
             el.addEventListener("change", scheduleAutoLoadFromFilters);
