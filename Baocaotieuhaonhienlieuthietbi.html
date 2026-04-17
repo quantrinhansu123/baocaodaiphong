@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Tổng Hợp Tiêu Hao Nhiên Liệu</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -22,7 +23,8 @@
 
         /* Logo styling */
         .logo-container {
-            width: 100px;
+            width: 92px;
+            flex-shrink: 0;
             text-align: center;
         }
         .logo-ellipse {
@@ -235,17 +237,74 @@
             .filter-select { height: 22px; font-size: 10px; max-width: 180px; }
             .action-btn { height: 24px; padding: 0 8px; font-size: 10px; }
         }
+
+        @media print {
+            /* 297×210 = A4 ngang; tránh driver/Adobe in dọc rồi bóp nội dung. */
+            @page {
+                size: 297mm 210mm;
+                margin: 6mm;
+            }
+            html,
+            body {
+                background: #fff !important;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .pdf-print-clip,
+            .page-container {
+                box-shadow: none;
+                max-width: 100% !important;
+            }
+            .page-container {
+                /* In: không dùng zoom JS (dễ lệch/“xoay” với Save as PDF/Acrobat) — thu chữ + bỏ min-width bảng. */
+                zoom: 1 !important;
+                transform: none !important;
+            }
+            .table-wrapper {
+                overflow: visible !important;
+                padding-bottom: 0 !important;
+            }
+            .table-wrapper table {
+                min-width: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+                font-size: 5.5pt !important;
+            }
+            .table-wrapper th,
+            .table-wrapper td {
+                font-size: 5.5pt !important;
+                padding: 1px 1px !important;
+                line-height: 1.15 !important;
+            }
+            #appsheet-status {
+                display: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Chỉ trong khoảng beforeprint→afterprint: ẩn filter trống; cần áp trên layout màn hình để đo scale PDF đúng. */
+        .report-filter-row--pdf-skip {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
+
+    <div id="pdf-print-clip" class="pdf-print-clip">
 
     <div class="page-container">
         
         <!-- HEADER SECTION -->
         <div class="flex items-start p-2 bg-white">
             <div class="logo-container mr-6">
-                <img src="https://www.appsheet.com/template/gettablefileurl?appName=Appsheet-325045268&tableName=Kho%20%E1%BA%A3nh&fileName=Kho%20%E1%BA%A3nh_Images%2F2e80b981.%E1%BA%A2nh.121832.png" alt="Logo Đại Phong" class="w-full max-w-[90px] mx-auto h-auto object-contain">
-                <div class="font-bold text-sm mt-1">PHÒNG VẬT TƯ</div>
+                <img id="report-header-logo" src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[92px] mx-auto h-auto object-contain">
+                <div class="font-bold text-sm mt-1 whitespace-nowrap">PHÒNG VẬT TƯ</div>
             </div>
             <div class="flex-1 mt-2">
                 <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
@@ -267,13 +326,13 @@
         <div class="p-1.5 bg-white">
             <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
                 <div class="w-full lg:w-[32%] space-y-1">
-                    <div class="flex items-center gap-1">
+                    <div class="report-filter-row flex items-center gap-1">
                         <span class="w-[118px] shrink-0">TÊN CÔNG TRÌNH:</span>
                         <select id="filter-project" class="filter-select" title="Chọn tên công trình">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="report-filter-row flex items-center gap-1">
                         <span class="w-[118px] shrink-0 whitespace-nowrap">NHÓM XE MÁY THIẾT BỊ:</span>
                         <select id="filter-group" class="filter-select" title="Lọc theo «Tên nhóm» trên Nhật trình máy CT (và cột nhóm trên phiếu nếu có)">
                             <option value="">— Tất cả —</option>
@@ -281,13 +340,13 @@
                     </div>
                 </div>
                 <div class="w-full lg:w-[32%] space-y-1">
-                    <div class="flex items-center gap-1">
+                    <div class="report-filter-row flex items-center gap-1">
                         <span class="w-[118px] shrink-0">TÊN LÁI MÁY:</span>
                         <select id="filter-driver" class="filter-select" title="Chọn tên lái máy">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="report-filter-row flex items-center gap-1">
                         <span class="w-[118px] shrink-0">NGUỒN GỐC:</span>
                         <select id="filter-origin" class="filter-select" title="Chọn nguồn gốc (ưu tiên «Danh sách tài sản» khớp Tên tài sản; sau đó phiếu)">
                             <option value="">— Tất cả —</option>
@@ -295,7 +354,7 @@
                     </div>
                 </div>
                 <div class="w-full lg:w-[32%] space-y-1 flex flex-col items-end lg:pr-2">
-                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                    <div class="report-filter-row flex items-center gap-1 w-full lg:w-[280px]">
                         <span class="w-[72px] shrink-0">TỪ NGÀY</span>
                         <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
                             <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
@@ -305,7 +364,7 @@
                         </div>
                         <input type="date" id="filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                     </div>
-                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                    <div class="report-filter-row flex items-center gap-1 w-full lg:w-[280px]">
                         <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
                         <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
                             <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
@@ -315,9 +374,11 @@
                         </div>
                         <input type="date" id="filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                     </div>
-                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end">
+                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end no-print">
                         <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
                         <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
+                        <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                        <button id="export-pdf" class="action-btn">Xuất PDF</button>
                     </div>
                 </div>
             </div>
@@ -399,13 +460,190 @@
             </table>
         </div>
     </div>
+
+    </div>
+
     <script>
         const APPSHEET_CONFIG = {
             appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
             // Dữ liệu báo cáo lấy từ bảng Nhật trình máy (cùng app với sổ theo dõi máy/thiết bị)
             tableName: "Nhật trình máy",
-            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa",
+            /**
+             * Logo header (trùng ảnh branding trên AppSheet). Dán URL https đầy đủ tới file ảnh
+             * (AppSheet Designer → Brand / About, hoặc link ảnh public bạn đã upload cho app).
+             * Để trống thì chỉ dùng file PNG cục bộ trong getReportLogoCandidateUrls().
+             */
+            headerLogoUrl: ""
         };
+
+        /** Thứ tự: URL AppSheet (headerLogoUrl) → PNG trong thư mục HTML. Dùng chung cho header + export Excel. */
+        function getReportLogoCandidateUrls() {
+            const urls = [];
+            const remote = (APPSHEET_CONFIG.headerLogoUrl || "").trim();
+            if (remote) urls.push(remote);
+            try {
+                urls.push(new URL("z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png", window.location.href).href);
+            } catch (e) {
+                /* ignore */
+            }
+            try {
+                urls.push(new URL("logo.png", window.location.href).href);
+            } catch (e) {
+                /* ignore */
+            }
+            return urls;
+        }
+
+        function wireReportHeaderLogo() {
+            const img = document.getElementById("report-header-logo");
+            if (!img) return;
+            const urls = getReportLogoCandidateUrls();
+            if (!urls.length) return;
+            let idx = 0;
+            img.onerror = () => {
+                idx += 1;
+                if (idx < urls.length) {
+                    img.removeAttribute("crossorigin");
+                    if (/^https?:\/\//i.test(urls[idx])) {
+                        img.crossOrigin = "anonymous";
+                    }
+                    img.src = urls[idx];
+                }
+            };
+            img.removeAttribute("crossorigin");
+            if (/^https?:\/\//i.test(urls[0])) {
+                img.crossOrigin = "anonymous";
+            }
+            img.src = urls[0];
+        }
+
+        function _arrayBufferToBase64(buf) {
+            let binary = "";
+            const bytes = new Uint8Array(buf);
+            for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+            return btoa(binary);
+        }
+
+        /** Decode ảnh PNG/JPEG sang base64 PNG — không set crossOrigin (tránh làm canvas «tainted» với file cục bộ). */
+        function _imageUrlToPngBase64(imageUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        if (!img.naturalWidth) return reject(new Error("naturalWidth 0"));
+                        const cv = document.createElement("canvas");
+                        cv.width = img.naturalWidth;
+                        cv.height = img.naturalHeight;
+                        const ctx = cv.getContext("2d");
+                        if (!ctx) return reject(new Error("no ctx"));
+                        ctx.drawImage(img, 0, 0);
+                        const b64 = cv.toDataURL("image/png").replace(/^data:image\/\w+;base64,/, "");
+                        if (b64 && b64.length > 32) resolve(b64);
+                        else reject(new Error("empty base64"));
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                img.onerror = () => reject(new Error("onerror"));
+                const u = String(imageUrl);
+                img.src = `${u}${u.includes("?") ? "&" : "?"}__x=${Date.now()}`;
+            });
+        }
+
+        /**
+         * Payload cho workbook.addImage — ưu tiên file PNG cạnh HTML (trang chưa kịp decode cũng vẫn được).
+         * Remote headerLogoUrl: crossOrigin anonymous rồi canvas.
+         */
+        async function buildExcelLogoImagePayload() {
+            const LOCAL_LOGO_FILES = [
+                "z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png",
+                "logo.png"
+            ];
+            for (const fn of LOCAL_LOGO_FILES) {
+                try {
+                    const href = new URL(fn, window.location.href).href;
+                    const base64 = await _imageUrlToPngBase64(href);
+                    return { base64, extension: "png" };
+                } catch (e) {
+                    console.warn("Logo local", fn, e.message || e);
+                }
+            }
+
+            const remote = (APPSHEET_CONFIG.headerLogoUrl || "").trim();
+            if (remote) {
+                try {
+                    const base64 = await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous";
+                        img.onload = () => {
+                            try {
+                                const cv = document.createElement("canvas");
+                                cv.width = img.naturalWidth;
+                                cv.height = img.naturalHeight;
+                                cv.getContext("2d").drawImage(img, 0, 0);
+                                resolve(cv.toDataURL("image/png").replace(/^data:image\/\w+;base64,/, ""));
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+                        img.onerror = reject;
+                        img.src = remote;
+                    });
+                    if (base64 && base64.length > 32) return { base64, extension: "png" };
+                } catch (e) {
+                    console.warn("Logo remote:", e);
+                }
+            }
+
+            const imgEl = document.getElementById("report-header-logo");
+            if (imgEl) {
+                imgEl.removeAttribute("crossorigin");
+                try {
+                    await imgEl.decode().catch(() => {});
+                } catch (e) {
+                    /* ignore */
+                }
+                if (imgEl.complete && imgEl.naturalWidth > 0) {
+                    try {
+                        const cv = document.createElement("canvas");
+                        cv.width = imgEl.naturalWidth;
+                        cv.height = imgEl.naturalHeight;
+                        const ctx = cv.getContext("2d");
+                        if (ctx) {
+                            ctx.drawImage(imgEl, 0, 0);
+                            const base64 = cv.toDataURL("image/png").replace(/^data:image\/\w+;base64,/, "");
+                            return { base64, extension: "png" };
+                        }
+                    } catch (e) {
+                        console.warn("Logo DOM:", e);
+                    }
+                }
+            }
+
+            for (const logoUrl of getReportLogoCandidateUrls()) {
+                try {
+                    const res = await fetch(logoUrl, { mode: "cors", cache: "no-store" });
+                    if (!res.ok) continue;
+                    const buf = await res.arrayBuffer();
+                    const ct = (res.headers.get("content-type") || "").toLowerCase();
+                    const extension = ct.includes("jpeg") || ct.includes("jpg") ? "jpeg" : "png";
+                    return { base64: _arrayBufferToBase64(buf), extension };
+                } catch (e) {
+                    /* file:// hoặc không fetch được */
+                }
+            }
+
+            for (const logoUrl of getReportLogoCandidateUrls()) {
+                try {
+                    const base64 = await _imageUrlToPngBase64(logoUrl);
+                    return { base64, extension: "png" };
+                } catch (e) {
+                    console.warn("Logo loop:", logoUrl, e);
+                }
+            }
+            return null;
+        }
 
         /** Chi tiết ca — «Giờ làm việc HC» / «Giờ tăng ca» = tổng «Tổng giờ lv» theo «Loại công việc», gom theo Tên tài sản */
         const TABLE_NT_CT = "Nhật trình máy CT";
@@ -3333,6 +3571,9 @@
 
         /** Dùng khi đổi «Từ/Đến ngày» mà chưa bấm tải lại — vẫn cập nhật nhãn. */
         let cachedRawRowsForBanner = [];
+        /** Dùng cho export Excel: map nhóm CT + phiếu đã lọc ngày (đồng bộ logic web). */
+        let lastTenNhomByTaiSan = null;
+        let lastNormalizedRowsForExport = [];
 
         /** Lọc ngày theo «Nhật trình máy CT» ở client, nên không đẩy điều kiện ngày cho bảng phiếu chính. */
         function buildFindRowFilterForApi(filters) {
@@ -3661,6 +3902,7 @@
                 const ctRowsByDate = filterCtRowsByNgayLamViec(ctRows, filters);
                 const afterDate = applyNgayLamViecFilterByCt(allRows, ctRowsByDate, filters);
                 const tenNhomByTaiSan = buildTenNhomByTaiSanFromNtCt(afterDate, ctRowsByDate);
+                lastTenNhomByTaiSan = tenNhomByTaiSan;
                 const nguonGocByTaiSan = buildNguonGocByTaiSanFromDanhSachTaiSan(dsTaiSanRows);
                 const tenLoaiByTaiSan = buildTenLoaiByTaiSanFromDanhSachTaiSan(dsTaiSanRows);
                 populateFilterDropdownsFromRawRows(afterDate, ctRowsByDate, dsTaiSanRows);
@@ -3710,6 +3952,7 @@
                 normalized = applyTieuHaoThucTeFromTongKm(rows, normalized);
                 normalized = injectNhomTongRows(normalized, tenNhomByTaiSan);
                 cachedRawRowsForBanner = rows;
+                lastNormalizedRowsForExport = normalized;
                 renderRows(normalized, { showXeBonHdColumn });
                 syncReportPeriodUi(filters, rows);
 
@@ -3792,6 +4035,8 @@
             } catch (error) {
                 console.error(error);
                 setStatus(`Không tải được dữ liệu AppSheet: ${error.message}`, true);
+                lastTenNhomByTaiSan = null;
+                lastNormalizedRowsForExport = [];
             } finally {
                 loadButton.disabled = false;
             }
@@ -3806,17 +4051,461 @@
             if (pTo) pTo.value = "";
             document.getElementById("filter-origin").value = "";
             cachedRawRowsForBanner = [];
+            lastTenNhomByTaiSan = null;
+            lastNormalizedRowsForExport = [];
             clearAppSheetDataCache();
             populateFilterDropdownsFromSeedDemo();
             renderRows(seedRows, {
                 showXeBonHdColumn: reportHasAnyXeBonRow(seedRows, new Map(), new Map())
             });
+            lastNormalizedRowsForExport = seedRows;
             syncReportPeriodUi({}, []);
             setStatus("Đã xóa bộ lọc, hiển thị dữ liệu mẫu.");
         }
 
+        async function exportReportToExcel() {
+            const tableEl = document.querySelector(".table-wrapper table");
+            if (!tableEl) {
+                setStatus("Không tìm thấy bảng báo cáo để xuất Excel.", true);
+                return;
+            }
+
+            if (!window.ExcelJS) {
+                setStatus("Không tải được thư viện xuất Excel (ExcelJS).", true);
+                return;
+            }
+
+            const exportExcelBtn = document.getElementById("export-excel");
+            if (exportExcelBtn) exportExcelBtn.disabled = true;
+            try {
+                setStatus("Đang xuất Excel...");
+
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao", {
+                    properties: { defaultRowHeight: 18 },
+                    pageSetup: {
+                        paperSize: 9,
+                        orientation: "landscape",
+                        fitToPage: true,
+                        fitToWidth: 1,
+                        fitToHeight: 0,
+                        margins: { left: 0.2, right: 0.2, top: 0.3, bottom: 0.3, header: 0.2, footer: 0.2 }
+                    }
+                });
+                worksheet.views = [{ showGridLines: true }];
+                worksheet.getCell("Z1").value = "EXPORT_BUILD_V17";
+                worksheet.getCell("Z1").font = { name: "Calibri", size: 9, bold: true, color: { argb: "FFCC0000" } };
+
+                const reportColPercents = [
+                    2, 14, 3.5, 5.5, 4.5, 3, 3, 3, 3, 3.5, 3.5, 3.5, 3.5,
+                    4, 3.5, 4, 2.5, 2.5, 2.5, 2.5, 3.5, 3.5, 3, 3, 11, 8
+                ];
+                reportColPercents.forEach((pct, idx) => {
+                    worksheet.getColumn(idx + 1).width = Math.max(7, Math.round(pct * 2.35));
+                });
+
+                let excelLogoAdded = false;
+                try {
+                    const lp = await buildExcelLogoImagePayload();
+                    if (lp) {
+                        const lid = workbook.addImage(lp);
+                        worksheet.addImage(lid, {
+                            tl: { col: 0, row: 0 },
+                            ext: { width: 102, height: 61 }
+                        });
+                        excelLogoAdded = true;
+                    }
+                } catch (logoErr) {
+                    console.warn("Excel logo:", logoErr);
+                }
+
+                const title = "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG";
+                const periodText = (document.getElementById("report-date-range")?.textContent || "").trim();
+
+                /* Vùng A1:B2 để logo; chữ PHÒNG VẬT TƯ ở A3 để không đè ảnh. Ảnh nhúng trước merge để Excel hiển thị ổn định. */
+                worksheet.mergeCells(1, 1, 2, 2);
+                worksheet.getCell("A3").value = "PHÒNG VẬT TƯ";
+                worksheet.mergeCells(3, 1, 3, 2);
+                worksheet.getCell("A3").font = { name: "Times New Roman", bold: true, size: 10 };
+                worksheet.getCell("A3").alignment = { horizontal: "center", vertical: "middle", wrapText: false };
+                worksheet.getRow(1).height = 42;
+                worksheet.getRow(2).height = 42;
+                worksheet.getRow(3).height = 22;
+
+                worksheet.getCell("C1").value = "CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG";
+                worksheet.getCell("C2").value = "Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định";
+                worksheet.getCell("C3").value = "Điện thoại: 0228.3823 484      Fax: 0228.3953 567";
+                worksheet.mergeCells(1, 3, 1, 26);
+                worksheet.mergeCells(2, 3, 2, 26);
+                worksheet.mergeCells(3, 3, 3, 26);
+                worksheet.getCell("C1").font = { name: "Times New Roman", bold: true, size: 12 };
+                worksheet.getCell("C2").font = { name: "Times New Roman", size: 10 };
+                worksheet.getCell("C3").font = { name: "Times New Roman", size: 10 };
+                worksheet.getCell("C1").alignment = { horizontal: "left", vertical: "middle" };
+                worksheet.getCell("C2").alignment = { horizontal: "left", vertical: "middle" };
+                worksheet.getCell("C3").alignment = { horizontal: "left", vertical: "middle" };
+
+                worksheet.getCell("A5").value = title;
+                worksheet.getCell("A6").value = periodText;
+                worksheet.mergeCells(5, 1, 5, 26);
+                worksheet.mergeCells(6, 1, 6, 26);
+                worksheet.getRow(5).height = 24;
+                worksheet.getRow(6).height = 18;
+                worksheet.getCell("A5").font = { name: "Times New Roman", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
+                worksheet.getCell("A6").font = { name: "Times New Roman", italic: true, size: 10, color: { argb: "FFFFFFFF" } };
+                worksheet.getCell("A5").alignment = { horizontal: "center", vertical: "middle" };
+                worksheet.getCell("A6").alignment = { horizontal: "center", vertical: "middle" };
+                ["A5", "A6"].forEach((addr) => {
+                    worksheet.getCell(addr).fill = {
+                        type: "pattern",
+                        pattern: "solid",
+                        fgColor: { argb: "FF2B7132" }
+                    };
+                });
+
+                const toArgb = (cssColor) => {
+                    if (!cssColor) return null;
+                    const c = cssColor.trim();
+                    if (!c || c === "transparent" || c === "rgba(0, 0, 0, 0)") return null;
+                    const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+                    if (!m) return null;
+                    const hex = (n) => Number(n).toString(16).padStart(2, "0").toUpperCase();
+                    return `FF${hex(m[1])}${hex(m[2])}${hex(m[3])}`;
+                };
+
+                const exportRowsNormalized = (lastNormalizedRowsForExport || []).filter(
+                    (r) => !r?.groupRow && !r?.subGroupRow && !r?.nhomTongRow
+                );
+
+                /* Sau dòng tiêu đề (5–6), một dòng trống (7), bảng bắt đầu 8 — không còn khối filter trong Excel. */
+                const startExcelRow = 8;
+                const allTableRows = Array.from(tableEl.querySelectorAll("tr"));
+                const theadRows = Array.from(tableEl.querySelectorAll("thead tr"));
+
+                /* Chiều cao hàng (giữ như trước). */
+                allTableRows.forEach((tr, rIndex) => {
+                    const excelRowIndex = startExcelRow + rIndex;
+                    const trStyle = window.getComputedStyle(tr);
+                    const pxHeight = Number.parseFloat(trStyle.height || "0");
+                    if (Number.isFinite(pxHeight) && pxHeight > 0) {
+                        worksheet.getRow(excelRowIndex).height = Math.max(14, Math.round(pxHeight * 0.78));
+                    }
+                });
+
+                /**
+                 * thead có rowspan/colspan — hàng 2 chỉ còn 4 <th> (Nhiên liệu phụ) nên không thể đặt cột từ trái 1→4.
+                 * Dùng lưới occupied[r][c] để nhảy đúng vị trí (cột 17–20 cho 4 cột con).
+                 */
+                const theadOcc = [];
+                const isTheadOcc = (r, c) => !!(theadOcc[r] && theadOcc[r][c]);
+                const markTheadOcc = (r0, c0, rs, cs) => {
+                    for (let r = r0; r < r0 + rs; r++) {
+                        if (!theadOcc[r]) theadOcc[r] = [];
+                        for (let c = c0; c < c0 + cs; c++) {
+                            theadOcc[r][c] = true;
+                        }
+                    }
+                };
+                /** Ghi ô trước, merge sau — ExcelJS có thể làm mất nội dung hàng con (vd. 4 cột «Nhiên liệu phụ»). */
+                const theadMergeTasks = [];
+                theadRows.forEach((tr, rIndex) => {
+                    const excelRowIndex = startExcelRow + rIndex;
+                    let col0 = 0;
+                    Array.from(tr.cells).forEach((cellEl) => {
+                        const rs = Math.max(1, Number(cellEl.getAttribute("rowspan") || "1"));
+                        const cs = Math.max(1, Number(cellEl.getAttribute("colspan") || "1"));
+                        while (isTheadOcc(rIndex, col0)) col0 += 1;
+                        const cIndex = col0 + 1;
+                        const excelCell = worksheet.getCell(excelRowIndex, cIndex);
+                        const txt = (cellEl.innerText || "").replace(/\s+/g, " ").trim();
+                        excelCell.value = txt;
+                        const st = window.getComputedStyle(cellEl);
+                        const bgArgb = toArgb(st.backgroundColor);
+                        const fgArgb = toArgb(st.color);
+                        const fontSize = Number.parseFloat(st.fontSize || "10");
+                        const isBold = Number(st.fontWeight) >= 600 || st.fontWeight === "bold";
+                        excelCell.font = {
+                            name: st.fontFamily?.includes("Arial") ? "Arial" : "Times New Roman",
+                            size: Math.max(8, Math.round(fontSize)),
+                            bold: !!isBold,
+                            color: fgArgb ? { argb: fgArgb } : undefined
+                        };
+                        excelCell.alignment = {
+                            vertical: "middle",
+                            horizontal: st.textAlign === "left" ? "left" : st.textAlign === "right" ? "right" : "center",
+                            wrapText: true,
+                            shrinkToFit: false
+                        };
+                        excelCell.border = {
+                            top: { style: "thin", color: { argb: "FF333333" } },
+                            left: { style: "thin", color: { argb: "FF333333" } },
+                            bottom: { style: "thin", color: { argb: "FF333333" } },
+                            right: { style: "thin", color: { argb: "FF333333" } }
+                        };
+                        if (bgArgb) {
+                            excelCell.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: { argb: bgArgb }
+                            };
+                        }
+                        if (rs > 1 || cs > 1) {
+                            theadMergeTasks.push({ excelRowIndex, cIndex, rs, cs });
+                        }
+                        markTheadOcc(rIndex, col0, rs, cs);
+                        col0 += cs;
+                    });
+                });
+                theadMergeTasks.forEach(({ excelRowIndex, cIndex, rs, cs }) => {
+                    worksheet.mergeCells(excelRowIndex, cIndex, excelRowIndex + rs - 1, cIndex + cs - 1);
+                });
+
+                const NLP_SUB_FALLBACK = ["Tổng mỡ (kg)", "Tổng nhớt (L)", "Dầu thủy lực (L)", "Dầu cầu (L)"];
+                const nlpSubExcelRow = startExcelRow + 1;
+                for (let i = 0; i < 4; i++) {
+                    const c = 17 + i;
+                    const cell = worksheet.getCell(nlpSubExcelRow, c);
+                    const cur = cell.value;
+                    const missing = cur === undefined || cur === null || String(cur).trim() === "";
+                    if (missing) {
+                        cell.value = NLP_SUB_FALLBACK[i];
+                        cell.font = { name: "Arial", size: 10, color: { argb: "FFFFFFFF" } };
+                        cell.fill = {
+                            type: "pattern",
+                            pattern: "solid",
+                            fgColor: { argb: "FF4A8694" }
+                        };
+                        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+                        cell.border = {
+                            top: { style: "thin", color: { argb: "FF333333" } },
+                            left: { style: "thin", color: { argb: "FF333333" } },
+                            bottom: { style: "thin", color: { argb: "FF333333" } },
+                            right: { style: "thin", color: { argb: "FF333333" } }
+                        };
+                    }
+                }
+                worksheet.getRow(nlpSubExcelRow).height = Math.max(worksheet.getRow(nlpSubExcelRow).height || 0, 30);
+
+                /** Ghi dữ liệu đã lọc (snapshot) — không dùng FILTER trong file để tránh Excel Repair. */
+                let dataStartRow = startExcelRow + 3;
+                let sttCounter = 0;
+                exportRowsNormalized.forEach((row, idx) => {
+                    const excelRowIndex = dataStartRow + idx;
+                    let maxRowPt = 16;
+                    REPORT_COLUMNS.forEach((column, colIdx) => {
+                        const excelCell = worksheet.getCell(excelRowIndex, colIdx + 1);
+                        let rawVal;
+                        if (column === "TT") {
+                            sttCounter += 1;
+                            rawVal = sttCounter;
+                        } else {
+                            rawVal = row[column];
+                        }
+                        const displayVal = formatReportCellDisplay(column, rawVal);
+                        excelCell.value = displayVal;
+                        const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "CongViec", "CongTruong"].includes(column)
+                            ? "left"
+                            : "center";
+                        excelCell.alignment = {
+                            vertical: "middle",
+                            horizontal: cssClass === "left" ? "left" : "center",
+                            wrapText: true
+                        };
+                        excelCell.border = {
+                            top: { style: "thin", color: { argb: "FF333333" } },
+                            left: { style: "thin", color: { argb: "FF333333" } },
+                            bottom: { style: "thin", color: { argb: "FF333333" } },
+                            right: { style: "thin", color: { argb: "FF333333" } }
+                        };
+                        excelCell.font = { name: "Arial", size: 10 };
+                        const wch = worksheet.getColumn(colIdx + 1).width || 9;
+                        const s = String(displayVal ?? "");
+                        const paras = s.split(/\r?\n/);
+                        const longest = paras.reduce((m, line) => Math.max(m, line.length), 0);
+                        const charsPerLine = Math.max(4, Math.round(wch * 0.52));
+                        const wrapLines = longest > 0 ? Math.ceil(longest / charsPerLine) : 1;
+                        const lines = Math.max(paras.length, wrapLines);
+                        const est = Math.min(180, Math.max(15, Math.round(6 + lines * 13)));
+                        if (est > maxRowPt) maxRowPt = est;
+                    });
+                    worksheet.getRow(excelRowIndex).height = maxRowPt;
+                });
+
+                const filterHeaderRow = startExcelRow + 2;
+                worksheet.views = [{
+                    showGridLines: true,
+                    state: "frozen",
+                    ySplit: filterHeaderRow
+                }];
+
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, "0");
+                const dd = String(now.getDate()).padStart(2, "0");
+                const hh = String(now.getHours()).padStart(2, "0");
+                const mi = String(now.getMinutes()).padStart(2, "0");
+                const ss = String(now.getSeconds()).padStart(2, "0");
+                const fileName = `bao-cao-nhien-lieu-thiet-bi-v17-${yyyy}${mm}${dd}-${hh}${mi}${ss}.xlsx`;
+
+                // Xuất binary .xlsx thật rồi tải qua Blob với MIME chuẩn để tránh cảnh báo mismatch.
+                const workbookArray = await workbook.xlsx.writeBuffer();
+                const blob = new Blob(
+                [workbookArray],
+                { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+                );
+
+                // Ưu tiên Save File Picker để tránh bị trình duyệt chặn download Blob.
+                if (window.showSaveFilePicker) {
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: fileName,
+                        types: [
+                            {
+                                description: "Excel Workbook",
+                                accept: {
+                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"]
+                                }
+                            }
+                        ]
+                    });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                } else {
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = downloadUrl;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(downloadUrl);
+                }
+                setStatus(
+                    `Đã xuất Excel v17: ${fileName}${excelLogoAdded ? "" : " — Không nhúng được logo (ảnh local / headerLogoUrl)."}`);
+                alert(`Export V17.\nFile: ${fileName}\nZ1 = EXPORT_BUILD_V17${excelLogoAdded ? "" : "\n(Cảnh báo: logo không nhúng được)"}`);
+            } catch (error) {
+                if (error && error.name === "AbortError") {
+                    setStatus("Đã hủy lưu file Excel.");
+                    return;
+                }
+                console.error(error);
+                setStatus(`Xuất Excel thất bại: ${error.message || error}`, true);
+            } finally {
+                if (exportExcelBtn) exportExcelBtn.disabled = false;
+            }
+        }
+
+        /** PDF: không in các dòng filter để trống (select = «Tất cả», ngày không nhập). */
+        function applyPrintFilterSkip() {
+            document.querySelectorAll(".report-filter-row").forEach((row) => {
+                const sel = row.querySelector("select.filter-select");
+                const inp = row.querySelector("input.filter-input");
+                let skip = false;
+                if (sel) {
+                    skip = sel.value === "";
+                } else if (inp) {
+                    skip = !(inp.value || "").trim();
+                }
+                row.classList.toggle("report-filter-row--pdf-skip", skip);
+            });
+        }
+
+        function resetPrintFilterSkip() {
+            document.querySelectorAll(".report-filter-row--pdf-skip").forEach((row) => {
+                row.classList.remove("report-filter-row--pdf-skip");
+            });
+        }
+
+        function applyPdfPrintScale() {
+            const clip = document.getElementById("pdf-print-clip");
+            const inner = clip && clip.querySelector(".page-container");
+            if (!clip || !inner) return;
+
+            inner.removeAttribute("data-pdf-print-scaled");
+
+            /**
+             * Không zoom/transform khi in — @media print thu font + bỏ min-width bảng.
+             * Zoom JS + Adobe PDF dễ ra trang dọc / nội dung lệch hướng.
+             */
+            clip.style.overflow = "";
+            clip.style.width = "";
+            clip.style.height = "";
+            inner.style.zoom = "";
+            inner.style.transform = "";
+            inner.style.transformOrigin = "";
+        }
+
+        function resetPdfPrintScale() {
+            resetPrintFilterSkip();
+            const clip = document.getElementById("pdf-print-clip");
+            const inner = clip && clip.querySelector(".page-container");
+            if (!clip || !inner) return;
+            clip.style.overflow = "";
+            clip.style.width = "";
+            clip.style.height = "";
+            inner.style.zoom = "";
+            inner.style.transform = "";
+            inner.style.transformOrigin = "";
+            inner.removeAttribute("data-pdf-print-scaled");
+        }
+
+        let pdfPrintRecoverTimer = null;
+        /** Thời điểm beforeprint gần nhất — tránh reset quá sớm khi hộp thoại in vừa mở hoặc khi alt-tab nhanh. */
+        let pdfPrintLastPrepareAt = 0;
+
+        /** Brave/Chrome: nhấn Cancel thường không gọi `afterprint` → zoom/transform kẹt; bù bằng focus / visibility. */
+        function schedulePdfPrintRecoverIfStuck() {
+            if (pdfPrintRecoverTimer) clearTimeout(pdfPrintRecoverTimer);
+            pdfPrintRecoverTimer = setTimeout(() => {
+                pdfPrintRecoverTimer = null;
+                if (Date.now() - pdfPrintLastPrepareAt < 450) return;
+                if (document.querySelector(".page-container[data-pdf-print-scaled='1']")) {
+                    resetPdfPrintScale();
+                }
+            }, 160);
+        }
+
+        function schedulePdfPrintScale() {
+            pdfPrintLastPrepareAt = Date.now();
+            applyPrintFilterSkip();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(applyPdfPrintScale);
+            });
+        }
+
+        window.addEventListener("beforeprint", schedulePdfPrintScale);
+        window.addEventListener("afterprint", resetPdfPrintScale);
+        window.addEventListener("focus", schedulePdfPrintRecoverIfStuck);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") schedulePdfPrintRecoverIfStuck();
+        });
+        if (window.matchMedia) {
+            window.matchMedia("print").addEventListener("change", (ev) => {
+                if (ev.matches) schedulePdfPrintScale();
+                else resetPdfPrintScale();
+            });
+        }
+
+        function exportReportToPdf() {
+            setStatus("Đang mở chế độ in PDF...");
+            window.print();
+            requestAnimationFrame(() => {
+                schedulePdfPrintRecoverIfStuck();
+            });
+            /* Sau Cancel, một số trình duyệt không gọi afterprint / không focus lại — tránh kẹt zoom. */
+            setTimeout(() => {
+                if (document.querySelector(".page-container[data-pdf-print-scaled='1']")) {
+                    resetPdfPrintScale();
+                }
+            }, 1800);
+        }
+
         loadButton.addEventListener("click", () => loadFromAppSheet({ forceRefresh: true }));
         resetButton.addEventListener("click", resetFilters);
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+        if (exportExcelBtn) exportExcelBtn.addEventListener("click", exportReportToExcel);
+        if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportReportToPdf);
 
         let autoFilterLoadTimer = null;
         function scheduleAutoLoadFromFilters() {
@@ -3868,6 +4557,7 @@
             bootLoadFromAppSheet();
         }
 
+        wireReportHeaderLogo();
         syncReportPeriodUi(getFilters(), cachedRawRowsForBanner);
     </script>
 </body>
