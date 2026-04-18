@@ -150,19 +150,54 @@
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
         .action-btn {
-            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            height: auto;
             border-radius: 9999px;
-            padding: 0 12px;
+            padding: 4px 14px;
             font-size: 11px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
             color: #fff;
             cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
+        }
+
+        /* Tabs styling */
+        .report-tabs-container {
+            display: flex;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
         }
         .status-line {
             min-height: 20px;
@@ -349,6 +384,13 @@
 
     <div class="page-container">
         
+        <!-- REPORT TABS -->
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn active" onclick="switchReportTab('trang-thiet-bi')">Báo cáo trang thiết bị</button>
+        </div>
+        
         <!-- HEADER SECTION -->
         <div class="flex items-start p-2 bg-white">
             <div class="logo-container mr-6">
@@ -401,11 +443,6 @@
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="report-filter-row flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">TÊN LOẠI:</span>
-                        <select id="filter-type" class="filter-select" title="Chọn Tên loại từ Danh sách tài sản">
-                            <option value="">— Tất cả —</option>
-                        </select>
                     </div>
                 </div>
                 <div class="w-full lg:w-[32%] space-y-1 flex flex-col items-end lg:pr-2">
@@ -429,7 +466,7 @@
                         </div>
                         <input type="date" id="filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                     </div>
-                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end no-print">
+                    <div class="flex flex-wrap items-center gap-2 w-full justify-end no-print mt-1">
                         <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
                         <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
                         <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
@@ -1370,6 +1407,56 @@
             return !isLoaiTrongGioHC(val);
         }
 
+        /** Chuẩn hóa chữ để so khớp (NFKC + bỏ dấu). */
+        function normalizeForMatching(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFKC")
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+        }
+
+        /** Nhóm «Xe ben» — nhận diện các từ khóa : ben, tự đổ... */
+        function nhomTenLooksLikeXeBen(s) {
+            const raw = String(s ?? "").trim();
+            if (!raw) return false;
+            const t = normalizeForMatching(raw);
+            if (/\bben\b/.test(t) || t.includes("xe ben") || t.includes("ben tu do")) return true;
+            if (t.includes("tu do") || t.includes("tự đổ") || t.includes("o to tai tu do")) return true;
+            return false;
+        }
+
+        function rowIsNhomXeBen(r, tenNhomByTaiSan, key, tenLoaiByTaiSan) {
+            const nhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            if (nhomTenLooksLikeXeBen(nhom)) return true;
+            const loai = (key && tenLoaiByTaiSan?.get) ? tenLoaiByTaiSan.get(key) : "";
+            if (nhomTenLooksLikeXeBen(loai)) return true;
+            return false;
+        }
+
+        function rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan) {
+            const nhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            if (nhomTenLooksLikeXeBon(nhom)) return true;
+            const loai = (key && tenLoaiByTaiSan?.get) ? tenLoaiByTaiSan.get(key) : "";
+            if (nhomTenLooksLikeXeBon(loai)) return true;
+            const originDs = (key && nguonGocByTaiSan?.get) ? nguonGocByTaiSan.get(key) : "";
+            const originMain = String(pickField(r, "NguonGoc") ?? "").trim();
+            if (nhomTenLooksLikeXeBon(originDs) || nhomTenLooksLikeXeBon(originMain)) return true;
+            if (typeof ntRowLooseXeBonHint === "function" && ntRowLooseXeBonHint(r)) return true;
+            return false;
+        }
+
+        /** «Tên nhóm» trên «Nhật trình máy CT» — ưu tiên khớp «Xe bồn» hoặc «Xe ben». */
+        function pickCtTenNhom(row) {
+            const candidates = collectTenNhomCandidatesFromRow(row);
+            if (!candidates?.length) return "";
+            for (const c of candidates) {
+                if (nhomTenLooksLikeXeBon(c) || nhomTenLooksLikeXeBen(c)) return c;
+            }
+            return candidates[0];
+        }
+
         /** Đọc số giờ từ ô AppSheet (thập phân . hoặc ,; không làm hỏng «8.5» như bản cũ). */
         function parseHourCell(raw) {
             if (raw == null || raw === "") return null;
@@ -2062,9 +2149,24 @@
             ).trim();
         }
 
-        /** «Tên nhóm» trên «Nhật trình máy CT» — ưu tiên khớp «Xe bồn» khi có nhiều cột nhóm. */
+        /** Nhóm «Xe ben» — nhận diện các từ khóa : ben, tự đổ... */
+        function nhomTenLooksLikeXeBen(s) {
+            const raw = String(s ?? "").trim();
+            if (!raw) return false;
+            const t = normTextForXeBonMatch(raw);
+            if (/\bben\b/.test(t) || t.includes("xe ben")) return true;
+            if (t.includes("tu do") || t.includes("tự đổ")) return true;
+            return false;
+        }
+
+        /** «Tên nhóm» trên «Nhật trình máy CT» — ưu tiên khớp «Xe bồn» hoặc «Xe ben» khi có nhiều cột nhóm. */
         function pickCtTenNhom(row) {
-            return pickPreferredTenNhomFromCandidates(collectTenNhomCandidatesFromRow(row));
+            const candidates = collectTenNhomCandidatesFromRow(row);
+            if (!candidates?.length) return "";
+            for (const c of candidates) {
+                if (nhomTenLooksLikeXeBon(c) || nhomTenLooksLikeXeBen(c)) return c;
+            }
+            return candidates[0];
         }
 
         function taiSanNamesLooselyEqual(a, b) {
@@ -3328,7 +3430,6 @@
                 false
             );
             fillFilterSelectElement("filter-origin", [], false);
-            fillFilterSelectElement("filter-type", [], false);
         }
 
         function escapeHtml(value) {
@@ -3397,7 +3498,21 @@
             const fromNtOrigin = uniqueSortedFromRaw(rawRows, "origin");
             const originMerged = [...new Set([...fromDsOrigin, ...fromNtOrigin])].sort((a, b) => a.localeCompare(b, "vi"));
             fillFilterSelectElement("filter-origin", originMerged, true);
-            fillFilterSelectElement("filter-type", uniqueTenLoaiFromDanhSachTaiSan(dsTaiSanRows || []), true);
+        }
+
+        let currentReportTab = "trang-thiet-bi";
+
+        function switchReportTab(tabId) {
+            currentReportTab = tabId;
+            // Update UI
+            document.querySelectorAll(".report-tab-btn").forEach((btn) => {
+                btn.classList.remove("active");
+            });
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) activeBtn.classList.add("active");
+
+            // Refresh report
+            loadFromAppSheet();
         }
 
         function getFilters() {
@@ -3410,7 +3525,6 @@
                 group: document.getElementById("filter-group").value.trim(),
                 driver: document.getElementById("filter-driver").value.trim(),
                 origin: document.getElementById("filter-origin").value.trim(),
-                type: document.getElementById("filter-type").value.trim(),
                 fromDate,
                 toDate
             };
@@ -3733,6 +3847,7 @@
         /** Dùng khi đổi «Từ/Đến ngày» mà chưa bấm tải lại — vẫn cập nhật nhãn. */
         let cachedRawRowsForBanner = [];
         let lastNormalizedRowsForExport = [];
+        let lastTenNhomByTaiSan = null;
 
         /** Lọc ngày theo «Nhật trình máy CT» ở client, nên không đẩy điều kiện ngày cho bảng phiếu chính. */
         function buildFindRowFilterForApi(filters) {
@@ -3772,16 +3887,6 @@
             return [...set].sort((a, b) => a.localeCompare(b, "vi"));
         }
 
-        function uniqueTenLoaiFromDanhSachTaiSan(dsRows) {
-            const set = new Set();
-            if (!dsRows?.length) return [];
-            for (const r of dsRows) {
-                const v = pickDanhSachTenLoai(r);
-                if (v) set.add(v);
-            }
-            return [...set].sort((a, b) => a.localeCompare(b, "vi"));
-        }
-
         function rawRowMatchesOriginFilter(raw, needle, nguonGocByTaiSan) {
             const n = needle.trim().toLowerCase();
             if (!n) return true;
@@ -3794,24 +3899,6 @@
                 if (g.includes(n) || n.includes(g)) return true;
             }
             return rawCellMatchesNeedle(raw, "origin", needle);
-        }
-
-        function rawRowMatchesTenLoaiFilter(raw, needle, tenLoaiByTaiSan) {
-            const n = needle.trim().toLowerCase();
-            if (!n) return true;
-            const asset = pickAssetNameForGroupSummary(raw) || String(pickField(raw, "TenThietBi") ?? "").trim();
-            const key = assetKeyFromName(asset);
-            const fromDs = key && tenLoaiByTaiSan?.get ? tenLoaiByTaiSan.get(key) : "";
-            const fromMain = String(pickField(raw, "TenLoai") ?? "").trim();
-            const loai = fromDs || fromMain;
-            if (!loai) return false;
-            if (n === "xe ô tô" || n === "xe o to" || n === "oto" || n === "o to") {
-                return tenLoaiIsXeOto(loai);
-            }
-            const g = String(loai).trim().toLowerCase();
-            if (g === n) return true;
-            if (g.includes(n) || n.includes(g)) return true;
-            return false;
         }
 
         function rawRowMatchesGroupFilter(raw, needle, tenNhomByTaiSan) {
@@ -3831,6 +3918,24 @@
         function applyRawTextFilters(rows, filters, tenNhomByTaiSan, nguonGocByTaiSan, tenLoaiByTaiSan) {
             if (!rows?.length) return rows || [];
             return rows.filter((r) => {
+                const asset = String(pickField(r, "TenThietBi") ?? "").trim();
+                const key = assetKeyFromName(asset);
+                const tenNhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+
+                // Tab Xe Ben
+                if (currentReportTab === "xe-ben") {
+                    if (!rowIsNhomXeBen(r, tenNhomByTaiSan, key, tenLoaiByTaiSan)) return false;
+                }
+                // Tab Xe Bồn
+                else if (currentReportTab === "xe-bon") {
+                    if (!rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan)) return false;
+                }
+                // Tab Trang thiết bị: Không phải Ben và không phải Bồn
+                else if (currentReportTab === "trang-thiet-bi") {
+                    if (rowIsNhomXeBen(r, tenNhomByTaiSan, key, tenLoaiByTaiSan)) return false;
+                    if (rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan)) return false;
+                }
+
                 for (const fk of ["project", "driver"]) {
                     const needle = (filters[fk] ?? "").trim();
                     if (!needle) continue;
@@ -4145,6 +4250,7 @@
                 const ctRowsByDate = filterCtRowsByNgayLamViec(ctRows, filters);
                 const afterDate = applyNgayLamViecFilterByCt(allRows, ctRowsByDate, filters);
                 const tenNhomByTaiSan = buildTenNhomByTaiSanFromNtCt(afterDate, ctRowsByDate);
+                lastTenNhomByTaiSan = tenNhomByTaiSan;
                 const nguonGocByTaiSan = buildNguonGocByTaiSanFromDanhSachTaiSan(dsTaiSanRows);
                 const tenLoaiByTaiSan = buildTenLoaiByTaiSanFromDanhSachTaiSan(dsTaiSanRows);
                 populateFilterDropdownsFromRawRows(afterDate, ctRowsByDate, dsTaiSanRows);
