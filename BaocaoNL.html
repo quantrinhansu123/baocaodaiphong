@@ -165,6 +165,20 @@
             font-weight: bold;
         }
 
+        .nl-cong-trinh-dd summary {
+            list-style: none;
+        }
+        .nl-cong-trinh-dd summary::-webkit-details-marker {
+            display: none;
+        }
+        .nl-cong-trinh-dd[open] > summary {
+            border-color: #2b7132;
+        }
+        #nl-filter-cong-trinh-panel label {
+            font-weight: normal;
+            color: #334155;
+        }
+
         @media print {
             @page {
                 size: A4 landscape;
@@ -210,28 +224,31 @@
         <!-- TITLE BANNER -->
         <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
             <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BẢNG KÊ CHI TIẾT NHẬP XUẤT NHIÊN LIỆU</h1>
-            <p class="font-bold text-sm text-[#0047ab] mb-1">CT HỐ SÓI - SÔNG ĐUỐNG</p>
-            <p id="nl-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … đến ngày …)</p>
+            <p id="nl-banner-cong-trinh-line" class="font-bold text-sm text-[#0047ab] mb-1 px-2">CT HỐ SÓI - SÔNG ĐUỐNG</p>
+            <p id="nl-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
 
         <!-- FILTERS -->
         <div class="p-1.5 bg-white print-hide">
             <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
-                <div class="w-full lg:w-[42%] space-y-1">
-                    <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">NƠI THI CÔNG</span>
-                        <select class="filter-input" id="nl-filter-noi-thi-cong" title="Chọn nơi thi công — danh sách lấy từ AppSheet «Nhập xuất luân chuyển CT»">
-                            <option value="">— Đang tải… —</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
-                        <select class="filter-input" id="nl-filter-cong-trinh" title="Theo «Nơi thi công» đã chọn (cột công trình trên NXLC CT)">
-                            <option value="">— Đang tải… —</option>
-                        </select>
+                <div class="w-full lg:w-[46%] space-y-1">
+                    <div class="flex items-start gap-1">
+                        <span class="w-[118px] shrink-0 pt-0.5">CÔNG TRÌNH</span>
+                        <div class="flex-1 min-w-0 space-y-0.5">
+                            <details id="nl-filter-cong-trinh-details" class="nl-cong-trinh-dd rounded-full border border-slate-400 bg-[#f8fafc]">
+                                <summary class="filter-input max-w-none w-full cursor-pointer rounded-full border-0 bg-transparent">Chọn công trình (sổ xuống)</summary>
+                                <div id="nl-filter-cong-trinh-panel" class="mt-1 max-h-36 overflow-y-auto rounded-lg border border-slate-300 bg-white p-2 shadow-sm text-left font-normal text-slate-700">
+                                    <span class="text-slate-400">— Đang tải… —</span>
+                                </div>
+                            </details>
+                            <div class="flex flex-wrap gap-1.5 justify-end">
+                                <button type="button" id="nl-cong-trinh-select-all" class="text-[10px] font-bold text-[#2b7132] underline decoration-dotted">Chọn tất cả</button>
+                                <button type="button" id="nl-cong-trinh-clear" class="text-[10px] font-bold text-slate-600 underline decoration-dotted">Bỏ chọn</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="w-full lg:w-[52%] space-y-1 flex flex-col items-end lg:pr-2">
+                <div class="w-full lg:w-[50%] space-y-1 flex flex-col items-end lg:pr-2">
                     <div class="flex items-center gap-1 w-full lg:w-[280px]">
                         <span class="w-[72px] shrink-0">TỪ NGÀY</span>
                         <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
@@ -271,8 +288,7 @@
                     <tr>
                         <th rowspan="2" style="width: 40px;">STT</th>
                         <th rowspan="2" style="width: 16%;">Tên thiết bị</th>
-                        <th rowspan="2" style="width: 12%;">Tên LM</th>
-                        <th rowspan="2" style="width: 12%;">Công trình</th>
+                        <th rowspan="2" style="width: 14%;">Tên LM</th>
                         <th colspan="5">Nhiên liệu</th>
                         <th rowspan="2" style="width: 8%;">Ghi chú</th>
                     </tr>
@@ -286,7 +302,7 @@
                 </thead>
                 <tbody id="nl-tbody">
                     <tr>
-                        <td colspan="10" class="text-center" style="padding:16px;">Đang tải dữ liệu từ AppSheet…</td>
+                        <td colspan="9" class="text-center" style="padding:16px;">Đang tải dữ liệu từ AppSheet…</td>
                     </tr>
                 </tbody>
             </table>

@@ -151,6 +151,32 @@
         return "";
     }
 
+    /** Giá trị hiển thị / lọc «Nơi thi công»: ưu tiên cột riêng, không có thì dùng «Nơi quản lý» (cùng nhóm báo cáo). */
+    function pickDsNoiThiCongForFilter(row) {
+        const strict = pickFirstCell(row, [
+            "Nơi thi công",
+            "Noi thi cong",
+            "Địa điểm thi công",
+            "Dia diem thi cong",
+            "Khu vực thi công"
+        ]).trim();
+        if (strict) return strict;
+        return pickDsNoiQuanLy(row).trim();
+    }
+
+    /** Chỉ các cột «Công trình» / dự án — không trùng fallback nơi quản lý. */
+    function pickDsCongTrinhForFilter(row) {
+        return pickFirstCell(row, [
+            "Công trình",
+            "Tên công trình",
+            "Ten cong trinh",
+            "Dự án",
+            "Du an",
+            "Tên dự án",
+            "Ten du an"
+        ]).trim();
+    }
+
     function pickDsMaThietBi(row) {
         return pickFirstCell(row, [
             "Mã tài sản",
@@ -301,34 +327,93 @@
         return formatNum(n);
     }
 
+    function getCheckedFilterValues(listId) {
+        const root = document.getElementById(listId);
+        if (!root) return [];
+        return [...root.querySelectorAll('input[type="checkbox"]:checked')].map((cb) => cb.value);
+    }
+
     function rowMatchesFilters(row, filters) {
-        const parts = [
-            filters.congTrinh,
-            filters.nhomNcc,
-            filters.tenNcc,
-            filters.tenKho,
-            filters.nhomVt,
-            filters.tenVt
-        ].filter((x) => x && String(x).trim());
-        if (!parts.length) return true;
-        let blob;
-        try {
-            blob = JSON.stringify(row).toLowerCase();
-        } catch (e) {
-            return true;
+        if (filters.noiThiCong) {
+            if (pickDsNoiThiCongForFilter(row) !== filters.noiThiCong) return false;
         }
-        return parts.every((p) => blob.includes(String(p).trim().toLowerCase()));
+        if (filters.congTrinh.length > 0) {
+            const v = pickDsCongTrinhForFilter(row);
+            if (!v || !filters.congTrinh.includes(v)) return false;
+        }
+        if (filters.nhomThietBi.length > 0) {
+            const v = pickDsNhomThietBi(row).trim();
+            if (!v || !filters.nhomThietBi.includes(v)) return false;
+        }
+        return true;
     }
 
     function getFilters() {
         return {
-            congTrinh: document.getElementById("tbx-filter-cong-trinh")?.value?.trim() ?? "",
-            nhomNcc: document.getElementById("tbx-filter-nhom-ncc")?.value?.trim() ?? "",
-            tenNcc: document.getElementById("tbx-filter-ten-ncc")?.value?.trim() ?? "",
-            tenKho: document.getElementById("tbx-filter-kho")?.value?.trim() ?? "",
-            nhomVt: document.getElementById("tbx-filter-nhom-vt")?.value?.trim() ?? "",
-            tenVt: document.getElementById("tbx-filter-ten-vt")?.value?.trim() ?? ""
+            noiThiCong: document.getElementById("tbx-filter-noi-thi-cong")?.value?.trim() ?? "",
+            congTrinh: getCheckedFilterValues("tbx-filter-cong-trinh-list"),
+            nhomThietBi: getCheckedFilterValues("tbx-filter-nhom-thiet-bi-list")
         };
+    }
+
+    function populateFilterCheckboxes(rows) {
+        const selNoi = document.getElementById("tbx-filter-noi-thi-cong");
+        const listCt = document.getElementById("tbx-filter-cong-trinh-list");
+        const listNhom = document.getElementById("tbx-filter-nhom-thiet-bi-list");
+        if (!selNoi || !listCt || !listNhom) return;
+
+        const prevNoi = selNoi.value?.trim() ?? "";
+        const prevCt = new Set(getCheckedFilterValues("tbx-filter-cong-trinh-list"));
+        const prevNhom = new Set(getCheckedFilterValues("tbx-filter-nhom-thiet-bi-list"));
+
+        const setNoi = new Set();
+        const setCt = new Set();
+        const setNhom = new Set();
+        for (const r of rows || []) {
+            const n = pickDsNoiThiCongForFilter(r);
+            if (n) setNoi.add(n);
+            const c = pickDsCongTrinhForFilter(r);
+            if (c) setCt.add(c);
+            const h = pickDsNhomThietBi(r).trim();
+            if (h) setNhom.add(h);
+        }
+
+        const sortVi = (a, b) => a.localeCompare(b, "vi");
+
+        selNoi.innerHTML = "";
+        const o0 = document.createElement("option");
+        o0.value = "";
+        o0.textContent = "--- Tất cả nơi thi công ---";
+        selNoi.appendChild(o0);
+        for (const v of [...setNoi].sort(sortVi)) {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = v;
+            selNoi.appendChild(o);
+        }
+        if (prevNoi && setNoi.has(prevNoi)) selNoi.value = prevNoi;
+        else selNoi.value = "";
+
+        function fillPanel(panel, valueSet, namePrefix, prevChecked) {
+            panel.innerHTML = "";
+            const sorted = [...valueSet].sort(sortVi);
+            for (const v of sorted) {
+                const label = document.createElement("label");
+                const input = document.createElement("input");
+                input.type = "checkbox";
+                input.name = namePrefix;
+                input.value = v;
+                if (prevChecked.has(v)) input.checked = true;
+                const span = document.createElement("span");
+                span.textContent = v;
+                label.appendChild(input);
+                label.appendChild(span);
+                panel.appendChild(label);
+            }
+        }
+
+        fillPanel(listCt, setCt, "tbx-cong-trinh", prevCt);
+        fillPanel(listNhom, setNhom, "tbx-nhom-thiet-bi", prevNhom);
     }
 
     function buildStrictDate(y, mm, dd) {
@@ -510,6 +595,7 @@
                 setStatus(`Đang tải «${TABLE_DS_TAI_SAN}»…`, false);
                 cacheDsRows = await fetchAppSheetTable(TABLE_DS_TAI_SAN);
             }
+            populateFilterCheckboxes(cacheDsRows);
             const filters = getFilters();
             const groups = buildGroupedReport(cacheDsRows, filters);
             renderTable(groups);
@@ -539,6 +625,38 @@
             el.addEventListener("change", fn);
             el.addEventListener("blur", fn);
         }
+
+        document.getElementById("tbx-filter-noi-thi-cong")?.addEventListener("change", () => loadFromAppSheet(false));
+
+        const ctList = document.getElementById("tbx-filter-cong-trinh-list");
+        if (ctList) ctList.addEventListener("change", () => loadFromAppSheet(false));
+        document.getElementById("tbx-ct-check-all")?.addEventListener("click", () => {
+            document.querySelectorAll("#tbx-filter-cong-trinh-list input[type='checkbox']").forEach((cb) => {
+                cb.checked = true;
+            });
+            loadFromAppSheet(false);
+        });
+        document.getElementById("tbx-ct-check-none")?.addEventListener("click", () => {
+            document.querySelectorAll("#tbx-filter-cong-trinh-list input[type='checkbox']").forEach((cb) => {
+                cb.checked = false;
+            });
+            loadFromAppSheet(false);
+        });
+
+        const nhomList = document.getElementById("tbx-filter-nhom-thiet-bi-list");
+        if (nhomList) nhomList.addEventListener("change", () => loadFromAppSheet(false));
+        document.getElementById("tbx-nhom-check-all")?.addEventListener("click", () => {
+            document.querySelectorAll("#tbx-filter-nhom-thiet-bi-list input[type='checkbox']").forEach((cb) => {
+                cb.checked = true;
+            });
+            loadFromAppSheet(false);
+        });
+        document.getElementById("tbx-nhom-check-none")?.addEventListener("click", () => {
+            document.querySelectorAll("#tbx-filter-nhom-thiet-bi-list input[type='checkbox']").forEach((cb) => {
+                cb.checked = false;
+            });
+            loadFromAppSheet(false);
+        });
 
         const search = document.getElementById("tbx-search");
         if (search) {

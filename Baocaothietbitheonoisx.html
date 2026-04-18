@@ -57,10 +57,70 @@
         
         /* Filter inputs */
         .filter-input {
-            background-color: #e2e8f0;
-            height: 18px;
+            background-color: #fff;
+            height: 32px;
             width: 100%;
-            border-radius: 2px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+        .filter-select-noi {
+            min-width: 0;
+            max-width: 100%;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #334155;
+            cursor: pointer;
+        }
+        .filter-checkbox-panel {
+            max-height: 9rem;
+            overflow-y: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 8px;
+            background: #fff;
+            font-size: 12px;
+            color: #334155;
+        }
+        .filter-checkbox-panel label {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 2px 0;
+            cursor: pointer;
+            line-height: 1.25;
+        }
+        .filter-checkbox-panel input[type="checkbox"] {
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: #387c2b;
+        }
+        .filter-checkbox-actions button {
+            font-size: 11px;
+            text-decoration: underline;
+            color: #1d4ed8;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .filter-checkbox-actions button:hover {
+            color: #1e40af;
+        }
+        .date-input-wrap {
+            position: relative;
+            min-width: 200px;
+        }
+        .date-input-wrap input[type="date"] {
+            padding-right: 28px;
+            color-scheme: light;
+        }
+        .date-input-wrap .date-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #387c2b;
         }
         @media print {
             .print-hide { display: none !important; }
@@ -87,37 +147,69 @@
         <div class="text-center font-bold text-sm mt-1 mb-1 text-gray-800">
             CT HỒ SÓI - SÔNG ĐUỐNG
         </div>
-        <p id="tbx-date-range" class="text-center text-xs font-bold text-blue-800 mb-4">(Từ ngày … đến ngày …)</p>
+        <p id="tbx-date-range" class="text-center text-xs font-bold italic text-blue-800 mb-4">(Từ ngày … đến ngày …)</p>
 
-        <div class="flex flex-wrap items-center gap-2 mb-3 text-xs print-hide" aria-label="Điều khiển AppSheet">
-            <button type="button" id="tbx-btn-load" class="px-3 py-1 rounded bg-[#43818e] text-white font-bold border border-slate-400">Tải dữ liệu AppSheet</button>
-            <button type="button" id="tbx-btn-refresh" class="px-3 py-1 rounded bg-white text-[#387c2b] font-bold border border-[#387c2b]">Làm mới</button>
-            <span id="tbx-appsheet-status" class="text-header-green font-semibold flex-1 min-w-[200px]"></span>
-        </div>
-
-        <!-- Filters Section -->
-        <div class="flex text-xs mb-4">
-            <!-- Left Column -->
-            <div class="w-[30%] flex flex-col gap-1.5 pr-4">
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">NHÓM NHÀ CC</span><input id="tbx-filter-nhom-ncc" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi" title="Tìm trong toàn bộ dòng DS"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN NHÀ CUNG CẤP</span><input id="tbx-filter-ten-ncc" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">CÔNG TRÌNH</span><input id="tbx-filter-cong-trinh" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN KHO</span><input id="tbx-filter-kho" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">NHÓM VẬT TƯ</span><input id="tbx-filter-nhom-vt" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN VẬT TƯ</span><input id="tbx-filter-ten-vt" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+        <!-- Bộ lọc: dropdown + kỳ ngày + nút (theo layout mới) -->
+        <div class="print-hide mb-3 text-xs" aria-label="Bộ lọc báo cáo">
+            <div class="flex flex-wrap justify-between items-start gap-6">
+                <div class="flex flex-col gap-2.5 min-w-[320px] flex-1 max-w-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0">NƠI THI CÔNG</span>
+                        <select id="tbx-filter-noi-thi-cong" class="filter-input filter-select-noi flex-1 border border-slate-300" title="Chọn nơi thi công">
+                            <option value="">--- Tất cả nơi thi công ---</option>
+                        </select>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0 pt-1">CÔNG TRÌNH</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5 mb-1">
+                                <button type="button" id="tbx-ct-check-all" class="font-medium">Chọn tất cả</button>
+                                <button type="button" id="tbx-ct-check-none" class="font-medium">Bỏ chọn</button>
+                                <span class="text-slate-500 italic">(Không chọn = hiện tất cả)</span>
+                            </div>
+                            <div id="tbx-filter-cong-trinh-list" class="filter-checkbox-panel" role="group" aria-label="Chọn một hoặc nhiều công trình"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0 pt-1 leading-tight text-left">NHÓM<br>THIẾT BỊ</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5 mb-1">
+                                <button type="button" id="tbx-nhom-check-all" class="font-medium">Chọn tất cả</button>
+                                <button type="button" id="tbx-nhom-check-none" class="font-medium">Bỏ chọn</button>
+                                <span class="text-slate-500 italic">(Không chọn = hiện tất cả)</span>
+                            </div>
+                            <div id="tbx-filter-nhom-thiet-bi-list" class="filter-checkbox-panel" role="group" aria-label="Chọn một hoặc nhiều nhóm thiết bị"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <div class="flex flex-col gap-2 w-full min-w-[260px]">
+                        <div class="flex items-center gap-3 justify-end">
+                            <span class="font-bold text-header-green w-20 text-right shrink-0">TỪ NGÀY</span>
+                            <div class="date-input-wrap w-52">
+                                <input id="tbx-filter-from-date" type="date" class="filter-input w-full pl-2 pr-7 text-[12px]" title="dd/mm/yyyy">
+                                <span class="date-icon" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 justify-end">
+                            <span class="font-bold text-header-green w-20 text-right shrink-0">ĐẾN NGÀY</span>
+                            <div class="date-input-wrap w-52">
+                                <input id="tbx-filter-to-date" type="date" class="filter-input w-full pl-2 pr-7 text-[12px]" title="dd/mm/yyyy">
+                                <span class="date-icon" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-end gap-2 mt-1">
+                        <button type="button" id="tbx-btn-load" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Tải dữ liệu AppSheet</button>
+                        <button type="button" id="tbx-btn-refresh" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Làm mới toàn bộ</button>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Middle Column -->
-            <div class="w-[25%] flex flex-col gap-1.5 pr-4">
-                <div class="flex items-center"><span class="font-bold text-header-green w-20">TỪ NGÀY</span><input id="tbx-filter-from-date" type="text" class="flex-1 filter-input border-0 px-1" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
-                <div class="flex items-center"><span class="font-bold text-header-green w-20">ĐẾN NGÀY</span><input id="tbx-filter-to-date" type="text" class="flex-1 filter-input border-0 px-1" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
-            </div>
-            
-            <!-- Right Column (Red Notes) -->
-            <div class="w-[45%] text-red-500 font-bold italic text-[11px] leading-snug pt-6">
-                <p>- Trong các trường lọc dữ liệu có thể chọn 1 hoặc nhiều trường</p>
-                <p>- (trường hợp chọn nhiều kho thì có thể xem trên báo cáo, group by và phần nhóm vật tư theo từng kho, ở mỗi kho có dòng tổng cộng số tiền theo các chỉ tiêu tồn đầu kỳ, nhập trong kỳ, xuất trong kỳ và tồn cuối kỳ)</p>
-            </div>
+            <p id="tbx-appsheet-status" class="text-header-green font-semibold text-[12px] mt-3 w-full"></p>
         </div>
 
         <!-- Search Bar -->
