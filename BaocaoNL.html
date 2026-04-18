@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng kê chi tiết nhập xuất nhiên liệu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
+            width: 100%;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+        }
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+
+        .date-filter-field {
+            height: 22px;
+            max-width: 200px;
+        }
+        .date-filter-field .filter-input {
+            max-width: none;
+            border-radius: 9999px 0 0 9999px;
+            border-right: none;
+        }
+        .date-cal-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 22px;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #94a3b8;
+            border-left: 1px solid #cbd5e1;
+            border-radius: 0 9999px 9999px 0;
+            background: #eef2f7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .date-cal-btn:hover {
+            background: #e2e8f0;
+        }
+        .date-cal-btn:focus-visible {
+            outline: 2px solid rgba(43, 113, 50, 0.35);
+            outline-offset: 0;
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+        .action-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .action-btn.action-btn-secondary {
+            background: #fff;
+            color: #2b7132;
+        }
+
+        .status-line {
+            min-height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .red-note {
+            color: #b91c1c;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            padding-bottom: 8px;
+        }
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        table.nl-report-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 920px;
+            table-layout: fixed;
+        }
+        .nl-report-table th,
+        .nl-report-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        .nl-report-table thead th {
+            background-color: #4a8694;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        .text-center { text-align: center !important; }
+        .text-left { text-align: left !important; padding-left: 6px; }
+
+        .bg-teal {
+            background-color: #45818e;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            .print-hide { display: none !important; }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .table-wrapper {
+                overflow: visible;
+            }
+            table.nl-report-table {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+
+        <!-- HEADER — giống Baocaotieuhaonhienlieu -->
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TITLE BANNER -->
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BẢNG KÊ CHI TIẾT NHẬP XUẤT NHIÊN LIỆU</h1>
+            <p class="font-bold text-sm text-[#0047ab] mb-1">CT HỐ SÓI - SÔNG ĐUỐNG</p>
+            <p id="nl-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … đến ngày …)</p>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="p-1.5 bg-white print-hide">
+            <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
+                <div class="w-full lg:w-[32%] space-y-1">
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">NHÓM NHÀ CC</span>
+                        <input type="text" class="filter-input" id="nl-filter-nhom-ncc" placeholder="Lọc theo nhóm (CT)" title="Khớp «Tên nhóm» trên Nhật trình máy CT">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN NHÀ CUNG CẤP</span>
+                        <input type="text" class="filter-input" id="nl-filter-ten-ncc" placeholder="Lọc lái máy / NCC" title="Khớp «Tên lái máy» trên phiếu">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
+                        <input type="text" class="filter-input" id="nl-filter-cong-trinh" placeholder="Công trường / công trình">
+                    </div>
+                </div>
+                <div class="w-full lg:w-[32%] space-y-1">
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">TÊN KHO</span>
+                        <input type="text" class="filter-input" id="nl-filter-kho" placeholder="Tìm trong toàn bộ dòng phiếu">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="w-[118px] shrink-0">NHÀ CC</span>
+                        <input type="text" class="filter-input" id="nl-filter-nha-cc" placeholder="Nguồn gốc (DS tài sản / phiếu)">
+                    </div>
+                </div>
+                <div class="w-full lg:w-[32%] space-y-1 flex flex-col items-end lg:pr-2">
+                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                        <span class="w-[72px] shrink-0">TỪ NGÀY</span>
+                        <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                            <input id="nl-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                            <button type="button" id="nl-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
+                        </div>
+                        <input type="date" id="nl-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                    </div>
+                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                        <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
+                        <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                            <input id="nl-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                            <button type="button" id="nl-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
+                        </div>
+                        <input type="date" id="nl-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                    </div>
+                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end flex-wrap">
+                        <button type="button" id="nl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                        <button type="button" id="nl-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
+                    </div>
+                </div>
+            </div>
+            <div id="nl-appsheet-status" class="status-line text-[#2b7132]">Đang kết nối…</div>
+            <div class="red-note text-[10px] mt-2 leading-snug">
+                - Trong các trường lọc dữ liệu có thể chọn 1 hoặc nhiều trường. Chi tiết: «Nhập xuất luân chuyển CT» — gom theo Tên XMTB, tổng Số lượng NL theo Tên nhiên liệu: AppSheet «Mỡ» → cột Mỡ bò; AppSheet «Nhớt» → cột Nhớt động cơ (các tên mở rộng vẫn khớp theo loại).
+            </div>
+        </div>
+
+        <div class="px-2 pb-1 bg-white print-hide flex items-center gap-2">
+            <span class="text-blue-600 font-bold text-xs whitespace-nowrap">🔍 Tìm kiếm</span>
+            <input type="text" class="filter-input max-w-none flex-1" id="nl-search" placeholder="Lọc nhanh trên bảng đã tải">
+        </div>
+
+        <div class="table-wrapper bg-white px-1 pb-2">
+            <table class="nl-report-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">STT</th>
+                        <th rowspan="2" style="width: 18%;">Tên thiết bị</th>
+                        <th rowspan="2" style="width: 14%;">Tên LM</th>
+                        <th colspan="5">Nhiên liệu</th>
+                        <th rowspan="2" style="width: 10%;">Ghi chú</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 9%;">Dầu diezel</th>
+                        <th style="width: 8%;">Mỡ bò</th>
+                        <th style="width: 9%;">Nhớt động cơ</th>
+                        <th style="width: 9%;">Dầu thủy lực</th>
+                        <th style="width: 8%;">Dầu cầu</th>
+                    </tr>
+                </thead>
+                <tbody id="nl-tbody">
+                    <tr>
+                        <td colspan="9" class="text-center" style="padding:16px;">Đang tải dữ liệu từ AppSheet…</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="BaocaoNL-appsheet.js"></script>
+</body>
+</html>

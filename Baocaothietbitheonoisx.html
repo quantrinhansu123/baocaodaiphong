@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tổng hợp xe máy thiết bị</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+        .bg-header { background-color: #387c2b; }
+        .text-header-green { color: #387c2b; }
+        .bg-table-header { background-color: #43818e; }
+        .bg-table-group { background-color: #67a63e; }
+        
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+        }
+        .custom-table th {
+            border: 1px solid #cbd5e1;
+            padding: 6px 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .custom-table .group-row td {
+            border: 1px solid #cbd5e1;
+            padding: 6px;
+            font-weight: bold;
+            color: white;
+            text-align: left;
+        }
+        .custom-table .group-row td:first-child {
+            text-align: center;
+        }
+        .custom-table .data-row td {
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1px dotted #94a3b8;
+            padding: 6px;
+            background-color: white;
+        }
+        .custom-table .data-row td:first-child,
+        .custom-table .data-row td:last-child {
+            border-left: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
+        }
+        .custom-table .footer-row td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 6px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+        
+        /* Filter inputs */
+        .filter-input {
+            background-color: #e2e8f0;
+            height: 18px;
+            width: 100%;
+            border-radius: 2px;
+        }
+        @media print {
+            .print-hide { display: none !important; }
+        }
+    </style>
+</head>
+<body class="p-4 flex justify-center">
+
+    <div class="w-full max-w-6xl bg-white p-6 shadow-md rounded-sm min-w-[1024px]">
+        
+        <!-- Header Text -->
+        <div class="flex justify-between items-start mb-2">
+            <div class="font-bold text-header-green text-sm">CTY CP XD HT ĐẠI PHONG</div>
+            <div class="text-center">
+                <div class="font-bold text-header-green text-sm">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div class="font-bold text-gray-800 text-xs mt-0.5">Độc lập - Tự do - Hạnh phúc</div>
+            </div>
+        </div>
+
+        <!-- Main Title -->
+        <div class="bg-header text-white text-center py-2.5 font-bold text-xl uppercase tracking-wide">
+            BÁO CÁO TỔNG HỢP XE MÁY THIẾT BỊ THEO NƠI QUẢN LÝ
+        </div>
+        <div class="text-center font-bold text-sm mt-1 mb-1 text-gray-800">
+            CT HỒ SÓI - SÔNG ĐUỐNG
+        </div>
+        <p id="tbx-date-range" class="text-center text-xs font-bold text-blue-800 mb-4">(Từ ngày … đến ngày …)</p>
+
+        <div class="flex flex-wrap items-center gap-2 mb-3 text-xs print-hide" aria-label="Điều khiển AppSheet">
+            <button type="button" id="tbx-btn-load" class="px-3 py-1 rounded bg-[#43818e] text-white font-bold border border-slate-400">Tải dữ liệu AppSheet</button>
+            <button type="button" id="tbx-btn-refresh" class="px-3 py-1 rounded bg-white text-[#387c2b] font-bold border border-[#387c2b]">Làm mới</button>
+            <span id="tbx-appsheet-status" class="text-header-green font-semibold flex-1 min-w-[200px]"></span>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="flex text-xs mb-4">
+            <!-- Left Column -->
+            <div class="w-[30%] flex flex-col gap-1.5 pr-4">
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">NHÓM NHÀ CC</span><input id="tbx-filter-nhom-ncc" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi" title="Tìm trong toàn bộ dòng DS"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN NHÀ CUNG CẤP</span><input id="tbx-filter-ten-ncc" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">CÔNG TRÌNH</span><input id="tbx-filter-cong-trinh" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN KHO</span><input id="tbx-filter-kho" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">NHÓM VẬT TƯ</span><input id="tbx-filter-nhom-vt" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-32">TÊN VẬT TƯ</span><input id="tbx-filter-ten-vt" type="text" class="flex-1 filter-input border-0 px-1" placeholder="Lọc theo chuỗi"></div>
+            </div>
+            
+            <!-- Middle Column -->
+            <div class="w-[25%] flex flex-col gap-1.5 pr-4">
+                <div class="flex items-center"><span class="font-bold text-header-green w-20">TỪ NGÀY</span><input id="tbx-filter-from-date" type="text" class="flex-1 filter-input border-0 px-1" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
+                <div class="flex items-center"><span class="font-bold text-header-green w-20">ĐẾN NGÀY</span><input id="tbx-filter-to-date" type="text" class="flex-1 filter-input border-0 px-1" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
+            </div>
+            
+            <!-- Right Column (Red Notes) -->
+            <div class="w-[45%] text-red-500 font-bold italic text-[11px] leading-snug pt-6">
+                <p>- Trong các trường lọc dữ liệu có thể chọn 1 hoặc nhiều trường</p>
+                <p>- (trường hợp chọn nhiều kho thì có thể xem trên báo cáo, group by và phần nhóm vật tư theo từng kho, ở mỗi kho có dòng tổng cộng số tiền theo các chỉ tiêu tồn đầu kỳ, nhập trong kỳ, xuất trong kỳ và tồn cuối kỳ)</p>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex items-center gap-2 mb-2 text-sm">
+            <span class="text-blue-700 font-bold flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </span>
+            <span class="font-bold text-header-green whitespace-nowrap">Tìm kiếm</span>
+            <input id="tbx-search" type="text" class="flex-1 border border-green-600 h-6 px-2 outline-none text-xs" placeholder="Lọc nhanh trên bảng đã tải">
+        </div>
+
+        <!-- Data Table -->
+        <table class="custom-table mt-1">
+            <thead>
+                <tr class="bg-table-header text-white">
+                    <th rowspan="2" class="w-12">MÃ<br>THIẾT<br>BỊ</th>
+                    <th rowspan="2" class="w-48">TÊN THIẾT BỊ</th>
+                    <th rowspan="2" class="w-12">ĐVT</th>
+                    <th colspan="2">TỒN ĐẦU KỲ</th>
+                    <th colspan="2">NHẬP TRONG KỲ</th>
+                    <th colspan="2">XUẤT TRONG KỲ</th>
+                    <th colspan="2">TỒN CUỐI KỲ</th>
+                    <th rowspan="2" class="w-16">NHÓM<br>THIẾT BỊ</th>
+                    <th rowspan="2" class="w-20">GHI CHÚ</th>
+                </tr>
+                <tr class="bg-table-header text-white">
+                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
+                </tr>
+            </thead>
+            <tbody id="tbx-tbody">
+                <tr>
+                    <td colspan="13" class="text-center py-4 text-gray-500">Đang tải «Danh sách tài sản» từ AppSheet…</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Signatures -->
+        <div class="flex justify-between mt-8 px-16 font-bold text-sm text-gray-800">
+            <div>TRƯỞNG PHÒNG VẬT TƯ</div>
+            <div>NGƯỜI LẬP BIỂU</div>
+        </div>
+        <!-- Thêm không gian trống bên dưới để giống với hình -->
+        <div class="h-20"></div>
+
+    </div>
+
+    <script src="Baocaothietbitheonoisx-appsheet.js"></script>
+</body>
+</html>
