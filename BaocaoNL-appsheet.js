@@ -8,7 +8,6 @@
 
     const APPSHEET_CONFIG = {
         appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
-        tableName: "Nhật trình máy",
         accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
     };
 
@@ -22,7 +21,34 @@
     const CT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
 
     const FILTER_DROPDOWN_SOURCE_KEYS = {
-        project: ["Tên công trình", "TenCongTrinh", "Công trường", "CongTruong", "Cong truong"],
+        /** Công trình / công trường trên dòng NXLC CT (lọc & sổ xuống). */
+        project: [
+            "Tên công trình",
+            "TenCongTrinh",
+            "Ten cong trinh",
+            "Công trường",
+            "CongTruong",
+            "Cong truong",
+            "Công trình",
+            "Cong trinh",
+            "CongTrinh",
+            "Tên CT",
+            "Ten CT",
+            "Dự án",
+            "Du an",
+            "Tên nơi quản lý",
+            "Ten noi quan ly"
+        ],
+        /** Nơi thi công — cha; «CÔNG TRÌNH» sổ theo giá trị đã chọn. */
+        noiThiCong: [
+            "Nơi thi công",
+            "Noi thi cong",
+            "NoiThiCong",
+            "Khu vực thi công",
+            "Khu vuc thi cong",
+            "Địa điểm thi công",
+            "Dia diem thi cong"
+        ],
         group: ["Nhóm xe máy thiết bị", "NhomXeMayThietBi", "Tên nhóm", "Ten nhom"],
         driver: ["Tên lái máy", "TenLaiMay", "Tên lái xe", "Ten lai xe", "Ten lai may"],
         origin: ["Nguồn gốc", "Nguon goc", "Nguồn gốc xe", "Nguon goc xe", "Origin"]
@@ -93,8 +119,9 @@
     let cacheNxlcCtRows = null;
     /** Cache «Danh sách tài sản» — tra «Tên LM» theo Tên tài sản ↔ Tên thiết bị. */
     let cacheDsTaiSanRows = null;
-    /** Cache toàn bộ «Nhật trình máy» — tra «Tên nơi quản lý» theo Tên tài sản. */
-    let cacheNtMainRows = null;
+
+    /** Trạng thái sổ «Nơi thi công» / «Công trình» (từ NXLC CT). */
+    let nlSiteProjectState = { map: new Map(), allProjectsSorted: [] };
 
     function cellString(v) {
         if (v == null) return "";
@@ -367,37 +394,6 @@
         if (Array.isArray(data)) return data.map(normalizeAppSheetRowDates);
         if (data && Array.isArray(data.Rows)) return data.Rows.map(normalizeAppSheetRowDates);
         return [];
-    }
-
-    async function fetchNtMainTableRows() {
-        const endpoint = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(APPSHEET_CONFIG.tableName)}/Action`;
-        const payload = {
-            Action: "Find",
-            Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
-            Rows: []
-        };
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ApplicationAccessKey: APPSHEET_CONFIG.accessKey
-            },
-            body: JSON.stringify(payload)
-        });
-        const rawText = await response.text();
-        if (!response.ok) {
-            throw new Error(`AppSheet: ${response.status}: ${rawText || "(empty)"}`);
-        }
-        let result = null;
-        if (rawText && rawText.trim() !== "") {
-            try {
-                result = JSON.parse(rawText);
-            } catch (e) {
-                throw new Error(`API không phải JSON: ${rawText.slice(0, 180)}`);
-            }
-        }
-        const allRows = Array.isArray(result) ? result : Array.isArray(result?.Rows) ? result.Rows : [];
-        return allRows.map(normalizeAppSheetRowDates);
     }
 
     async function fetchAuxiliaryTablesParallel() {
@@ -686,101 +682,6 @@
         return "";
     }
 
-    /**
-     * «Tên nơi quản lý» trên phiếu «Nhật trình máy» (cột công trình / nơi QL).
-     */
-    function pickNtTenNoiQuanLy(raw) {
-        if (!raw || typeof raw !== "object") return "";
-        const keys = [
-            "Tên nơi quản lý",
-            "Ten noi quan ly",
-            "Tên nơi QL",
-            "Ten noi QL",
-            "Nơi quản lý",
-            "Noi quan ly",
-            "Tên công trình",
-            "Ten cong trinh",
-            "Công trường",
-            "Cong truong",
-            "CongTruong"
-        ];
-        for (const k of keys) {
-            const t = cellString(raw[k]).trim();
-            if (t) return t;
-        }
-        for (const [k, v] of Object.entries(raw)) {
-            const t = cellString(v).trim();
-            if (!t) continue;
-            if (/n[oơ]i.*qu[aả]n.*l[yý]|noi.*quan.*ly/i.test(k)) return t;
-        }
-        return "";
-    }
-
-    function filterNtMainRowsByDateRange(ntRows, filters) {
-        const from = parseDateInputYmd(filters?.fromDate);
-        const to = parseDateInputYmd(filters?.toDate);
-        if (!from && !to) return ntRows || [];
-        if (!ntRows?.length) return [];
-        return ntRows.filter((raw) => {
-            const d = parseRecordNgayLamViec(raw);
-            if (!d || isNaN(d.getTime())) return false;
-            if (from && d < from) return false;
-            if (to && d > to) return false;
-            return true;
-        });
-    }
-
-    /**
-     * Gom «Tên nơi quản lý» theo «Tên tài sản» trên NT (khớp Tên thiết bị báo cáo).
-     * Nhiều giá trị: chọn nhãn xuất hiện nhiều lần nhất trong kỳ lọc.
-     */
-    function buildTenNoiQuanLyByTaiSanFromNt(ntRows) {
-        const tally = new Map();
-        if (!ntRows?.length) return new Map();
-
-        for (const r of ntRows) {
-            const tenTs = pickCtTaiSanTen(r);
-            if (!tenTs) continue;
-            const nql = pickNtTenNoiQuanLy(r);
-            if (!nql) continue;
-            const key = assetKeyFromName(tenTs);
-            if (!key) continue;
-            if (!tally.has(key)) tally.set(key, new Map());
-            const m = tally.get(key);
-            m.set(nql, (m.get(nql) ?? 0) + 1);
-        }
-
-        const out = new Map();
-        for (const [k, voteMap] of tally) {
-            let best = "";
-            let bestN = -1;
-            for (const [label, n] of voteMap) {
-                if (n > bestN || (n === bestN && label.localeCompare(best, "vi") < 0)) {
-                    best = label;
-                    bestN = n;
-                }
-            }
-            if (best) out.set(k, best);
-        }
-        return out;
-    }
-
-    /** «Công trình» = «Tên nơi quản lý» từ NT, khớp Tên tài sản (phiếu) ↔ Tên thiết bị (báo cáo). */
-    function resolveCongTruongFromNt(tenThietBiBaoCao, noiQlByKey, ntRowsFiltered) {
-        const tx = String(tenThietBiBaoCao ?? "").trim();
-        if (!tx) return "";
-        const k0 = assetKeyFromName(tx);
-        if (k0 && noiQlByKey?.has(k0)) return noiQlByKey.get(k0);
-        if (!ntRowsFiltered?.length) return "";
-        for (const r of ntRowsFiltered) {
-            const name = pickCtTaiSanTen(r);
-            if (!taiSanNamesLooselyEqual(tx, name)) continue;
-            const nql = pickNtTenNoiQuanLy(r);
-            if (nql) return nql;
-        }
-        return "";
-    }
-
     function buildNguonGocByTaiSanFromDanhSachTaiSan(dsRows) {
         const map = new Map();
         if (!dsRows?.length) return map;
@@ -917,6 +818,77 @@
             if (v.toLowerCase().includes(n)) return true;
         }
         return false;
+    }
+
+    function pickFirstDisplayFromColumnKeys(raw, keys) {
+        if (!raw || !keys?.length) return "";
+        for (const col of keys) {
+            const v = cellDisplayString(raw[col] ?? "").trim();
+            if (v) return v;
+        }
+        return "";
+    }
+
+    /**
+     * Gom cặp (Nơi thi công, Công trình) từ «Nhập xuất luân chuyển CT» để sổ xuống phụ thuộc.
+     */
+    function buildNlSiteToProjectsFromNxlcRows(rows) {
+        const map = new Map();
+        const siteSet = new Set();
+        const projectSet = new Set();
+        const sk = FILTER_DROPDOWN_SOURCE_KEYS.noiThiCong || [];
+
+        for (const r of rows || []) {
+            const site = pickFirstDisplayFromColumnKeys(r, sk);
+            const proj = pickNxlcCongTrinhLabel(r);
+            if (proj) projectSet.add(proj);
+            if (site) siteSet.add(site);
+            if (site && proj) {
+                if (!map.has(site)) map.set(site, new Set());
+                map.get(site).add(proj);
+            }
+        }
+
+        const allSites = [...siteSet].sort((a, b) => a.localeCompare(b, "vi"));
+        const allProjects = [...projectSet].sort((a, b) => a.localeCompare(b, "vi"));
+        return { map, allSites, allProjects };
+    }
+
+    function setNlSelectOptions(selectEl, values, emptyLabel) {
+        if (!selectEl) return;
+        const prev = selectEl.value;
+        const opts = [`<option value="">${escapeHtml(emptyLabel)}</option>`];
+        for (const v of values || []) {
+            opts.push(`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`);
+        }
+        selectEl.innerHTML = opts.join("");
+        const still = [...selectEl.options].some((o) => o.value === prev);
+        if (still) selectEl.value = prev;
+    }
+
+    function refreshNlCongTrinhDropdownForSite(siteValue) {
+        const selCt = document.getElementById("nl-filter-cong-trinh");
+        if (!selCt) return;
+        const s = String(siteValue ?? "").trim();
+        let list;
+        if (!s) {
+            list = nlSiteProjectState.allProjectsSorted || [];
+        } else {
+            const sub = nlSiteProjectState.map?.get(s);
+            list = sub?.size ? [...sub].sort((a, b) => a.localeCompare(b, "vi")) : [];
+        }
+        setNlSelectOptions(selCt, list, "— Tất cả công trình —");
+    }
+
+    function populateNlNoiThiCongAndCongTrinhDropdowns(nxlcRows) {
+        const { map, allSites, allProjects } = buildNlSiteToProjectsFromNxlcRows(nxlcRows);
+        nlSiteProjectState = { map, allSites, allProjects, allProjectsSorted: allProjects };
+
+        const selSite = document.getElementById("nl-filter-noi-thi-cong");
+        if (selSite) {
+            setNlSelectOptions(selSite, allSites, "— Tất cả nơi thi công —");
+        }
+        refreshNlCongTrinhDropdownForSite(selSite?.value ?? "");
     }
 
     function rawRowMatchesOriginFilter(raw, needle, nguonGocByTaiSan) {
@@ -1098,9 +1070,22 @@
     }
 
     function getNxlcTaiSanCell(r) {
-        return cellDisplayString(
+        if (!r || typeof r !== "object") return "";
+        const direct = cellDisplayString(
             r["Tên tài sản"] ?? r["Ten tai san"] ?? r["TenTaiSan"] ?? r["Tên thiết bị"] ?? r["Ten thiet bi"] ?? ""
         ).trim();
+        if (direct) return direct;
+        for (const [k, v] of Object.entries(r)) {
+            const kn = String(k)
+                .trim()
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+            if (!/t[eê]n\s*t[aà]i\s*s[aả]n|t[eê]n\s*thi[eê]t\s*b[iị]|ten\s*tai\s*san|ten\s*thiet\s*bi/.test(kn)) continue;
+            const t = cellDisplayString(v).trim();
+            if (t) return t;
+        }
+        return "";
     }
 
     function getNxlcTenXmtbCell(r) {
@@ -1119,6 +1104,61 @@
             if (t) return t;
         }
         return "";
+    }
+
+    /**
+     * Tên hiển thị / khóa gom thiết bị trên «Nhập xuất luân chuyển CT»:
+     * ưu tiên «Tên XMTB» (đúng quy tắc gom NL), nếu trống thì «Tên tài sản» / «Tên thiết bị»
+     * để cột «Công trình» khớp cùng dòng với «Tên thiết bị» khi AppSheet không điền XMTB.
+     */
+    function getNxlcDeviceLabelForRow(r) {
+        const xmtb = getNxlcTenXmtbCell(r);
+        if (xmtb) return xmtb;
+        const ts = getNxlcTaiSanCell(r);
+        if (ts) return ts;
+        return "";
+    }
+
+    /**
+     * Lấy nhãn «Công trình» trên «Nhập xuất luân chuyển CT»: ưu tiên cột đã khai báo,
+     * sau đó tên cột có chứa «công trình»/«công trường»/«dự án», cuối cùng «Nơi thi công».
+     */
+    function pickNxlcCongTrinhLabel(row) {
+        if (!row || typeof row !== "object") return "";
+        const extra = [
+            "Công trình thi công",
+            "Cong trinh thi cong",
+            "Công trình làm việc",
+            "Hạng mục",
+            "Hang muc"
+        ];
+        const keyList = [...(FILTER_DROPDOWN_SOURCE_KEYS.project || []), ...extra];
+        const seen = new Set();
+        for (const col of keyList) {
+            if (!col || seen.has(col)) continue;
+            seen.add(col);
+            if (row[col] === undefined || row[col] === null || row[col] === "") continue;
+            let t = cellDisplayString(row[col]).trim();
+            if (!t) t = cellString(row[col]).trim();
+            if (t) return t;
+        }
+        for (const [k, v] of Object.entries(row)) {
+            const kn = String(k)
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+            if (/\bnoi\s*thi\s*cong\b|\bkhu\s*vuc\s*thi\s*cong\b/.test(kn)) continue;
+            if (
+                /\bcong\s*trinh\b|\bcong\s*truong\b|\bten\s*ct\b|\bdu\s*an\b|\bhang\s*muc\b/.test(kn) ||
+                /^ct$/i.test(String(k).trim())
+            ) {
+                let t = cellDisplayString(v).trim();
+                if (!t) t = cellString(v).trim();
+                if (t) return t;
+            }
+        }
+        const sk = FILTER_DROPDOWN_SOURCE_KEYS.noiThiCong || [];
+        return pickFirstDisplayFromColumnKeys(row, sk);
     }
 
     function parseNxlcSlCell(row) {
@@ -1694,29 +1734,19 @@
     }
 
     function nxlcCtRowMatchesQuickFilters(row, filters) {
-        const parts = [
-            filters?.project?.trim(),
-            filters?.group?.trim(),
-            filters?.driver?.trim(),
-            filters?.origin?.trim(),
-            filters?.warehouse?.trim()
-        ].filter(Boolean);
-        if (!parts.length) return true;
-        let blob;
-        try {
-            blob = JSON.stringify(row).toLowerCase();
-        } catch (e) {
-            return true;
-        }
-        return parts.every((p) => blob.includes(p.toLowerCase()));
+        if (filters?.noiThiCong?.trim() && !rawCellMatchesNeedle(row, "noiThiCong", filters.noiThiCong)) return false;
+        if (filters?.project?.trim() && !rawCellMatchesNeedle(row, "project", filters.project)) return false;
+        return true;
     }
 
     /**
-     * Một dòng = một «Tên XMTB»; mỗi ô nhiên liệu = tổng Số lượng NL các dòng CT có cùng XMTB
-     * và «Tên nhiên liệu» khớp loại tương ứng.
+     * Một dòng báo cáo = một thiết bị (ưu tiên «Tên XMTB», fallback «Tên tài sản»/«Tên thiết bị»);
+     * mỗi ô nhiên liệu = tổng Số lượng NL các dòng CT cùng thiết bị và «Tên nhiên liệu» khớp loại.
      */
     function buildAggregatedRowsFromNxlcCt(nxlcCtRows, filters) {
         const agg = new Map();
+        /** Gom nhãn công trình theo cùng khóa thiết bị với cột «Tên thiết bị» (mọi dòng CT có tên máy). */
+        const congTrinhVotesByKey = new Map();
         const from = parseDateInputYmd(filters?.fromDate);
         const to = parseDateInputYmd(filters?.toDate);
 
@@ -1729,8 +1759,18 @@
             }
             if (!nxlcCtRowMatchesQuickFilters(r, filters)) continue;
 
-            const tenXmtb = getNxlcTenXmtbCell(r);
-            if (!tenXmtb) continue;
+            const tenThietBi = getNxlcDeviceLabelForRow(r);
+            if (!tenThietBi) continue;
+
+            const key = assetKeyFromName(tenThietBi);
+            if (!key) continue;
+
+            const projLabel = pickNxlcCongTrinhLabel(r);
+            if (projLabel) {
+                if (!congTrinhVotesByKey.has(key)) congTrinhVotesByKey.set(key, new Map());
+                const vm = congTrinhVotesByKey.get(key);
+                vm.set(projLabel, (vm.get(projLabel) ?? 0) + 1);
+            }
 
             const tenNl = getNxlcTenNhienLieuCell(r);
             const col = classifyNxlcTenNhienLieuToReportFiveColumns(tenNl);
@@ -1739,12 +1779,9 @@
             const q = parseNxlcSlCell(r);
             if (q == null || isNaN(q)) continue;
 
-            const key = assetKeyFromName(tenXmtb);
-            if (!key) continue;
-
             if (!agg.has(key)) {
                 agg.set(key, {
-                    TenThietBi: tenXmtb,
+                    TenThietBi: tenThietBi,
                     LuongDauTieuHao: 0,
                     TongMo: 0,
                     TongNhot: 0,
@@ -1759,16 +1796,21 @@
         const list = [...agg.values()].sort((a, b) =>
             String(a.TenThietBi ?? "").localeCompare(String(b.TenThietBi ?? ""), "vi")
         );
-        return list.map((o) => ({
-            TenThietBi: o.TenThietBi,
-            NguoiPhuTrach: "",
-            CongTruong: "",
-            LuongDauTieuHao: o.LuongDauTieuHao > 0 ? formatLitersDisplay(o.LuongDauTieuHao) : "",
-            TongMo: o.TongMo > 0 ? formatLitersDisplay(o.TongMo) : "",
-            TongNhot: o.TongNhot > 0 ? formatLitersDisplay(o.TongNhot) : "",
-            DauThuyLuc: o.DauThuyLuc > 0 ? formatLitersDisplay(o.DauThuyLuc) : "",
-            DauCau: o.DauCau > 0 ? formatLitersDisplay(o.DauCau) : ""
-        }));
+        return list.map((o) => {
+            const k = assetKeyFromName(o.TenThietBi);
+            const votes = (k && congTrinhVotesByKey.get(k)) || new Map();
+            return {
+                TenThietBi: o.TenThietBi,
+                NguoiPhuTrach: "",
+                CongTrinh: pickModeTenNhomFromVoteMap(votes) || "",
+                CongTruong: "",
+                LuongDauTieuHao: o.LuongDauTieuHao > 0 ? formatLitersDisplay(o.LuongDauTieuHao) : "",
+                TongMo: o.TongMo > 0 ? formatLitersDisplay(o.TongMo) : "",
+                TongNhot: o.TongNhot > 0 ? formatLitersDisplay(o.TongNhot) : "",
+                DauThuyLuc: o.DauThuyLuc > 0 ? formatLitersDisplay(o.DauThuyLuc) : "",
+                DauCau: o.DauCau > 0 ? formatLitersDisplay(o.DauCau) : ""
+            };
+        });
     }
 
     function rowMatchesWarehouse(raw, needle) {
@@ -1785,12 +1827,8 @@
         const fromRaw = document.getElementById("nl-filter-from-date")?.value?.trim() ?? "";
         const toRaw = document.getElementById("nl-filter-to-date")?.value?.trim() ?? "";
         return {
+            noiThiCong: document.getElementById("nl-filter-noi-thi-cong")?.value?.trim() ?? "",
             project: document.getElementById("nl-filter-cong-trinh")?.value?.trim() ?? "",
-            group: document.getElementById("nl-filter-nhom-ncc")?.value?.trim() ?? "",
-            driver: document.getElementById("nl-filter-ten-ncc")?.value?.trim() ?? "",
-            origin: document.getElementById("nl-filter-nha-cc")?.value?.trim() ?? "",
-            type: "",
-            warehouse: document.getElementById("nl-filter-kho")?.value?.trim() ?? "",
             fromDate: dateKeyYmd(parseDateFlexible(fromRaw)),
             toDate: dateKeyYmd(parseDateFlexible(toRaw))
         };
@@ -1823,7 +1861,7 @@
         const data = rows || [];
         if (!data.length) {
             tbody.innerHTML =
-                '<tr><td colspan="9" class="text-center" style="padding:12px;">Không có dữ liệu «Nhập xuất luân chuyển CT» phù hợp bộ lọc.</td></tr>';
+                '<tr><td colspan="10" class="text-center" style="padding:12px;">Không có dữ liệu «Nhập xuất luân chuyển CT» phù hợp bộ lọc.</td></tr>';
             return;
         }
 
@@ -1834,17 +1872,18 @@
             stt += 1;
             const ten = escapeHtml(String(row.TenThietBi ?? ""));
             const nguoiPt = escapeHtml(String(row.NguoiPhuTrach ?? ""));
-            const gc = escapeHtml(String(row.CongTruong ?? ""));
+            const congTrinh = escapeHtml(String(row.CongTrinh ?? ""));
             html += `<tr>
                 <td class="text-center">${stt}</td>
                 <td class="text-left">${ten}</td>
                 <td class="text-left">${nguoiPt}</td>
+                <td class="text-left">${congTrinh}</td>
                 <td class="text-center">${escapeHtml(fuelDisplay(row.LuongDauTieuHao))}</td>
                 <td class="text-center">${escapeHtml(fuelDisplay(row.TongMo))}</td>
                 <td class="text-center">${escapeHtml(fuelDisplay(row.TongNhot))}</td>
                 <td class="text-center">${escapeHtml(fuelDisplay(row.DauThuyLuc))}</td>
                 <td class="text-center">${escapeHtml(fuelDisplay(row.DauCau))}</td>
-                <td class="text-left">${gc}</td>
+                <td class="text-left"></td>
             </tr>`;
         }
 
@@ -1868,7 +1907,7 @@
         const tCau = sumCol("DauCau");
 
         html += `<tr class="bg-teal">
-            <td></td><td class="text-left">Tổng xuất</td><td></td>
+            <td></td><td class="text-left">Tổng xuất</td><td></td><td></td>
             <td class="text-center">${escapeHtml(tXuat)}</td>
             <td class="text-center">${escapeHtml(tMo)}</td>
             <td class="text-center">${escapeHtml(tNhot)}</td>
@@ -1877,19 +1916,19 @@
             <td class="text-center">A</td>
         </tr>`;
         html += `<tr class="bg-teal">
-            <td></td><td class="text-left">Tồn đầu kỳ</td><td></td>
+            <td></td><td class="text-left">Tồn đầu kỳ</td><td></td><td></td>
             <td class="text-center">-</td>
             <td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>
             <td class="text-center">B</td>
         </tr>`;
         html += `<tr class="bg-teal">
-            <td></td><td class="text-left">Nhập trong tháng</td><td></td>
+            <td></td><td class="text-left">Nhập trong tháng</td><td></td><td></td>
             <td class="text-center">-</td>
             <td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>
             <td class="text-center">C</td>
         </tr>`;
         html += `<tr class="bg-teal">
-            <td></td><td class="text-left">Tồn cuối tháng</td><td></td>
+            <td></td><td class="text-left">Tồn cuối tháng</td><td></td><td></td>
             <td class="text-center">-</td>
             <td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>
             <td class="text-center">D=B+C-A</td>
@@ -1898,17 +1937,9 @@
         tbody.innerHTML = html;
     }
 
-    function setStatus(msg, isError) {
-        const el = document.getElementById("nl-appsheet-status");
-        if (!el) return;
-        el.textContent = msg;
-        el.style.color = isError ? "#b00020" : "#2c5e1c";
-    }
-
     async function loadFromAppSheet(forceRefresh) {
         const btn = document.getElementById("nl-btn-load");
         if (btn) btn.disabled = true;
-        setStatus("Đang tải dữ liệu AppSheet…");
 
         try {
             const filters = getNlFilters();
@@ -1916,46 +1947,28 @@
             if (forceRefresh) {
                 cacheNxlcCtRows = null;
                 cacheDsTaiSanRows = null;
-                cacheNtMainRows = null;
             }
 
             if (!cacheNxlcCtRows) {
-                setStatus(`Đang tải «${TABLE_NXLC_CT}»…`);
                 cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
             }
+            populateNlNoiThiCongAndCongTrinhDropdowns(cacheNxlcCtRows);
             if (!cacheDsTaiSanRows) {
-                setStatus(`Đang tải «${TABLE_DS_TAI_SAN}» (Tên LM)…`);
                 cacheDsTaiSanRows = await fetchAppSheetTable(TABLE_DS_TAI_SAN);
-            }
-            if (!cacheNtMainRows) {
-                setStatus(`Đang tải «${APPSHEET_CONFIG.tableName}» (Tên nơi quản lý)…`);
-                cacheNtMainRows = await fetchNtMainTableRows();
             }
 
             const tenLmByKey = buildTenLmByTaiSanFromDanhSachTaiSan(cacheDsTaiSanRows);
-            const ntFiltered = filterNtMainRowsByDateRange(cacheNtMainRows, filters);
-            const noiQlByKey = buildTenNoiQuanLyByTaiSanFromNt(ntFiltered);
 
             let normalized = buildAggregatedRowsFromNxlcCt(cacheNxlcCtRows, filters);
             normalized = normalized.map((row) => ({
                 ...row,
-                NguoiPhuTrach: resolveTenLmForTenXmtb(row.TenThietBi, tenLmByKey, cacheDsTaiSanRows),
-                CongTruong: resolveCongTruongFromNt(row.TenThietBi, noiQlByKey, ntFiltered)
+                NguoiPhuTrach: resolveTenLmForTenXmtb(row.TenThietBi, tenLmByKey, cacheDsTaiSanRows)
             }));
             renderNlTable(normalized);
 
             syncNlDateRangeBanner();
-
-            const nDev = normalized.length;
-            const nRaw = cacheNxlcCtRows?.length ?? 0;
-            const nNt = ntFiltered?.length ?? 0;
-            setStatus(
-                `«${TABLE_NXLC_CT}»: ${nRaw} dòng → ${nDev} thiết bị; «${APPSHEET_CONFIG.tableName}» trong kỳ: ${nNt} phiếu (Công trình = Tên nơi quản lý).`,
-                false
-            );
         } catch (e) {
             console.error(e);
-            setStatus(`Lỗi AppSheet: ${e.message}`, true);
         } finally {
             if (btn) btn.disabled = false;
         }
@@ -1979,6 +1992,11 @@
         const btnRef = document.getElementById("nl-btn-refresh");
         if (btn) btn.addEventListener("click", () => loadFromAppSheet(false));
         if (btnRef) btnRef.addEventListener("click", () => loadFromAppSheet(true));
+
+        const selNoiThiCong = document.getElementById("nl-filter-noi-thi-cong");
+        if (selNoiThiCong) {
+            selNoiThiCong.addEventListener("change", () => refreshNlCongTrinhDropdownForSite(selNoiThiCong.value));
+        }
 
         const search = document.getElementById("nl-search");
         if (search) {

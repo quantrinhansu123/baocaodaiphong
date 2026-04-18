@@ -55,6 +55,15 @@
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
+        select.filter-input {
+            cursor: pointer;
+            padding-right: 22px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            appearance: none;
+            -webkit-appearance: none;
+        }
 
         .date-filter-field {
             height: 22px;
@@ -108,19 +117,6 @@
             color: #2b7132;
         }
 
-        .status-line {
-            min-height: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-
-        .red-note {
-            color: #b91c1c;
-            font-style: italic;
-            font-weight: bold;
-        }
-
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
@@ -142,7 +138,7 @@
         table.nl-report-table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 920px;
+            min-width: 1000px;
             table-layout: fixed;
         }
         .nl-report-table th,
@@ -221,31 +217,21 @@
         <!-- FILTERS -->
         <div class="p-1.5 bg-white print-hide">
             <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
-                <div class="w-full lg:w-[32%] space-y-1">
+                <div class="w-full lg:w-[42%] space-y-1">
                     <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">NHÓM NHÀ CC</span>
-                        <input type="text" class="filter-input" id="nl-filter-nhom-ncc" placeholder="Lọc theo nhóm (CT)" title="Khớp «Tên nhóm» trên Nhật trình máy CT">
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">TÊN NHÀ CUNG CẤP</span>
-                        <input type="text" class="filter-input" id="nl-filter-ten-ncc" placeholder="Lọc lái máy / NCC" title="Khớp «Tên lái máy» trên phiếu">
+                        <span class="w-[118px] shrink-0">NƠI THI CÔNG</span>
+                        <select class="filter-input" id="nl-filter-noi-thi-cong" title="Chọn nơi thi công — danh sách lấy từ AppSheet «Nhập xuất luân chuyển CT»">
+                            <option value="">— Đang tải… —</option>
+                        </select>
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
-                        <input type="text" class="filter-input" id="nl-filter-cong-trinh" placeholder="Công trường / công trình">
+                        <select class="filter-input" id="nl-filter-cong-trinh" title="Theo «Nơi thi công» đã chọn (cột công trình trên NXLC CT)">
+                            <option value="">— Đang tải… —</option>
+                        </select>
                     </div>
                 </div>
-                <div class="w-full lg:w-[32%] space-y-1">
-                    <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">TÊN KHO</span>
-                        <input type="text" class="filter-input" id="nl-filter-kho" placeholder="Tìm trong toàn bộ dòng phiếu">
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="w-[118px] shrink-0">NHÀ CC</span>
-                        <input type="text" class="filter-input" id="nl-filter-nha-cc" placeholder="Nguồn gốc (DS tài sản / phiếu)">
-                    </div>
-                </div>
-                <div class="w-full lg:w-[32%] space-y-1 flex flex-col items-end lg:pr-2">
+                <div class="w-full lg:w-[52%] space-y-1 flex flex-col items-end lg:pr-2">
                     <div class="flex items-center gap-1 w-full lg:w-[280px]">
                         <span class="w-[72px] shrink-0">TỪ NGÀY</span>
                         <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
@@ -272,10 +258,6 @@
                     </div>
                 </div>
             </div>
-            <div id="nl-appsheet-status" class="status-line text-[#2b7132]">Đang kết nối…</div>
-            <div class="red-note text-[10px] mt-2 leading-snug">
-                - Trong các trường lọc dữ liệu có thể chọn 1 hoặc nhiều trường. Chi tiết: «Nhập xuất luân chuyển CT» — gom theo Tên XMTB, tổng Số lượng NL theo Tên nhiên liệu: AppSheet «Mỡ» → cột Mỡ bò; AppSheet «Nhớt» → cột Nhớt động cơ (các tên mở rộng vẫn khớp theo loại).
-            </div>
         </div>
 
         <div class="px-2 pb-1 bg-white print-hide flex items-center gap-2">
@@ -288,10 +270,11 @@
                 <thead>
                     <tr>
                         <th rowspan="2" style="width: 40px;">STT</th>
-                        <th rowspan="2" style="width: 18%;">Tên thiết bị</th>
-                        <th rowspan="2" style="width: 14%;">Tên LM</th>
+                        <th rowspan="2" style="width: 16%;">Tên thiết bị</th>
+                        <th rowspan="2" style="width: 12%;">Tên LM</th>
+                        <th rowspan="2" style="width: 12%;">Công trình</th>
                         <th colspan="5">Nhiên liệu</th>
-                        <th rowspan="2" style="width: 10%;">Ghi chú</th>
+                        <th rowspan="2" style="width: 8%;">Ghi chú</th>
                     </tr>
                     <tr>
                         <th style="width: 9%;">Dầu diezel</th>
@@ -303,7 +286,7 @@
                 </thead>
                 <tbody id="nl-tbody">
                     <tr>
-                        <td colspan="9" class="text-center" style="padding:16px;">Đang tải dữ liệu từ AppSheet…</td>
+                        <td colspan="10" class="text-center" style="padding:16px;">Đang tải dữ liệu từ AppSheet…</td>
                     </tr>
                 </tbody>
             </table>
