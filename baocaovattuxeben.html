@@ -1020,16 +1020,17 @@
          * Gán loại theo cột «Tên nhiên liệu» → ô trên form (thứ tự ưu tiên: thủy lực / cầu trước từ khóa chung «dầu»).
          */
         function classifyNlByTen(tenRaw) {
-            const s = (tenRaw == null ? '' : String(tenRaw)).trim().toLowerCase();
+            const s = (tenRaw == null ? '' : String(tenRaw)).trim();
             if (!s) return null;
-            const noAccent = s.normalize('NFD').replace(/\u0300-\u036f/g, '');
-            if (noAccent.includes('thuy luc') || s.includes('thủy lực')) return 'thuyluc';
+            const noAccent = s.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
+            const sLc = s.toLowerCase();
+            if (noAccent.includes('thuy luc') || sLc.includes('thủy lực')) return 'thuyluc';
             /* Dầu Diezel / Diesel / Dầu DO — tiêu hao NL trong ngày (ưu tiên trước dầu cầu, v.v.) */
             if (noAccent.includes('diezel') || noAccent.includes('diesel')) return 'diesel';
-            if ((noAccent.includes('dau') || s.includes('dầu')) && /\bdo\b/i.test(noAccent)) return 'diesel';
-            if (noAccent.includes('dau cau') || (s.includes('cầu') && s.includes('dầu'))) return 'cau';
-            if (noAccent.includes('nhot') || s.includes('nhớt')) return 'nhot';
-            if (s.includes('mỡ')) return 'mo';
+            if ((noAccent.includes('dau') || sLc.includes('dầu')) && /\bdo\b/i.test(noAccent)) return 'diesel';
+            if (noAccent.includes('dau cau') || (sLc.includes('cầu') && sLc.includes('dầu'))) return 'cau';
+            if (noAccent.includes('nhot') || sLc.includes('nhớt')) return 'nhot';
+            if (sLc.includes('mỡ')) return 'mo';
             return null;
         }
 

@@ -1282,6 +1282,7 @@
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
+            const sLc = s.toLowerCase();
             if (
                 s.includes("dầu thủy lực") ||
                 noAccent.includes("dau thuy luc") ||
@@ -1297,7 +1298,7 @@
                 compact.includes("nhotcau")
             ) return "DauCau";
             if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauTieuHao";
             if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
             return null;
@@ -1424,6 +1425,7 @@
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
+            const sLc = s.toLowerCase();
 
             if (
                 s.includes("dầu thủy lực") ||
@@ -1440,7 +1442,7 @@
                 compact.includes("nhotcau")
             ) return "DauCau";
             if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
             if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
             return null;
