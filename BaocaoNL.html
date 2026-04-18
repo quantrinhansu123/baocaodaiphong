@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng kê chi tiết nhập xuất nhiên liệu</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -117,6 +118,35 @@
             color: #2b7132;
         }
 
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
@@ -167,22 +197,77 @@
 
         .nl-cong-trinh-dd summary {
             list-style: none;
+            min-height: 22px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.1;
         }
         .nl-cong-trinh-dd summary::-webkit-details-marker {
             display: none;
         }
+        .nl-cong-trinh-dd summary::after {
+            content: "▾";
+            font-size: 11px;
+            color: #2b7132;
+            flex-shrink: 0;
+        }
+        .nl-cong-trinh-dd[open] summary::after {
+            content: "▴";
+        }
         .nl-cong-trinh-dd[open] > summary {
             border-color: #2b7132;
+        }
+        .nl-cong-trinh-dd {
+            width: 100%;
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+        #nl-filter-cong-trinh-panel {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 4px 12px;
+            max-height: 116px;
+            overflow-y: auto;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
         #nl-filter-cong-trinh-panel label {
             font-weight: normal;
             color: #334155;
+        }
+        .nl-cong-trinh-actions {
+            gap: 10px;
+            margin-top: 2px;
+        }
+        .nl-cong-trinh-actions button {
+            line-height: 1;
+        }
+
+        @media (max-width: 900px) {
+            #nl-filter-cong-trinh-panel {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media print {
             @page {
                 size: A4 landscape;
                 margin: 8mm;
+            }
+            html,
+            body,
+            .page-container,
+            .nl-report-table,
+            .nl-report-table th,
+            .nl-report-table td,
+            .bg-teal {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .print-hide { display: none !important; }
             body {
@@ -198,12 +283,30 @@
             table.nl-report-table {
                 min-width: 0;
             }
+            .nl-report-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+            .bg-teal {
+                background-color: #45818e !important;
+                color: #fff !important;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="page-container">
+
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn active" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+        </div>
 
         <!-- HEADER — giống Baocaotieuhaonhienlieu -->
         <div class="flex items-start p-2 bg-white">
@@ -229,19 +332,20 @@
         </div>
 
         <!-- FILTERS -->
-        <div class="p-1.5 bg-white print-hide">
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="flex flex-col gap-2 max-w-[1400px]">
             <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
                 <div class="w-full lg:w-[46%] space-y-1">
                     <div class="flex items-start gap-1">
                         <span class="w-[118px] shrink-0 pt-0.5">CÔNG TRÌNH</span>
                         <div class="flex-1 min-w-0 space-y-0.5">
-                            <details id="nl-filter-cong-trinh-details" class="nl-cong-trinh-dd rounded-full border border-slate-400 bg-[#f8fafc]">
-                                <summary class="filter-input max-w-none w-full cursor-pointer rounded-full border-0 bg-transparent">Chọn công trình (sổ xuống)</summary>
-                                <div id="nl-filter-cong-trinh-panel" class="mt-1 max-h-36 overflow-y-auto rounded-lg border border-slate-300 bg-white p-2 shadow-sm text-left font-normal text-slate-700">
+                            <details id="nl-filter-cong-trinh-details" class="nl-cong-trinh-dd rounded-[16px] border border-slate-300 bg-[#f8fafc]">
+                                <summary class="filter-input max-w-none w-full cursor-pointer rounded-[16px] border-0 bg-transparent">Chọn công trình (sổ xuống)</summary>
+                                <div id="nl-filter-cong-trinh-panel" class="mt-1 rounded-b-[16px] border border-slate-300 bg-white p-2 shadow-sm text-left font-normal text-slate-700">
                                     <span class="text-slate-400">— Đang tải… —</span>
                                 </div>
                             </details>
-                            <div class="flex flex-wrap gap-1.5 justify-end">
+                            <div class="nl-cong-trinh-actions flex flex-wrap justify-end">
                                 <button type="button" id="nl-cong-trinh-select-all" class="text-[10px] font-bold text-[#2b7132] underline decoration-dotted">Chọn tất cả</button>
                                 <button type="button" id="nl-cong-trinh-clear" class="text-[10px] font-bold text-slate-600 underline decoration-dotted">Bỏ chọn</button>
                             </div>
@@ -272,8 +376,11 @@
                     <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end flex-wrap">
                         <button type="button" id="nl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
                         <button type="button" id="nl-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
+                        <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
+                        <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -309,6 +416,103 @@
         </div>
     </div>
 
+    <script>
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "chi-tiet-nl") return;
+            window.location.href = target;
+        }
+
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table) {
+                alert("Không tìm thấy bảng để xuất Excel.");
+                return;
+            }
+            if (!window.ExcelJS) {
+                alert("Không tải được thư viện xuất Excel (ExcelJS).");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) =>
+                        String(cell.innerText || "").replace(/\s+/g, " ").trim()
+                    )
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
+                for (let i = 1; i <= headerRowCount; i += 1) {
+                    const row = worksheet.getRow(i);
+                    row.font = { bold: true };
+                }
+
+                const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+                for (let c = 1; c <= colCount; c += 1) {
+                    let maxLen = 10;
+                    rows.forEach((r) => {
+                        const val = r[c - 1] || "";
+                        if (val.length > maxLen) maxLen = val.length;
+                    });
+                    worksheet.getColumn(c).width = Math.min(45, Math.max(10, maxLen + 2));
+                }
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".nl-report-table", "bang-ke-chi-tiet-nhap-xuat-nl"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+    </script>
     <script src="BaocaoNL-appsheet.js"></script>
 </body>
 </html>

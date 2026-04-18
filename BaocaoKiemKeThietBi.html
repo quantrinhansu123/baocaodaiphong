@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo kiểm kê thiết bị</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0 4px 10px;
+        }
+
+        table.inventory-check-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1250px;
+            table-layout: fixed;
+        }
+        .inventory-check-table th,
+        .inventory-check-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        .inventory-check-table thead th {
+            background-color: #4a8694;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        .inventory-check-table thead .sub-head th {
+            background-color: #5b93a0;
+            font-size: 9px;
+        }
+        .inventory-check-table .group-row td {
+            background-color: #efefef;
+            font-weight: bold;
+        }
+        .inventory-check-table .group-row td:first-child,
+        .inventory-check-table .child-row td:first-child {
+            text-align: center;
+            padding-left: 3px;
+            font-style: normal;
+            font-weight: bold;
+        }
+        .inventory-check-table .child-row td {
+            background: #fff;
+        }
+        .inventory-check-table .grand-total-row td {
+            background-color: #e5e7eb;
+            font-weight: bold;
+        }
+        .inventory-check-table .text-left {
+            text-align: left !important;
+            padding-left: 8px;
+        }
+        .inventory-check-table .text-right {
+            text-align: right !important;
+            padding-right: 8px;
+        }
+
+        .check-info-section {
+            padding: 10px 10px 0;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        .check-info-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin: 4px 0;
+        }
+        .check-info-lines {
+            font-size: 14px;
+            line-height: 1.45;
+            margin-left: 8px;
+        }
+        .check-info-line {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin: 2px 0;
+        }
+        .check-info-label {
+            white-space: nowrap;
+        }
+        .check-info-dots {
+            flex: 1;
+            border-bottom: 1px dotted #999;
+            min-width: 120px;
+            transform: translateY(-2px);
+        }
+        .check-result-section {
+            padding: 4px 10px 8px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        .check-result-line {
+            margin-left: 8px;
+            border-bottom: 1px dotted #999;
+            height: 20px;
+            width: min(420px, 55%);
+        }
+
+        .signature-section {
+            margin: 14px 0 8px;
+            padding: 0 8px 12px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .signature-title {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            html,
+            body,
+            .page-container,
+            .inventory-check-table,
+            .inventory-check-table th,
+            .inventory-check-table td,
+            .inventory-check-table .group-row td,
+            .inventory-check-table .grand-total-row td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-hide { display: none !important; }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .table-wrapper {
+                overflow: visible;
+            }
+            table.inventory-check-table {
+                min-width: 0;
+                width: 100%;
+            }
+            .inventory-check-table th,
+            .inventory-check-table td {
+                font-size: 7pt;
+                padding: 1px 1px;
+                line-height: 1.15;
+            }
+            .inventory-check-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+            .inventory-check-table thead .sub-head th {
+                background-color: #5b93a0 !important;
+                color: #fff !important;
+            }
+            .inventory-check-table .group-row td {
+                background-color: #efefef !important;
+            }
+            .inventory-check-table .grand-total-row td {
+                background-color: #e5e7eb !important;
+            }
+            .check-info-section,
+            .check-result-section {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .signature-section {
+                margin-top: 8px;
+            }
+            .signature-title {
+                font-size: 12.5pt;
+            }
+            .signature-note {
+                font-size: 8.5pt;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn active" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+        </div>
+
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO KIỂM KÊ THIẾT BỊ</h1>
+            <p class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+        </div>
+
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+            </div>
+        </div>
+
+        <div class="check-info-section">
+            <div class="check-info-title">1. THÔNG TIN BAN KIỂM KÊ</div>
+            <div class="check-info-lines">
+                <div class="check-info-line"><span class="check-info-label">- Ông/bà:</span><span class="check-info-dots"></span><span style="width: 22px;"></span><span class="check-info-label">Chức vụ:</span><span class="check-info-dots"></span></div>
+                <div class="check-info-line"><span class="check-info-label">- Ông/bà:</span><span class="check-info-dots"></span><span style="width: 22px;"></span><span class="check-info-label">Chức vụ:</span><span class="check-info-dots"></span></div>
+            </div>
+        </div>
+        <div class="check-result-section">
+            <div class="check-info-title">2. KẾT QUẢ KIỂM KÊ</div>
+            <div class="check-result-line"></div>
+            <div class="check-result-line" style="margin-top: 8px;"></div>
+        </div>
+
+        <div class="table-wrapper bg-white">
+            <table class="inventory-check-table">
+                <colgroup>
+                    <col style="width: 5%">
+                    <col style="width: 24%">
+                    <col style="width: 8%">
+                    <col style="width: 4.5%">
+                    <col style="width: 7%">
+                    <col style="width: 7%">
+                    <col style="width: 4.5%">
+                    <col style="width: 7%">
+                    <col style="width: 7%">
+                    <col style="width: 4.5%">
+                    <col style="width: 7%">
+                    <col style="width: 7%">
+                    <col style="width: 16%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th rowspan="2">STT</th>
+                        <th rowspan="2">Tên XMTB</th>
+                        <th rowspan="2">Mã số</th>
+                        <th colspan="3">Theo sổ</th>
+                        <th colspan="3">Kiểm kê</th>
+                        <th colspan="3">Chênh lệch</th>
+                        <th rowspan="2">Ghi chú</th>
+                    </tr>
+                    <tr class="sub-head">
+                        <th>SL</th>
+                        <th>Nguyên giá</th>
+                        <th>Giá trị</th>
+                        <th>SL</th>
+                        <th>Nguyên giá</th>
+                        <th>Giá trị</th>
+                        <th>SL</th>
+                        <th>Nguyên giá</th>
+                        <th>Giá trị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group-row">
+                        <td>1</td>
+                        <td class="text-left">NHÓM MÁY XÚC:</td>
+                        <td></td>
+                        <td></td><td></td><td></td>
+                        <td></td><td></td><td></td>
+                        <td></td><td></td><td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>1.1</td>
+                        <td class="text-left">Máy xúc PC 200-6/062</td>
+                        <td>MX-062</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">2,500,000</td>
+                        <td class="text-right">2,500,000</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">2,500,000</td>
+                        <td class="text-right">2,500,000</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>1.2</td>
+                        <td class="text-left">Máy xúc PC 200-8/013</td>
+                        <td>MX-013</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">1,800,000</td>
+                        <td class="text-right">1,800,000</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">1,800,000</td>
+                        <td class="text-right">1,800,000</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="group-row">
+                        <td>2</td>
+                        <td class="text-left">NHÓM MÁY LU:</td>
+                        <td></td>
+                        <td></td><td></td><td></td>
+                        <td></td><td></td><td></td>
+                        <td></td><td></td><td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>2.1</td>
+                        <td class="text-left">Máy xúc PC22SLU-1/051</td>
+                        <td>LU-051</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">5,500,000</td>
+                        <td class="text-right">5,500,000</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">5,500,000</td>
+                        <td class="text-right">5,500,000</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>2.2</td>
+                        <td class="text-left">Máy xúc SK 200-3077</td>
+                        <td>LU-077</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">3,200,000</td>
+                        <td class="text-right">3,200,000</td>
+                        <td class="text-right">1</td>
+                        <td class="text-right">3,200,000</td>
+                        <td class="text-right">3,200,000</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="13" style="height: 26px;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="13" style="height: 26px;"></td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td></td>
+                        <td class="text-left">TỔNG CỘNG</td>
+                        <td></td>
+                        <td class="text-right">4</td>
+                        <td class="text-right">13,000,000</td>
+                        <td class="text-right">13,000,000</td>
+                        <td class="text-right">4</td>
+                        <td class="text-right">13,000,000</td>
+                        <td class="text-right">13,000,000</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td class="text-right">0</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">TRƯỞNG PHÒNG VẬT TƯ</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP BIỂU</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "kiem-ke-thiet-bi") return;
+            window.location.href = target;
+        }
+
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table) {
+                alert("Không tìm thấy bảng để xuất Excel.");
+                return;
+            }
+            if (!window.ExcelJS) {
+                alert("Không tải được thư viện xuất Excel (ExcelJS).");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) =>
+                        String(cell.innerText || "").replace(/\s+/g, " ").trim()
+                    )
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
+                for (let i = 1; i <= headerRowCount; i += 1) {
+                    worksheet.getRow(i).font = { bold: true };
+                }
+
+                const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+                for (let c = 1; c <= colCount; c += 1) {
+                    let maxLen = 10;
+                    rows.forEach((r) => {
+                        const val = r[c - 1] || "";
+                        if (val.length > maxLen) maxLen = val.length;
+                    });
+                    worksheet.getColumn(c).width = Math.min(45, Math.max(10, maxLen + 2));
+                }
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".inventory-check-table", "bao-cao-kiem-ke-thiet-bi"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+    </script>
+</body>
+</html>

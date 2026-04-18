@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tổng hợp chi phí sửa chữa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+        
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+        
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+        
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0 4px 10px;
+        }
+        
+        table.repair-summary-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1100px;
+            table-layout: fixed;
+        }
+        
+        .repair-summary-table th,
+        .repair-summary-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        
+        .repair-summary-table thead th {
+            background-color: #4a8694;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        
+        .repair-summary-table thead .sub-head th {
+            background-color: #5b93a0;
+            font-size: 10px;
+        }
+
+        .repair-summary-table tbody td {
+            font-size: 10px;
+            line-height: 1.15;
+        }
+        
+        .repair-summary-table .group-row td {
+            background-color: #efefef;
+            font-weight: bold;
+        }
+        
+        .repair-summary-table .group-row td:first-child,
+        .repair-summary-table .child-row td:first-child {
+            text-align: center;
+            padding-left: 3px;
+            font-style: normal;
+            font-weight: bold;
+        }
+        
+        .repair-summary-table .child-row td {
+            background: #fff;
+        }
+        
+        .repair-summary-table .grand-total-row td {
+            background-color: #e5e7eb;
+            font-weight: bold;
+        }
+        
+        .repair-summary-table .text-left {
+            text-align: left !important;
+            padding-left: 8px;
+        }
+        
+        .repair-summary-table .text-right {
+            text-align: right !important;
+            padding-right: 8px;
+        }
+        
+        .signature-section {
+            margin: 14px 0 8px;
+            padding: 0 8px 12px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+            margin-top: 2px;
+        }
+        
+        .signature-title {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+        
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
+            width: 100%;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            background: #235c2a;
+        }
+
+        .repair-filter-bar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 14px 20px;
+            font-weight: 700;
+            color: #2b7132;
+            font-size: 15px;
+            line-height: 1.2;
+        }
+
+        .repair-filter-dates {
+            display: grid;
+            grid-template-columns: 120px minmax(210px, 1fr) 120px minmax(210px, 1fr);
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .repair-filter-label {
+            white-space: nowrap;
+        }
+
+        .repair-filter-label.right {
+            text-align: right;
+        }
+
+        .repair-filter-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .repair-filter-bar {
+                grid-template-columns: 1fr;
+            }
+            .repair-filter-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .repair-filter-dates {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .repair-filter-label,
+            .repair-filter-label.right {
+                text-align: left;
+            }
+            .repair-filter-actions {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            html,
+            body,
+            .page-container,
+            .repair-summary-table,
+            .repair-summary-table th,
+            .repair-summary-table td,
+            .repair-summary-table .group-row td,
+            .repair-summary-table .grand-total-row td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-hide {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .table-wrapper {
+                overflow: visible;
+            }
+            table.repair-summary-table {
+                min-width: 0;
+                width: 100%;
+            }
+            .repair-summary-table th,
+            .repair-summary-table td {
+                padding: 1px 1px;
+                line-height: 1.15;
+            }
+            .repair-summary-table thead th {
+                font-size: 7.7pt;
+            }
+            .repair-summary-table thead .sub-head th {
+                font-size: 7.3pt;
+            }
+            .repair-summary-table tbody td {
+                font-size: 6.8pt;
+            }
+            .repair-summary-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+            .repair-summary-table thead .sub-head th {
+                background-color: #5b93a0 !important;
+                color: #fff !important;
+            }
+            .repair-summary-table .group-row td {
+                background-color: #efefef !important;
+            }
+            .repair-summary-table .grand-total-row td {
+                background-color: #e5e7eb !important;
+            }
+            .signature-section {
+                margin-top: 8px;
+            }
+            .signature-title {
+                font-size: 12.5pt;
+            }
+            .signature-note {
+                font-size: 8.5pt;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn active" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+        </div>
+
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]" style="font-size: 1.55rem;">BÁO CÁO TỔNG HỢP CHI PHÍ SỬA CHỮA</h1>
+            <p class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+        </div>
+
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="repair-filter-bar">
+                <div class="repair-filter-dates">
+                    <span class="repair-filter-label">TỪ NGÀY GIỜ</span>
+                    <input type="datetime-local" class="filter-input" aria-label="Từ ngày giờ">
+                    <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
+                    <input type="datetime-local" class="filter-input" aria-label="Đến ngày giờ">
+                </div>
+                <div class="repair-filter-actions">
+                    <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper bg-white">
+            <table class="repair-summary-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 38%;">DIỄN GIẢI</th>
+                        <th colspan="2" style="width: 24%;">Năm 2024</th>
+                        <th colspan="2" style="width: 24%;">Năm 2025</th>
+                        <th rowspan="2" style="width: 14%;">Total Số tiền SC</th>
+                    </tr>
+                    <tr class="sub-head">
+                        <th>Số tiền SC</th>
+                        <th>Tỷ trọng</th>
+                        <th>Số tiền SC</th>
+                        <th>Tỷ trọng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group-row">
+                        <td class="text-left">01. ĐỘI THẢM</td>
+                        <td class="text-right">1,127,579,080</td>
+                        <td>5.31%</td>
+                        <td class="text-right">491,501,000</td>
+                        <td>2.31%</td>
+                        <td class="text-right">1,619,080,080</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Kawasaki 2 Thân</td>
+                        <td class="text-right">181,862,200</td>
+                        <td>0.86%</td>
+                        <td class="text-right">10,095,000</td>
+                        <td>0.05%</td>
+                        <td class="text-right">191,957,200</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Lốp Xcmg Xp263 (2024)</td>
+                        <td class="text-right">1,485,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">7,870,000</td>
+                        <td>0.04%</td>
+                        <td class="text-right">9,355,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Rung Bánh Thép Hamm Hd70</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">15,745,000</td>
+                        <td>0.07%</td>
+                        <td class="text-right">15,745,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Rung Sakai Sw900</td>
+                        <td class="text-right">1,341,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">3,620,000</td>
+                        <td>0.02%</td>
+                        <td class="text-right">4,961,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Rung Sakai Tw502 (Đội Thảm)</td>
+                        <td class="text-right">3,000,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">2,975,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">5,975,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Thảm Bánh Lốp Dynapac</td>
+                        <td class="text-right">127,555,000</td>
+                        <td>0.60%</td>
+                        <td class="text-right">1,535,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">129,090,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Thảm Bánh Lốp Gwm 18</td>
+                        <td class="text-right">194,515,000</td>
+                        <td>0.92%</td>
+                        <td class="text-right">27,856,000</td>
+                        <td>0.13%</td>
+                        <td class="text-right">222,371,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Thảm Bánh Lốp Sakai Ts</td>
+                        <td class="text-right">35,130,000</td>
+                        <td>0.17%</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">35,130,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Tĩnh Bánh Lốp Sakai Ts650C</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">53,765,000</td>
+                        <td>0.25%</td>
+                        <td class="text-right">53,765,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Tĩnh Bánh Thép Sakai R2</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">9,395,000</td>
+                        <td>0.04%</td>
+                        <td class="text-right">9,395,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Tĩnh Sakai Ts600C</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">28,515,000</td>
+                        <td>0.13%</td>
+                        <td class="text-right">28,515,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Máy Giải Tổng Nhựa Dynapac</td>
+                        <td class="text-right">930,000</td>
+                        <td>0.00%</td>
+                        <td class="text-right">51,813,000</td>
+                        <td>0.24%</td>
+                        <td class="text-right">52,743,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Máy Giải Thảm</td>
+                        <td class="text-right">581,760,880</td>
+                        <td>2.74%</td>
+                        <td class="text-right">278,317,000</td>
+                        <td>1.31%</td>
+                        <td class="text-right">860,077,880</td>
+                    </tr>
+                    <tr class="group-row">
+                        <td class="text-left">02. TRẠM THẢM BTNN</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">35,020,000</td>
+                        <td>0.16%</td>
+                        <td class="text-right">35,020,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Trạm Thảm Cđc</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">25,960,000</td>
+                        <td>0.12%</td>
+                        <td class="text-right">25,960,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Trạm Thảm Gia Thủy</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">9,060,000</td>
+                        <td>0.04%</td>
+                        <td class="text-right">9,060,000</td>
+                    </tr>
+                    <tr class="group-row">
+                        <td class="text-left">03. TRẠM BT THƯƠNG PHẨM</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">6,480,000</td>
+                        <td>0.03%</td>
+                        <td class="text-right">6,480,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Trạm Thịnh Long</td>
+                        <td class="text-right">0</td>
+                        <td>0.00%</td>
+                        <td class="text-right">6,480,000</td>
+                        <td>0.03%</td>
+                        <td class="text-right">6,480,000</td>
+                    </tr>
+                    <tr class="group-row">
+                        <td class="text-left">04. LU TĨNH:</td>
+                        <td class="text-right">109,296,000</td>
+                        <td>0.51%</td>
+                        <td class="text-right">58,525,000</td>
+                        <td>0.28%</td>
+                        <td class="text-right">167,821,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Tĩnh 2 Thân 3 Bánh Thép</td>
+                        <td class="text-right">7,710,000</td>
+                        <td>0.04%</td>
+                        <td class="text-right">10,275,000</td>
+                        <td>0.05%</td>
+                        <td class="text-right">17,985,000</td>
+                    </tr>
+                    <tr class="child-row">
+                        <td>Lu Tĩnh 8T</td>
+                        <td class="text-right">21,200,000</td>
+                        <td>0.10%</td>
+                        <td class="text-right">1,105,000</td>
+                        <td>0.01%</td>
+                        <td class="text-right">22,305,000</td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td class="text-left">TỔNG CỘNG</td>
+                        <td class="text-right">1,236,875,080</td>
+                        <td>100%</td>
+                        <td class="text-right">591,501,000</td>
+                        <td>100%</td>
+                        <td class="text-right">1,828,376,080</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">TRƯỞNG PHÒNG VẬT TƯ</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP BIỂU</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "tong-hop-sc") return;
+            window.location.href = target;
+        }
+
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table) {
+                alert("Không tìm thấy bảng để xuất Excel.");
+                return;
+            }
+            if (!window.ExcelJS) {
+                alert("Không tải được thư viện xuất Excel (ExcelJS).");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) =>
+                        String(cell.innerText || "").replace(/\s+/g, " ").trim()
+                    )
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
+                for (let i = 1; i <= headerRowCount; i += 1) {
+                    worksheet.getRow(i).font = { bold: true };
+                }
+
+                const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+                for (let c = 1; c <= colCount; c += 1) {
+                    let maxLen = 10;
+                    rows.forEach((r) => {
+                        const val = r[c - 1] || "";
+                        if (val.length > maxLen) maxLen = val.length;
+                    });
+                    worksheet.getColumn(c).width = Math.min(45, Math.max(10, maxLen + 2));
+                }
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".repair-summary-table", "bao-cao-tong-hop-cp-sua-chua"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+    </script>
+</body>
+
+</html>

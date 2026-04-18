@@ -205,6 +205,18 @@
             font-weight: bold;
             margin-top: 8px;
         }
+        .report-print-filter-summary {
+            display: none;
+            border-top: 1px solid #94a3b8;
+            border-bottom: 1px solid #94a3b8;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #1e293b;
+            background: #fff;
+        }
+        .report-print-filter-summary b {
+            color: #0f172a;
+        }
 
         /* Table specific styling */
         .table-wrapper {
@@ -357,19 +369,47 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 table-layout: fixed !important;
-                font-size: 5.5pt !important;
+                font-size: 6.2pt !important;
             }
             .table-wrapper th,
             .table-wrapper td {
-                font-size: 5.5pt !important;
+                font-size: 6.2pt !important;
                 padding: 1px 1px !important;
-                line-height: 1.15 !important;
+                line-height: 1.2 !important;
             }
             #appsheet-status {
                 display: none !important;
             }
+            .print-hide {
+                display: none !important;
+            }
+            .report-print-filter-summary {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                font-size: 8.2pt !important;
+            }
             .no-print {
                 display: none !important;
+            }
+            .signature-section {
+                margin: 8px 0 0 !important;
+                padding: 0 4px !important;
+            }
+            .signature-date {
+                font-size: 10pt !important;
+                margin-bottom: 2px !important;
+            }
+            .signature-grid {
+                gap: 6px !important;
+            }
+            .signature-title {
+                font-size: 12.5pt !important;
+                line-height: 1.1 !important;
+            }
+            .signature-note {
+                font-size: 8.5pt !important;
             }
         }
 
@@ -389,6 +429,10 @@
             <button id="tab-xe-ben" class="report-tab-btn" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
             <button id="tab-xe-bon" class="report-tab-btn" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
             <button id="tab-trang-thiet-bi" class="report-tab-btn active" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
         </div>
         
         <!-- HEADER SECTION -->
@@ -411,6 +455,13 @@
         <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
             <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
             <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
+        </div>
+
+        <div class="report-print-filter-summary">
+            <span><b>CÔNG TRƯỜNG:</b> <span id="print-filter-project">Tất cả</span></span>
+            <span><b>LÁI MÁY:</b> <span id="print-filter-driver">Tất cả</span></span>
+            <span><b>NGUỒN GỐC:</b> <span id="print-filter-origin">Tất cả</span></span>
+            <span><b>NHÓM XE:</b> <span id="print-filter-group">Tất cả</span></span>
         </div>
 
         <!-- FILTERS -->
@@ -3509,16 +3560,42 @@
             fillFilterSelectElement("filter-origin", originMerged, true);
         }
 
+        const LOCAL_REPORT_TABS = new Set(["xe-ben", "xe-bon", "trang-thiet-bi"]);
+        const REPORT_TAB_REDIRECTS = {
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
         let currentReportTab = "trang-thiet-bi";
 
-        function switchReportTab(tabId) {
-            currentReportTab = tabId;
-            // Update UI
+        function setActiveReportTabButton(tabId) {
             document.querySelectorAll(".report-tab-btn").forEach((btn) => {
                 btn.classList.remove("active");
             });
             const activeBtn = document.getElementById(`tab-${tabId}`);
             if (activeBtn) activeBtn.classList.add("active");
+        }
+
+        function applyTabFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const tabFromUrl = (params.get("tab") || "").trim();
+            if (LOCAL_REPORT_TABS.has(tabFromUrl)) {
+                currentReportTab = tabFromUrl;
+            }
+            setActiveReportTabButton(currentReportTab);
+        }
+
+        function switchReportTab(tabId) {
+            const redirectUrl = REPORT_TAB_REDIRECTS[tabId];
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+                return;
+            }
+            if (!LOCAL_REPORT_TABS.has(tabId)) return;
+            currentReportTab = tabId;
+            setActiveReportTabButton(tabId);
 
             // Refresh report
             loadFromAppSheet();
@@ -3537,6 +3614,26 @@
                 fromDate,
                 toDate
             };
+        }
+
+        function getSelectFilterDisplayText(id) {
+            const el = document.getElementById(id);
+            if (!el || !el.options || el.selectedIndex < 0) return "Tất cả";
+            const value = String(el.value || "").trim();
+            if (!value) return "Tất cả";
+            const label = String(el.options[el.selectedIndex].text || "").trim();
+            return label || value;
+        }
+
+        function updatePrintFilterSummary() {
+            const setText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+            setText("print-filter-project", getSelectFilterDisplayText("filter-project"));
+            setText("print-filter-driver", getSelectFilterDisplayText("filter-driver"));
+            setText("print-filter-origin", getSelectFilterDisplayText("filter-origin"));
+            setText("print-filter-group", getSelectFilterDisplayText("filter-group"));
         }
 
         function normalizeDateFilterField(inputId) {
@@ -3841,6 +3938,7 @@
             updateDateRangeBanner(filters, rows);
             updateKmColumnHeaders(filters);
             updateSignatureDate(filters);
+            updatePrintFilterSummary();
         }
 
         function updateSignatureDate(filters) {
@@ -4881,6 +4979,7 @@
 
         /** Tự kết nối AppSheet khi mở trang (giống các báo cáo khác trong dự án). */
         function bootLoadFromAppSheet() {
+            applyTabFromUrl();
             loadFromAppSheet({ forceRefresh: false });
         }
         if (document.readyState === "loading") {

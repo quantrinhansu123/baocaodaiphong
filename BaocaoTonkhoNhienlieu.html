@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tồn kho nhiên liệu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
+            width: 100%;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+        }
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .tonkho-filter-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(440px, 1fr);
+            gap: 16px;
+            font-weight: bold;
+            color: #2b7132;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        .tonkho-filter-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tonkho-filter-left .filter-input {
+            max-width: none;
+        }
+
+        .tonkho-filter-right {
+            display: grid;
+            gap: 6px;
+            justify-items: end;
+        }
+
+        .tonkho-date-row {
+            width: 100%;
+            max-width: 420px;
+            display: grid;
+            grid-template-columns: 72px minmax(0, 1fr);
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tonkho-actions {
+            width: 100%;
+            max-width: 520px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .tonkho-actions .action-btn {
+            width: 100%;
+            padding: 0 6px;
+        }
+
+        @media (max-width: 1180px) {
+            .tonkho-filter-shell {
+                grid-template-columns: 1fr;
+            }
+            .tonkho-filter-right {
+                justify-items: start;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .tonkho-date-row {
+                max-width: none;
+            }
+            .tonkho-actions {
+                max-width: none;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            padding: 0 4px 10px;
+        }
+
+        table.inventory-report-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1240px;
+            table-layout: fixed;
+        }
+        .inventory-report-table th,
+        .inventory-report-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        .inventory-report-table thead th {
+            background-color: #4a8694;
+            color: #fff;
+            font-weight: bold;
+            font-size: 10px;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        .inventory-empty-row td {
+            height: 24px;
+        }
+
+        .inventory-total-row td {
+            background-color: #e5e7eb;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin: 14px 0 8px;
+            padding: 0 8px 12px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .signature-title {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            html,
+            body,
+            .page-container,
+            .inventory-report-table,
+            .inventory-report-table th,
+            .inventory-report-table td,
+            .inventory-total-row td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-hide { display: none !important; }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .table-wrapper {
+                overflow: visible;
+            }
+            table.inventory-report-table {
+                min-width: 0;
+            }
+            .inventory-report-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+            .inventory-total-row td {
+                background-color: #e5e7eb !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn active" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+        </div>
+
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỒN KHO NHIÊN LIỆU</h1>
+            <p class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+        </div>
+
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="flex flex-col gap-2 max-w-[1400px]">
+            <div class="tonkho-filter-shell">
+                <div class="tonkho-filter-left">
+                    <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
+                    <input type="text" class="filter-input" placeholder="Chọn công trình">
+                </div>
+                <div class="tonkho-filter-right">
+                    <div class="tonkho-date-row">
+                        <span>TỪ NGÀY</span>
+                        <input type="text" placeholder="dd/mm/yyyy" class="filter-input">
+                    </div>
+                    <div class="tonkho-date-row">
+                        <span>ĐẾN NGÀY</span>
+                        <input type="text" placeholder="dd/mm/yyyy" class="filter-input">
+                    </div>
+                    <div class="tonkho-actions">
+                        <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
+                        <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                        <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                        <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper bg-white">
+            <table class="inventory-report-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 8%;">Mã nhiên liệu</th>
+                        <th rowspan="2" style="width: 13%;">Tên nhiên liệu</th>
+                        <th rowspan="2" style="width: 7%;">ĐVT</th>
+                        <th colspan="2" style="width: 15%;">Tồn đầu kỳ</th>
+                        <th colspan="2" style="width: 15%;">Nhập trong kỳ</th>
+                        <th colspan="2" style="width: 15%;">Xuất trong kỳ</th>
+                        <th colspan="2" style="width: 15%;">Tồn cuối kỳ</th>
+                        <th rowspan="2" style="width: 8%;">Khoản mục chi phí</th>
+                        <th rowspan="2" style="width: 7%;">Ghi chú</th>
+                    </tr>
+                    <tr>
+                        <th>SL</th>
+                        <th>Giá trị</th>
+                        <th>SL</th>
+                        <th>Giá trị</th>
+                        <th>SL</th>
+                        <th>Giá trị</th>
+                        <th>SL</th>
+                        <th>Giá trị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-total-row">
+                        <td></td>
+                        <td>TỔNG CỘNG</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">TRƯỞNG PHÒNG VẬT TƯ</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP BIỂU</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "ton-kho-nl") return;
+            window.location.href = target;
+        }
+
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table) {
+                alert("Không tìm thấy bảng để xuất Excel.");
+                return;
+            }
+            if (!window.ExcelJS) {
+                alert("Không tải được thư viện xuất Excel (ExcelJS).");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) =>
+                        String(cell.innerText || "").replace(/\s+/g, " ").trim()
+                    )
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
+                for (let i = 1; i <= headerRowCount; i += 1) {
+                    worksheet.getRow(i).font = { bold: true };
+                }
+
+                const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+                for (let c = 1; c <= colCount; c += 1) {
+                    let maxLen = 10;
+                    rows.forEach((r) => {
+                        const val = r[c - 1] || "";
+                        if (val.length > maxLen) maxLen = val.length;
+                    });
+                    worksheet.getColumn(c).width = Math.min(45, Math.max(10, maxLen + 2));
+                }
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".inventory-report-table", "bao-cao-ton-kho-nhien-lieu"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+    </script>
+</body>
+</html>
