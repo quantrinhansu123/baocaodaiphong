@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
             background-color: #f9fafb;
             padding: 8px;
         }
-
+        
         .page-container {
             width: 100%;
             max-width: 100%;
@@ -20,11 +21,12 @@
             background-color: white;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
+        
         .logo-container {
             width: 145px;
             text-align: center;
         }
+        
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -40,7 +42,66 @@
             display: inline-block;
             min-width: 0;
         }
-
+        
+        .tkh-page-head {
+            padding: 8px 14px 4px;
+            border-bottom: 1px solid #d4dbe5;
+        }
+        
+        .tkh-page-head-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        
+        .tkh-page-head-right {
+            text-align: right;
+            line-height: 1.15;
+        }
+        
+        .tkh-page-head-right small {
+            display: block;
+            font-size: 12px;
+            text-transform: none;
+            font-weight: 700;
+        }
+        
+        .tkh-title-bar {
+            margin-top: 6px;
+            background: #3e8395;
+            color: #fff;
+            text-align: center;
+            font-weight: 800;
+            font-size: 34px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            padding: 5px 10px 4px;
+            line-height: 1.05;
+        }
+        
+        .tkh-title-sub {
+            text-align: center;
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 20px;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+        
+        .tkh-title-month {
+            text-align: center;
+            font-weight: 700;
+            color: #374151;
+            font-size: 15px;
+            margin-top: 1px;
+            text-transform: uppercase;
+        }
+        
         .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
@@ -49,6 +110,7 @@
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
+        
         .report-tab-btn {
             padding: 6px 16px;
             font-size: 11px;
@@ -61,15 +123,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+        
         .report-tab-btn:hover {
             background: #d1d5db;
         }
+        
         .report-tab-btn.active {
             background: #0047ab;
             color: white;
             border-color: #0047ab;
         }
-
+        
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
@@ -81,11 +145,12 @@
             font-size: 11px;
             outline: none;
         }
+        
         .filter-input:focus {
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
-
+        
         .action-btn {
             height: 26px;
             border-radius: 9999px;
@@ -97,7 +162,109 @@
             color: #fff;
             cursor: pointer;
         }
-
+        
+        .tkh-info-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+            font-size: 13px;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+        
+        .tkh-info-col {
+            display: grid;
+            gap: 5px;
+        }
+        
+        .tkh-info-line {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tkh-info-line label {
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #1f2937;
+        }
+        
+        .tkh-line-input {
+            border: none;
+            border-bottom: 2px solid #d1d5db;
+            background: transparent;
+            height: 24px;
+            padding: 0 4px;
+            font-size: 13px;
+            color: #111827;
+            outline: none;
+        }
+        
+        .tkh-line-input:focus {
+            border-bottom-color: #4a8694;
+        }
+        .tkh-select-line {
+            border: none;
+            border-bottom: 2px solid #d1d5db;
+            background-color: transparent;
+            height: 24px;
+            padding: 0 20px 0 4px;
+            font-size: 13px;
+            color: #111827;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 4px center;
+            cursor: pointer;
+        }
+        .tkh-select-line:focus {
+            border-bottom-color: #4a8694;
+        }
+        
+        .tkh-note {
+            grid-column: 1 / -1;
+            color: #b91c1c;
+            font-size: 12px;
+            line-height: 1.35;
+            font-style: italic;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        
+        .tkh-action-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        
+        .tkh-search-row {
+            display: grid;
+            grid-template-columns: 120px minmax(0, 1fr);
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+        
+        .tkh-search-label {
+            color: #1f6b7d;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .tkh-search-input {
+            border: 1px solid #9ca3af;
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+            outline: none;
+        }
+        
         .tonkho-filter-shell {
             display: grid;
             grid-template-columns: minmax(0, 1.3fr) minmax(440px, 1fr);
@@ -107,23 +274,23 @@
             font-size: 10px;
             line-height: 1.2;
         }
-
+        
         .tonkho-filter-left {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
+        
         .tonkho-filter-left .filter-input {
             max-width: none;
         }
-
+        
         .tonkho-filter-right {
             display: grid;
             gap: 6px;
             justify-items: end;
         }
-
+        
         .tonkho-date-row {
             width: 100%;
             max-width: 420px;
@@ -132,7 +299,7 @@
             align-items: center;
             gap: 8px;
         }
-
+        
         .tonkho-actions {
             width: 100%;
             max-width: 520px;
@@ -140,12 +307,12 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 6px;
         }
-
+        
         .tonkho-actions .action-btn {
             width: 100%;
             padding: 0 6px;
         }
-
+        
         @media (max-width: 1180px) {
             .tonkho-filter-shell {
                 grid-template-columns: 1fr;
@@ -153,8 +320,11 @@
             .tonkho-filter-right {
                 justify-items: start;
             }
+            .tkh-info-wrap {
+                grid-template-columns: 1fr;
+            }
         }
-
+        
         @media (max-width: 760px) {
             .tonkho-date-row {
                 max-width: none;
@@ -164,20 +334,21 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
-
+        
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11px;
             padding: 0 4px 10px;
         }
-
+        
         table.inventory-report-table {
             border-collapse: collapse;
             width: 100%;
             min-width: 1240px;
             table-layout: fixed;
         }
+        
         .inventory-report-table th,
         .inventory-report-table td {
             border: 1px solid #333;
@@ -186,6 +357,7 @@
             vertical-align: middle;
             word-wrap: break-word;
         }
+        
         .inventory-report-table thead th {
             background-color: #4a8694;
             color: #fff;
@@ -194,22 +366,23 @@
             line-height: 1.2;
             text-transform: uppercase;
         }
-
+        
         .inventory-empty-row td {
             height: 24px;
         }
-
+        
         .inventory-total-row td {
             background-color: #e5e7eb;
             font-weight: bold;
         }
-
+        
         .signature-section {
             margin: 14px 0 8px;
             padding: 0 8px 12px;
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
+        
         .signature-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -217,18 +390,20 @@
             text-align: center;
             margin-top: 2px;
         }
+        
         .signature-title {
             font-weight: 700;
             font-size: 18px;
             line-height: 1.15;
             text-transform: uppercase;
         }
+        
         .signature-note {
             font-style: italic;
             font-size: 12px;
             margin-top: 2px;
         }
-
+        
         @media print {
             @page {
                 size: A4 landscape;
@@ -244,7 +419,9 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .print-hide { display: none !important; }
+            .print-hide {
+                display: none !important;
+            }
             body {
                 background: #fff;
                 padding: 0;
@@ -268,6 +445,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="page-container">
@@ -276,56 +454,85 @@
             <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
             <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
             <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-thiet-bi-noi-ql" class="report-tab-btn" type="button" onclick="switchReportTab('thiet-bi-noi-ql')">Báo cáo TB theo nơi quản lý</button>
             <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
             <button id="tab-ton-kho-nl" class="report-tab-btn active" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
             <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
             <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
         </div>
 
-        <div class="flex items-start p-2 bg-white">
-            <div class="logo-container mr-6">
-                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
-                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
-            </div>
-            <div class="flex-1 mt-2">
-                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
-                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
-                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
-                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
-                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+        <div class="tkh-page-head">
+            <div class="tkh-page-head-top">
+                <div>CTY CP XD HT ĐẠI PHONG</div>
+                <div class="tkh-page-head-right">
+                    CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+                    <small>Độc lập - Tự do - Hạnh phúc</small>
                 </div>
             </div>
-        </div>
-
-        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
-            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỒN KHO NHIÊN LIỆU</h1>
-            <p class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+            <div class="tkh-title-bar">BÁO CÁO TỔNG HỢP TỒN KHO NHIÊN LIỆU</div>
+            <div class="tkh-title-sub">CT HỐ SÓI - SÔNG ĐUỐNG</div>
+            <div class="tkh-title-month">THÁNG 11 NĂM 2025</div>
         </div>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-            <div class="flex flex-col gap-2 max-w-[1400px]">
-            <div class="tonkho-filter-shell">
-                <div class="tonkho-filter-left">
-                    <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
-                    <input type="text" class="filter-input" placeholder="Chọn công trình">
+            <div class="tkh-info-wrap">
+                <div class="tkh-info-col">
+                    <div class="tkh-info-line">
+                        <label>Nhóm nhà cc</label>
+                        <select class="tkh-select-line">
+                            <option value="">-- Tất cả --</option>
+                            <option value="nhom-a">Nhóm A</option>
+                            <option value="nhom-b">Nhóm B</option>
+                        </select>
+                    </div>
+                    <div class="tkh-info-line">
+                        <label>Tên nhà cung cấp</label>
+                        <select class="tkh-select-line">
+                            <option value="">-- Tất cả --</option>
+                            <option value="ncc-1">Nhà cung cấp 1</option>
+                            <option value="ncc-2">Nhà cung cấp 2</option>
+                        </select>
+                    </div>
+                    <div class="tkh-info-line">
+                        <label>Công trình</label>
+                        <select class="tkh-select-line">
+                            <option value="">-- Tất cả --</option>
+                            <option value="ct-ho-soi">CT Hố Sói</option>
+                            <option value="ct-song-duong">CT Sông Đuống</option>
+                        </select>
+                    </div>
+                    <div class="tkh-info-line">
+                        <label>Tên kho</label>
+                        <select class="tkh-select-line">
+                            <option value="">-- Tất cả --</option>
+                            <option value="kho-1">Kho 1</option>
+                            <option value="kho-2">Kho 2</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="tonkho-filter-right">
-                    <div class="tonkho-date-row">
-                        <span>TỪ NGÀY</span>
-                        <input type="text" placeholder="dd/mm/yyyy" class="filter-input">
+                <div class="tkh-info-col">
+                    <div class="tkh-info-line">
+                        <label>Từ ngày</label>
+                        <input type="datetime-local" class="tkh-line-input" placeholder="">
                     </div>
-                    <div class="tonkho-date-row">
-                        <span>ĐẾN NGÀY</span>
-                        <input type="text" placeholder="dd/mm/yyyy" class="filter-input">
-                    </div>
-                    <div class="tonkho-actions">
-                        <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
-                        <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
-                        <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                        <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                    <div class="tkh-info-line">
+                        <label>Đến ngày</label>
+                        <input type="datetime-local" class="tkh-line-input" placeholder="">
                     </div>
                 </div>
+
             </div>
+
+            <div class="tkh-action-row">
+                <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
+                <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+            </div>
+
+            <div class="tkh-search-row">
+                <span class="tkh-search-label">🔎 Tìm kiếm</span>
+                <input type="text" class="tkh-search-input" placeholder="">
             </div>
         </div>
 
@@ -355,12 +562,96 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr class="inventory-empty-row"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="inventory-empty-row">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
                     <tr class="inventory-total-row">
                         <td></td>
                         <td>TỔNG CỘNG</td>
@@ -399,6 +690,7 @@
             "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
             "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
             "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "thiet-bi-noi-ql": "Baocaothietbitheonoisx.html",
             "chi-tiet-nl": "BaocaoNL.html",
             "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
             "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
@@ -444,7 +736,9 @@
 
                 const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
                 for (let i = 1; i <= headerRowCount; i += 1) {
-                    worksheet.getRow(i).font = { bold: true };
+                    worksheet.getRow(i).font = {
+                        bold: true
+                    };
                 }
 
                 const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
@@ -491,4 +785,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -5,15 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo cáo tổng hợp xe máy thiết bị</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            min-width: 1024px;
+        }
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            margin: -24px -24px 14px;
+        }
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+        .logo-container {
+            width: 92px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
         }
         .bg-header { background-color: #387c2b; }
         .text-header-green { color: #387c2b; }
-        .bg-table-header { background-color: #43818e; }
-        .bg-table-group { background-color: #67a63e; }
+        .bg-table-header { background-color: #4a8694; }
+        .bg-table-group { background-color: #5fa13f; }
         
         .custom-table {
             border-collapse: collapse;
@@ -53,6 +113,7 @@
             font-weight: bold;
             color: white;
             text-align: center;
+            background-color: #4a8694;
         }
         
         /* Filter inputs */
@@ -123,31 +184,80 @@
             color: #387c2b;
         }
         @media print {
+            html,
+            body {
+                background: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .print-hide { display: none !important; }
+            .page-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+            }
+            .custom-table thead th,
+            .custom-table thead .bg-table-header th,
+            .custom-table tr.bg-table-header th,
+            .bg-table-header {
+                background-color: #4a8694 !important;
+                color: #ffffff !important;
+            }
+            .custom-table .group-row td,
+            .custom-table tr.bg-table-group td,
+            .bg-table-group {
+                background-color: #5fa13f !important;
+                color: #ffffff !important;
+            }
+            .custom-table .footer-row td {
+                background-color: #4a8694 !important;
+                color: #ffffff !important;
+            }
         }
     </style>
 </head>
-<body class="p-4 flex justify-center">
+<body>
 
-    <div class="w-full max-w-6xl bg-white p-6 shadow-md rounded-sm min-w-[1024px]">
+    <div class="page-container">
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-thiet-bi-noi-ql" class="report-tab-btn active" type="button" onclick="switchReportTab('thiet-bi-noi-ql')">Báo cáo TB theo nơi quản lý</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+        </div>
         
-        <!-- Header Text -->
-        <div class="flex justify-between items-start mb-2">
-            <div class="font-bold text-header-green text-sm">CTY CP XD HT ĐẠI PHONG</div>
-            <div class="text-center">
-                <div class="font-bold text-header-green text-sm">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-                <div class="font-bold text-gray-800 text-xs mt-0.5">Độc lập - Tự do - Hạnh phúc</div>
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[92px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box whitespace-nowrap">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
             </div>
         </div>
 
-        <!-- Main Title -->
-        <div class="bg-header text-white text-center py-2.5 font-bold text-xl uppercase tracking-wide">
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỔNG HỢP XE MÁY THIẾT BỊ THEO NƠI QUẢN LÝ</h1>
+            <p class="font-bold text-sm text-[#0047ab] mb-1">CT HỒ SÓI - SÔNG ĐUỐNG</p>
+            <p id="tbx-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … đến ngày …)</p>
+        </div>
+
+        <!-- Main Title (legacy text kept hidden for compatibility) -->
+        <div class="bg-header text-white text-center py-2.5 font-bold text-xl uppercase tracking-wide hidden">
             BÁO CÁO TỔNG HỢP XE MÁY THIẾT BỊ THEO NƠI QUẢN LÝ
         </div>
-        <div class="text-center font-bold text-sm mt-1 mb-1 text-gray-800">
+        <div class="text-center font-bold text-sm mt-1 mb-1 text-gray-800 hidden">
             CT HỒ SÓI - SÔNG ĐUỐNG
         </div>
-        <p id="tbx-date-range" class="text-center text-xs font-bold italic text-blue-800 mb-4">(Từ ngày … đến ngày …)</p>
+        <p class="text-center text-xs font-bold italic text-blue-800 mb-4 hidden">(Từ ngày … đến ngày …)</p>
 
         <!-- Bộ lọc: dropdown + kỳ ngày + nút (theo layout mới) -->
         <div class="print-hide mb-3 text-xs" aria-label="Bộ lọc báo cáo">
@@ -206,6 +316,8 @@
                     <div class="flex flex-wrap justify-end gap-2 mt-1">
                         <button type="button" id="tbx-btn-load" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Tải dữ liệu AppSheet</button>
                         <button type="button" id="tbx-btn-refresh" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Làm mới toàn bộ</button>
+                        <button type="button" id="tbx-btn-export-excel" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Xuất Excel</button>
+                        <button type="button" id="tbx-btn-export-pdf" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Xuất PDF</button>
                     </div>
                 </div>
             </div>
@@ -259,6 +371,180 @@
 
     </div>
 
+    <script>
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "thiet-bi-noi-ql": "Baocaothietbitheonoisx.html",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
+        };
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "thiet-bi-noi-ql") return;
+            window.location.href = target;
+        }
+
+        function setExportStatus(message, isError) {
+            const statusEl = document.getElementById("tbx-appsheet-status");
+            if (!statusEl) return;
+            statusEl.textContent = message;
+            statusEl.classList.toggle("text-red-600", !!isError);
+            statusEl.classList.toggle("text-header-green", !isError);
+        }
+
+        function safeFileNameDate() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
+            return `${yyyy}${mm}${dd}`;
+        }
+
+        async function exportTableToExcel() {
+            if (!window.ExcelJS) {
+                setExportStatus("Không tải được thư viện xuất Excel (ExcelJS).", true);
+                return;
+            }
+
+            const exportBtn = document.getElementById("tbx-btn-export-excel");
+            const table = document.querySelector("table.custom-table");
+            if (!table) {
+                setExportStatus("Không tìm thấy bảng dữ liệu để xuất Excel.", true);
+                return;
+            }
+
+            const oldText = exportBtn ? exportBtn.textContent : "";
+            if (exportBtn) {
+                exportBtn.disabled = true;
+                exportBtn.textContent = "Đang xuất Excel...";
+            }
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const sheet = workbook.addWorksheet("BaoCaoTBTheoNoiQL");
+
+                const occupied = new Set();
+                const keyOf = (r, c) => `${r}:${c}`;
+                const rows = Array.from(table.querySelectorAll("tr"));
+                const totalColCount = 13;
+
+                rows.forEach((tr, rowIndex) => {
+                    const excelRow = rowIndex + 1;
+                    let excelCol = 1;
+
+                    const cells = Array.from(tr.children).filter((el) => el.tagName === "TH" || el.tagName === "TD");
+                    cells.forEach((cell) => {
+                        while (occupied.has(keyOf(excelRow, excelCol))) excelCol += 1;
+
+                        const rowSpan = Number(cell.getAttribute("rowspan") || "1");
+                        const colSpan = Number(cell.getAttribute("colspan") || "1");
+                        const value = (cell.textContent || "").replace(/\s+/g, " ").trim();
+
+                        const target = sheet.getCell(excelRow, excelCol);
+                        target.value = value;
+                        target.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+                        target.font = { name: "Times New Roman", size: 11 };
+
+                        if (tr.parentElement && tr.parentElement.tagName === "THEAD") {
+                            target.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: { argb: "FF4A8694" }
+                            };
+                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                        }
+
+                        if (tr.classList.contains("group-row")) {
+                            target.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: { argb: "FF5FA13F" }
+                            };
+                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                        }
+
+                        if (tr.classList.contains("footer-row")) {
+                            target.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: { argb: "FF4A8694" }
+                            };
+                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                        }
+
+                        for (let r = 0; r < rowSpan; r += 1) {
+                            for (let c = 0; c < colSpan; c += 1) {
+                                occupied.add(keyOf(excelRow + r, excelCol + c));
+                                const borderCell = sheet.getCell(excelRow + r, excelCol + c);
+                                borderCell.border = {
+                                    top: { style: "thin", color: { argb: "FFCBD5E1" } },
+                                    left: { style: "thin", color: { argb: "FFCBD5E1" } },
+                                    bottom: { style: "thin", color: { argb: "FFCBD5E1" } },
+                                    right: { style: "thin", color: { argb: "FFCBD5E1" } }
+                                };
+                            }
+                        }
+
+                        if (rowSpan > 1 || colSpan > 1) {
+                            sheet.mergeCells(excelRow, excelCol, excelRow + rowSpan - 1, excelCol + colSpan - 1);
+                        }
+
+                        excelCol += colSpan;
+                    });
+                });
+
+                for (let c = 1; c <= totalColCount; c += 1) {
+                    sheet.getColumn(c).width = c === 2 ? 30 : (c === 13 ? 18 : 12);
+                }
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `BaoCaoTBTheoNoiQuanLy_${safeFileNameDate()}.xlsx`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                setExportStatus("Xuất Excel thành công.", false);
+            } catch (err) {
+                console.error(err);
+                setExportStatus(`Lỗi xuất Excel: ${err.message || err}`, true);
+            } finally {
+                if (exportBtn) {
+                    exportBtn.disabled = false;
+                    exportBtn.textContent = oldText || "Xuất Excel";
+                }
+            }
+        }
+
+        function exportToPdf() {
+            setExportStatus("Đang chuẩn bị in PDF...", false);
+            window.print();
+        }
+
+        function wireExportButtons() {
+            const excelBtn = document.getElementById("tbx-btn-export-excel");
+            const pdfBtn = document.getElementById("tbx-btn-export-pdf");
+            if (excelBtn) excelBtn.addEventListener("click", exportTableToExcel);
+            if (pdfBtn) pdfBtn.addEventListener("click", exportToPdf);
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", wireExportButtons);
+        } else {
+            wireExportButtons();
+        }
+    </script>
     <script src="Baocaothietbitheonoisx-appsheet.js"></script>
 </body>
 </html>
