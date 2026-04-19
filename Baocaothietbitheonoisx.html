@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             background-color: #f9fafb;
             padding: 8px;
         }
+        
         .page-container {
             width: 100%;
             max-width: 100%;
@@ -21,6 +23,7 @@
             padding: 24px;
             min-width: 1024px;
         }
+        
         .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
@@ -30,6 +33,7 @@
             border-bottom: 1px solid #e2e8f0;
             margin: -24px -24px 14px;
         }
+        
         .report-tab-btn {
             padding: 6px 16px;
             font-size: 11px;
@@ -42,19 +46,23 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+        
         .report-tab-btn:hover {
             background: #d1d5db;
         }
+        
         .report-tab-btn.active {
             background: #0047ab;
             color: white;
             border-color: #0047ab;
         }
+        
         .logo-container {
             width: 92px;
             flex-shrink: 0;
             text-align: center;
         }
+        
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -70,22 +78,36 @@
             display: inline-block;
             min-width: 0;
         }
-        .bg-header { background-color: #387c2b; }
-        .text-header-green { color: #387c2b; }
-        .bg-table-header { background-color: #4a8694; }
-        .bg-table-group { background-color: #5fa13f; }
+        
+        .bg-header {
+            background-color: #387c2b;
+        }
+        
+        .text-header-green {
+            color: #387c2b;
+        }
+        
+        .bg-table-header {
+            background-color: #4a8694;
+        }
+        
+        .bg-table-group {
+            background-color: #5fa13f;
+        }
         
         .custom-table {
             border-collapse: collapse;
             width: 100%;
             font-size: 11px;
         }
+        
         .custom-table th {
             border: 1px solid #cbd5e1;
             padding: 6px 4px;
             text-align: center;
             font-weight: bold;
         }
+        
         .custom-table .group-row td {
             border: 1px solid #cbd5e1;
             padding: 6px;
@@ -93,20 +115,24 @@
             color: white;
             text-align: left;
         }
+        
         .custom-table .group-row td:first-child {
             text-align: center;
         }
+        
         .custom-table .data-row td {
             border-right: 1px solid #cbd5e1;
             border-bottom: 1px dotted #94a3b8;
             padding: 6px;
             background-color: white;
         }
+        
         .custom-table .data-row td:first-child,
         .custom-table .data-row td:last-child {
             border-left: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
         }
+        
         .custom-table .footer-row td {
             border: 1px solid #cbd5e1;
             padding: 8px 6px;
@@ -115,8 +141,8 @@
             text-align: center;
             background-color: #4a8694;
         }
-        
         /* Filter inputs */
+        
         .filter-input {
             background-color: #fff;
             height: 32px;
@@ -124,6 +150,7 @@
             border-radius: 6px;
             border: 1px solid #cbd5e1;
         }
+        
         .filter-select-noi {
             min-width: 0;
             max-width: 100%;
@@ -132,6 +159,7 @@
             color: #334155;
             cursor: pointer;
         }
+        
         .filter-checkbox-panel {
             max-height: 9rem;
             overflow-y: auto;
@@ -142,6 +170,7 @@
             font-size: 12px;
             color: #334155;
         }
+        
         .filter-checkbox-panel label {
             display: flex;
             align-items: flex-start;
@@ -150,11 +179,13 @@
             cursor: pointer;
             line-height: 1.25;
         }
+        
         .filter-checkbox-panel input[type="checkbox"] {
             margin-top: 2px;
             flex-shrink: 0;
             accent-color: #387c2b;
         }
+        
         .filter-checkbox-actions button {
             font-size: 11px;
             text-decoration: underline;
@@ -164,17 +195,21 @@
             padding: 0;
             cursor: pointer;
         }
+        
         .filter-checkbox-actions button:hover {
             color: #1e40af;
         }
+        
         .date-input-wrap {
             position: relative;
             min-width: 200px;
         }
+        
         .date-input-wrap input[type="date"] {
             padding-right: 28px;
             color-scheme: light;
         }
+        
         .date-input-wrap .date-icon {
             position: absolute;
             right: 8px;
@@ -183,6 +218,7 @@
             pointer-events: none;
             color: #387c2b;
         }
+        
         @media print {
             html,
             body {
@@ -190,7 +226,9 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            .print-hide { display: none !important; }
+            .print-hide {
+                display: none !important;
+            }
             .page-container {
                 box-shadow: none !important;
                 margin: 0 !important;
@@ -215,6 +253,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="page-container">
@@ -228,7 +267,7 @@
             <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
             <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
         </div>
-        
+
         <div class="flex items-start p-2 bg-white">
             <div class="logo-container mr-6">
                 <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[92px] mx-auto h-auto object-contain">
@@ -348,10 +387,14 @@
                     <th rowspan="2" class="w-20">GHI CHÚ</th>
                 </tr>
                 <tr class="bg-table-header text-white">
-                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
-                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
-                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
-                    <th class="w-12">SL</th><th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th>
+                    <th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th>
+                    <th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th>
+                    <th class="w-16">GIÁ TRỊ</th>
+                    <th class="w-12">SL</th>
+                    <th class="w-16">GIÁ TRỊ</th>
                 </tr>
             </thead>
             <tbody id="tbx-tbody">
@@ -448,34 +491,68 @@
 
                         const target = sheet.getCell(excelRow, excelCol);
                         target.value = value;
-                        target.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-                        target.font = { name: "Times New Roman", size: 11 };
+                        target.alignment = {
+                            vertical: "middle",
+                            horizontal: "center",
+                            wrapText: true
+                        };
+                        target.font = {
+                            name: "Times New Roman",
+                            size: 11
+                        };
 
                         if (tr.parentElement && tr.parentElement.tagName === "THEAD") {
                             target.fill = {
                                 type: "pattern",
                                 pattern: "solid",
-                                fgColor: { argb: "FF4A8694" }
+                                fgColor: {
+                                    argb: "FF4A8694"
+                                }
                             };
-                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                            target.font = {
+                                name: "Times New Roman",
+                                size: 11,
+                                bold: true,
+                                color: {
+                                    argb: "FFFFFFFF"
+                                }
+                            };
                         }
 
                         if (tr.classList.contains("group-row")) {
                             target.fill = {
                                 type: "pattern",
                                 pattern: "solid",
-                                fgColor: { argb: "FF5FA13F" }
+                                fgColor: {
+                                    argb: "FF5FA13F"
+                                }
                             };
-                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                            target.font = {
+                                name: "Times New Roman",
+                                size: 11,
+                                bold: true,
+                                color: {
+                                    argb: "FFFFFFFF"
+                                }
+                            };
                         }
 
                         if (tr.classList.contains("footer-row")) {
                             target.fill = {
                                 type: "pattern",
                                 pattern: "solid",
-                                fgColor: { argb: "FF4A8694" }
+                                fgColor: {
+                                    argb: "FF4A8694"
+                                }
                             };
-                            target.font = { name: "Times New Roman", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+                            target.font = {
+                                name: "Times New Roman",
+                                size: 11,
+                                bold: true,
+                                color: {
+                                    argb: "FFFFFFFF"
+                                }
+                            };
                         }
 
                         for (let r = 0; r < rowSpan; r += 1) {
@@ -483,10 +560,30 @@
                                 occupied.add(keyOf(excelRow + r, excelCol + c));
                                 const borderCell = sheet.getCell(excelRow + r, excelCol + c);
                                 borderCell.border = {
-                                    top: { style: "thin", color: { argb: "FFCBD5E1" } },
-                                    left: { style: "thin", color: { argb: "FFCBD5E1" } },
-                                    bottom: { style: "thin", color: { argb: "FFCBD5E1" } },
-                                    right: { style: "thin", color: { argb: "FFCBD5E1" } }
+                                    top: {
+                                        style: "thin",
+                                        color: {
+                                            argb: "FFCBD5E1"
+                                        }
+                                    },
+                                    left: {
+                                        style: "thin",
+                                        color: {
+                                            argb: "FFCBD5E1"
+                                        }
+                                    },
+                                    bottom: {
+                                        style: "thin",
+                                        color: {
+                                            argb: "FFCBD5E1"
+                                        }
+                                    },
+                                    right: {
+                                        style: "thin",
+                                        color: {
+                                            argb: "FFCBD5E1"
+                                        }
+                                    }
                                 };
                             }
                         }
@@ -547,4 +644,5 @@
     </script>
     <script src="Baocaothietbitheonoisx-appsheet.js"></script>
 </body>
+
 </html>

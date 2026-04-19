@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
             background-color: #f9fafb;
             padding: 8px;
         }
-
+        
         .page-container {
             width: 100%;
             max-width: 100%;
@@ -20,11 +21,12 @@
             background-color: white;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
+        
         .logo-container {
             width: 145px;
             text-align: center;
         }
+        
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -40,7 +42,7 @@
             display: inline-block;
             min-width: 0;
         }
-
+        
         .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
@@ -49,6 +51,7 @@
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
+        
         .report-tab-btn {
             padding: 6px 16px;
             font-size: 11px;
@@ -61,15 +64,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+        
         .report-tab-btn:hover {
             background: #d1d5db;
         }
+        
         .report-tab-btn.active {
             background: #0047ab;
             color: white;
             border-color: #0047ab;
         }
-
+        
         .action-btn {
             height: 26px;
             border-radius: 9999px;
@@ -81,24 +86,25 @@
             color: #fff;
             cursor: pointer;
         }
-
+        
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
-
+        
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
             padding: 0 4px 10px;
         }
-
+        
         table.inventory-check-table {
             border-collapse: collapse;
             width: 100%;
             min-width: 1250px;
             table-layout: fixed;
         }
+        
         .inventory-check-table th,
         .inventory-check-table td {
             border: 1px solid #333;
@@ -107,6 +113,7 @@
             vertical-align: middle;
             word-wrap: break-word;
         }
+        
         .inventory-check-table thead th {
             background-color: #4a8694;
             color: white;
@@ -115,14 +122,17 @@
             line-height: 1.2;
             text-transform: uppercase;
         }
+        
         .inventory-check-table thead .sub-head th {
             background-color: #5b93a0;
             font-size: 9px;
         }
+        
         .inventory-check-table .group-row td {
             background-color: #efefef;
             font-weight: bold;
         }
+        
         .inventory-check-table .group-row td:first-child,
         .inventory-check-table .child-row td:first-child {
             text-align: center;
@@ -130,70 +140,82 @@
             font-style: normal;
             font-weight: bold;
         }
+        
         .inventory-check-table .child-row td {
             background: #fff;
         }
+        
         .inventory-check-table .grand-total-row td {
             background-color: #e5e7eb;
             font-weight: bold;
         }
+        
         .inventory-check-table .text-left {
             text-align: left !important;
             padding-left: 8px;
         }
+        
         .inventory-check-table .text-right {
             text-align: right !important;
             padding-right: 8px;
         }
-
+        
         .check-info-section {
             padding: 10px 10px 0;
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
+        
         .check-info-title {
             font-weight: 700;
             font-size: 18px;
             margin: 4px 0;
         }
+        
         .check-info-lines {
             font-size: 14px;
             line-height: 1.45;
             margin-left: 8px;
         }
+        
         .check-info-line {
             display: flex;
             align-items: baseline;
             gap: 8px;
             margin: 2px 0;
         }
+        
         .check-info-label {
             white-space: nowrap;
         }
+        
         .check-info-dots {
             flex: 1;
             border-bottom: 1px dotted #999;
             min-width: 120px;
             transform: translateY(-2px);
         }
+        
         .check-result-section {
             padding: 4px 10px 8px;
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
+        
         .check-result-line {
             margin-left: 8px;
             border-bottom: 1px dotted #999;
             height: 20px;
             width: min(420px, 55%);
         }
-
+        
         .signature-section {
             margin: 14px 0 8px;
             padding: 0 8px 12px;
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
+        
         .signature-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -201,18 +223,20 @@
             text-align: center;
             margin-top: 2px;
         }
+        
         .signature-title {
             font-weight: 700;
             font-size: 18px;
             line-height: 1.15;
             text-transform: uppercase;
         }
+        
         .signature-note {
             font-style: italic;
             font-size: 12px;
             margin-top: 2px;
         }
-
+        
         @media print {
             @page {
                 size: A4 landscape;
@@ -229,7 +253,9 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .print-hide { display: none !important; }
+            .print-hide {
+                display: none !important;
+            }
             body {
                 background: #fff;
                 padding: 0;
@@ -281,6 +307,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page-container">
         <div class="report-tabs-container print-hide">
@@ -378,9 +405,15 @@
                         <td>1</td>
                         <td class="text-left">NHÓM MÁY XÚC:</td>
                         <td></td>
-                        <td></td><td></td><td></td>
-                        <td></td><td></td><td></td>
-                        <td></td><td></td><td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                         <td></td>
                     </tr>
                     <tr class="child-row">
@@ -417,9 +450,15 @@
                         <td>2</td>
                         <td class="text-left">NHÓM MÁY LU:</td>
                         <td></td>
-                        <td></td><td></td><td></td>
-                        <td></td><td></td><td></td>
-                        <td></td><td></td><td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                         <td></td>
                     </tr>
                     <tr class="child-row">
@@ -542,7 +581,9 @@
 
                 const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
                 for (let i = 1; i <= headerRowCount; i += 1) {
-                    worksheet.getRow(i).font = { bold: true };
+                    worksheet.getRow(i).font = {
+                        bold: true
+                    };
                 }
 
                 const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
@@ -589,4 +630,5 @@
         }
     </script>
 </body>
+
 </html>

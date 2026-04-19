@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
             background-color: #f9fafb;
             padding: 8px;
         }
-
+        
         .page-container {
             width: 100%;
             max-width: 100%;
@@ -20,11 +21,12 @@
             background-color: white;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
+        
         .logo-container {
             width: 145px;
             text-align: center;
         }
+        
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -40,7 +42,7 @@
             display: inline-block;
             min-width: 0;
         }
-
+        
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
@@ -52,10 +54,12 @@
             font-size: 11px;
             outline: none;
         }
+        
         .filter-input:focus {
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
+        
         select.filter-input {
             cursor: pointer;
             padding-right: 22px;
@@ -65,16 +69,18 @@
             appearance: none;
             -webkit-appearance: none;
         }
-
+        
         .date-filter-field {
             height: 22px;
             max-width: 200px;
         }
+        
         .date-filter-field .filter-input {
             max-width: none;
             border-radius: 9999px 0 0 9999px;
             border-right: none;
         }
+        
         .date-cal-btn {
             flex-shrink: 0;
             width: 28px;
@@ -90,14 +96,16 @@
             align-items: center;
             justify-content: center;
         }
+        
         .date-cal-btn:hover {
             background: #e2e8f0;
         }
+        
         .date-cal-btn:focus-visible {
             outline: 2px solid rgba(43, 113, 50, 0.35);
             outline-offset: 0;
         }
-
+        
         .action-btn {
             height: 26px;
             border-radius: 9999px;
@@ -109,15 +117,17 @@
             color: #fff;
             cursor: pointer;
         }
+        
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
+        
         .action-btn.action-btn-secondary {
             background: #fff;
             color: #2b7132;
         }
-
+        
         .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
@@ -126,6 +136,7 @@
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
+        
         .report-tab-btn {
             padding: 6px 16px;
             font-size: 11px;
@@ -138,39 +149,45 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+        
         .report-tab-btn:hover {
             background: #d1d5db;
         }
+        
         .report-tab-btn.active {
             background: #0047ab;
             color: white;
             border-color: #0047ab;
         }
-
+        
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11px;
             padding-bottom: 8px;
         }
+        
         .table-wrapper::-webkit-scrollbar {
             height: 8px;
         }
+        
         .table-wrapper::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
+        
         .table-wrapper::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 4px;
         }
-
+        
         table.nl-report-table {
             border-collapse: collapse;
             width: 100%;
             min-width: 1000px;
             table-layout: fixed;
         }
+        
         .nl-report-table th,
         .nl-report-table td {
             border: 1px solid #333;
@@ -179,6 +196,7 @@
             vertical-align: middle;
             word-wrap: break-word;
         }
+        
         .nl-report-table thead th {
             background-color: #4a8694;
             color: white;
@@ -186,15 +204,22 @@
             font-size: 10px;
             line-height: 1.2;
         }
-        .text-center { text-align: center !important; }
-        .text-left { text-align: left !important; padding-left: 6px; }
-
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .text-left {
+            text-align: left !important;
+            padding-left: 6px;
+        }
+        
         .bg-teal {
             background-color: #45818e;
             color: white;
             font-weight: bold;
         }
-
+        
         .nl-cong-trinh-dd summary {
             list-style: none;
             min-height: 22px;
@@ -207,26 +232,32 @@
             font-size: 10px;
             line-height: 1.1;
         }
+        
         .nl-cong-trinh-dd summary::-webkit-details-marker {
             display: none;
         }
+        
         .nl-cong-trinh-dd summary::after {
             content: "▾";
             font-size: 11px;
             color: #2b7132;
             flex-shrink: 0;
         }
+        
         .nl-cong-trinh-dd[open] summary::after {
             content: "▴";
         }
-        .nl-cong-trinh-dd[open] > summary {
+        
+        .nl-cong-trinh-dd[open]>summary {
             border-color: #2b7132;
         }
+        
         .nl-cong-trinh-dd {
             width: 100%;
             overflow: hidden;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
         }
+        
         #nl-filter-cong-trinh-panel {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -236,24 +267,27 @@
             border-top-left-radius: 0;
             border-top-right-radius: 0;
         }
+        
         #nl-filter-cong-trinh-panel label {
             font-weight: normal;
             color: #334155;
         }
+        
         .nl-cong-trinh-actions {
             gap: 10px;
             margin-top: 2px;
         }
+        
         .nl-cong-trinh-actions button {
             line-height: 1;
         }
-
+        
         @media (max-width: 900px) {
             #nl-filter-cong-trinh-panel {
                 grid-template-columns: 1fr;
             }
         }
-
+        
         @media print {
             @page {
                 size: A4 landscape;
@@ -269,7 +303,9 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .print-hide { display: none !important; }
+            .print-hide {
+                display: none !important;
+            }
             body {
                 background: #fff;
                 padding: 0;
@@ -294,6 +330,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="page-container">
@@ -335,53 +372,53 @@
         <!-- FILTERS -->
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
             <div class="flex flex-col gap-2 max-w-[1400px]">
-            <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
-                <div class="w-full lg:w-[46%] space-y-1">
-                    <div class="flex items-start gap-1">
-                        <span class="w-[118px] shrink-0 pt-0.5">CÔNG TRÌNH</span>
-                        <div class="flex-1 min-w-0 space-y-0.5">
-                            <details id="nl-filter-cong-trinh-details" class="nl-cong-trinh-dd rounded-[16px] border border-slate-300 bg-[#f8fafc]">
-                                <summary class="filter-input max-w-none w-full cursor-pointer rounded-[16px] border-0 bg-transparent">Chọn công trình (sổ xuống)</summary>
-                                <div id="nl-filter-cong-trinh-panel" class="mt-1 rounded-b-[16px] border border-slate-300 bg-white p-2 shadow-sm text-left font-normal text-slate-700">
-                                    <span class="text-slate-400">— Đang tải… —</span>
+                <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
+                    <div class="w-full lg:w-[46%] space-y-1">
+                        <div class="flex items-start gap-1">
+                            <span class="w-[118px] shrink-0 pt-0.5">CÔNG TRÌNH</span>
+                            <div class="flex-1 min-w-0 space-y-0.5">
+                                <details id="nl-filter-cong-trinh-details" class="nl-cong-trinh-dd rounded-[16px] border border-slate-300 bg-[#f8fafc]">
+                                    <summary class="filter-input max-w-none w-full cursor-pointer rounded-[16px] border-0 bg-transparent">Chọn công trình (sổ xuống)</summary>
+                                    <div id="nl-filter-cong-trinh-panel" class="mt-1 rounded-b-[16px] border border-slate-300 bg-white p-2 shadow-sm text-left font-normal text-slate-700">
+                                        <span class="text-slate-400">— Đang tải… —</span>
+                                    </div>
+                                </details>
+                                <div class="nl-cong-trinh-actions flex flex-wrap justify-end">
+                                    <button type="button" id="nl-cong-trinh-select-all" class="text-[10px] font-bold text-[#2b7132] underline decoration-dotted">Chọn tất cả</button>
+                                    <button type="button" id="nl-cong-trinh-clear" class="text-[10px] font-bold text-slate-600 underline decoration-dotted">Bỏ chọn</button>
                                 </div>
-                            </details>
-                            <div class="nl-cong-trinh-actions flex flex-wrap justify-end">
-                                <button type="button" id="nl-cong-trinh-select-all" class="text-[10px] font-bold text-[#2b7132] underline decoration-dotted">Chọn tất cả</button>
-                                <button type="button" id="nl-cong-trinh-clear" class="text-[10px] font-bold text-slate-600 underline decoration-dotted">Bỏ chọn</button>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="w-full lg:w-[50%] space-y-1 flex flex-col items-end lg:pr-2">
-                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
-                        <span class="w-[72px] shrink-0">TỪ NGÀY</span>
-                        <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
-                            <input id="nl-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
-                            <button type="button" id="nl-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
+                    <div class="w-full lg:w-[50%] space-y-1 flex flex-col items-end lg:pr-2">
+                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                            <span class="w-[72px] shrink-0">TỪ NGÀY</span>
+                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                                <input id="nl-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                                <button type="button" id="nl-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             </button>
+                            </div>
+                            <input type="date" id="nl-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                         </div>
-                        <input type="date" id="nl-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
-                    </div>
-                    <div class="flex items-center gap-1 w-full lg:w-[280px]">
-                        <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
-                        <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
-                            <input id="nl-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
-                            <button type="button" id="nl-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
+                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                            <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
+                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                                <input id="nl-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                                <button type="button" id="nl-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             </button>
+                            </div>
+                            <input type="date" id="nl-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                         </div>
-                        <input type="date" id="nl-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
-                    </div>
-                    <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end flex-wrap">
-                        <button type="button" id="nl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
-                        <button type="button" id="nl-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
-                        <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
-                        <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                        <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end flex-wrap">
+                            <button type="button" id="nl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                            <button type="button" id="nl-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
+                            <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
+                            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -469,7 +506,9 @@
                 const headerRowCount = table.tHead ? table.tHead.rows.length : 1;
                 for (let i = 1; i <= headerRowCount; i += 1) {
                     const row = worksheet.getRow(i);
-                    row.font = { bold: true };
+                    row.font = {
+                        bold: true
+                    };
                 }
 
                 const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
@@ -517,4 +556,5 @@
     </script>
     <script src="BaocaoNL-appsheet.js"></script>
 </body>
+
 </html>
