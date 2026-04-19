@@ -622,12 +622,53 @@
             "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
         };
 
+        const TOP_GROUP_TAB_MAP = {
+            "thiet-bi": new Set(["tab-trang-thiet-bi", "tab-xe-ben", "tab-xe-bon"]),
+            "nhien-lieu": new Set(["tab-chi-tiet-nl", "tab-ton-kho-nl", "tab-xuat-nl-theo-ct", "tab-th-xuat-ct"]),
+            "sua-chua": new Set(["tab-tong-hop-sc"]),
+            "kiem-ke": new Set(["tab-kiem-ke-thiet-bi"]),
+            "ke-hoach": new Set([])
+        };
+
+        function getCurrentTopGroup() {
+            return (new URLSearchParams(window.location.search).get("group") || "").trim();
+        }
+
+        function appendGroupToTarget(url) {
+            const group = getCurrentTopGroup();
+            if (!group) return url;
+            try {
+                const u = new URL(url, window.location.href);
+                u.searchParams.set("group", group);
+                return `${u.pathname}${u.search}${u.hash}`;
+            } catch (e) {
+                const sep = url.includes("?") ? "&" : "?";
+                return `${url}${sep}group=${encodeURIComponent(group)}`;
+            }
+        }
+
+        function applyGroupedTabVisibility() {
+            const allowed = TOP_GROUP_TAB_MAP[getCurrentTopGroup()];
+            if (!allowed) return;
+            const container = document.querySelector(".report-tabs-container");
+            if (!container) return;
+            let visible = 0;
+            container.querySelectorAll(".report-tab-btn").forEach((btn) => {
+                const show = allowed.has(btn.id || "");
+                btn.style.display = show ? "" : "none";
+                if (show) visible += 1;
+            });
+            if (!visible) container.style.display = "none";
+        }
+
         function switchReportTab(tabId) {
             const target = REPORT_TAB_URLS[tabId];
             if (!target) return;
             if (tabId === "tong-hop-sc") return;
-            window.location.href = target;
+            window.location.href = appendGroupToTarget(target);
         }
+
+        applyGroupedTabVisibility();
 
         function getTimestampForFileName() {
             const now = new Date();

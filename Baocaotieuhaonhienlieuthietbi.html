@@ -1032,14 +1032,14 @@
         function cellDisplayString(v) {
             if (v == null) return "";
             if (typeof v === "object" && v !== null) {
-                const display = v.DisplayValue ? ? v.displayValue ? ? v.FormattedValue ? ? v.formattedValue ? ? v.Text ? ? v.text;
+                const display = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
                 if (display != null && String(display).trim() !== "") return String(display);
             }
             return cellString(v);
         }
 
         function normalizeKeyPart(s) {
-            return String(s ? ? "")
+            return String(s ?? "")
                 .trim()
                 .toLowerCase()
                 .replace(/-/g, "")
@@ -1278,11 +1278,11 @@
 
         function getNxlcTaiSanCell(r) {
             return cellDisplayString(
-                r["Tên tài sản"] ? ?
-                r["Ten tai san"] ? ?
-                r["TenTaiSan"] ? ?
-                r["Tên thiết bị"] ? ?
-                r["Ten thiet bi"] ? ?
+                r["Tên tài sản"] ??
+                r["Ten tai san"] ??
+                r["TenTaiSan"] ??
+                r["Tên thiết bị"] ??
+                r["Ten thiet bi"] ??
                 ""
             ).trim();
         }
@@ -1290,12 +1290,12 @@
         /** Tên XMTB trên «Nhập xuất luân chuyển CT» (ưu tiên cho 4 cột nhiên liệu phụ). */
         function getNxlcTenXmtbCell(r) {
             const direct = cellDisplayString(
-                r["Tên XMTB"] ? ?
-                r["Ten XMTB"] ? ?
-                r["TenXMTB"] ? ?
-                r["XMTB"] ? ?
-                r["Tên xe máy thiết bị"] ? ?
-                r["Ten xe may thiet bi"] ? ?
+                r["Tên XMTB"] ??
+                r["Ten XMTB"] ??
+                r["TenXMTB"] ??
+                r["XMTB"] ??
+                r["Tên xe máy thiết bị"] ??
+                r["Ten xe may thiet bi"] ??
                 ""
             ).trim();
             if (direct) return direct;
@@ -1349,12 +1349,12 @@
 
         function getNxlcTenNhienLieuCell(r) {
             return cellDisplayString(
-                r["Tên nhiên liệu"] ? ?
-                r["Ten nhien lieu"] ? ?
-                r["Tên NL"] ? ?
-                r["Ten NL"] ? ?
-                r["Loại nhiên liệu"] ? ?
-                r["Loai nhien lieu"] ? ?
+                r["Tên nhiên liệu"] ??
+                r["Ten nhien lieu"] ??
+                r["Tên NL"] ??
+                r["Ten NL"] ??
+                r["Loại nhiên liệu"] ??
+                r["Loai nhien lieu"] ??
                 ""
             ).trim();
         }
@@ -1425,7 +1425,7 @@
         }
 
         function loaiPhieuIsXuat(rawVal) {
-            const s = String(rawVal ? ? "")
+            const s = String(rawVal ?? "")
                 .trim()
                 .toLowerCase()
                 .normalize("NFD")
@@ -1438,7 +1438,7 @@
         function getLoaiPhieuOnRow(row) {
             const keys = ["Loại phiếu", "Loai phieu", "Loại", "Loai", "Phiếu", "Phieu"];
             for (const k of keys) {
-                const v = row ? .[k];
+                const v = row ?.[k];
                 if (v == null || v === "") continue;
                 return v;
             }
@@ -1536,16 +1536,16 @@
 
         function getNlTaiSanCell(r) {
             return (
-                r["Tên tài sản"] ? ?
-                r["Ten tai san"] ? ?
-                r["TenTaiSan"] ? ?
-                r["Tên thiết bị"] ? ?
+                r["Tên tài sản"] ??
+                r["Ten tai san"] ??
+                r["TenTaiSan"] ??
+                r["Tên thiết bị"] ??
                 ""
             );
         }
 
         function isLoaiTrongGioHC(val) {
-            const s = String(val ? ? "")
+            const s = String(val ?? "")
                 .trim()
                 .toLowerCase()
                 .normalize("NFD")
@@ -1559,13 +1559,13 @@
 
         /** «Loại công việc» có nhập và khác «Trong giờ HC» → cộng «Tổng giờ lv» vào cột Giờ tăng ca (cùng rule ghép Ref như HC). */
         function isLoaiGioTangCaTuNtCt(val) {
-            if (!String(val ? ? "").trim()) return false;
+            if (!String(val ?? "").trim()) return false;
             return !isLoaiTrongGioHC(val);
         }
 
         /** Chuẩn hóa chữ để so khớp (NFKC + bỏ dấu). */
         function normalizeForMatching(s) {
-            return String(s ? ? "")
+            return String(s ?? "")
                 .trim()
                 .normalize("NFKC")
                 .normalize("NFD")
@@ -1575,7 +1575,7 @@
 
         /** Nhóm «Xe ben» — nhận diện các từ khóa : ben, tự đổ... */
         function nhomTenLooksLikeXeBen(s) {
-            const raw = String(s ? ? "").trim();
+            const raw = String(s ?? "").trim();
             if (!raw) return false;
             const t = normalizeForMatching(raw);
             if (/\bben\b/.test(t) || t.includes("xe ben") || t.includes("ben tu do")) return true;
@@ -1584,20 +1584,20 @@
         }
 
         function rowIsNhomXeBen(r, tenNhomByTaiSan, key, tenLoaiByTaiSan) {
-            const nhom = (key && tenNhomByTaiSan ? .get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            const nhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
             if (nhomTenLooksLikeXeBen(nhom)) return true;
-            const loai = (key && tenLoaiByTaiSan ? .get) ? tenLoaiByTaiSan.get(key) : "";
+            const loai = (key && tenLoaiByTaiSan ?.get) ? tenLoaiByTaiSan.get(key) : "";
             if (nhomTenLooksLikeXeBen(loai)) return true;
             return false;
         }
 
         function rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan) {
-            const nhom = (key && tenNhomByTaiSan ? .get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            const nhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
             if (nhomTenLooksLikeXeBon(nhom)) return true;
-            const loai = (key && tenLoaiByTaiSan ? .get) ? tenLoaiByTaiSan.get(key) : "";
+            const loai = (key && tenLoaiByTaiSan ?.get) ? tenLoaiByTaiSan.get(key) : "";
             if (nhomTenLooksLikeXeBon(loai)) return true;
-            const originDs = (key && nguonGocByTaiSan ? .get) ? nguonGocByTaiSan.get(key) : "";
-            const originMain = String(pickField(r, "NguonGoc") ? ? "").trim();
+            const originDs = (key && nguonGocByTaiSan ?.get) ? nguonGocByTaiSan.get(key) : "";
+            const originMain = String(pickField(r, "NguonGoc") ?? "").trim();
             if (nhomTenLooksLikeXeBon(originDs) || nhomTenLooksLikeXeBon(originMain)) return true;
             if (typeof ntRowLooseXeBonHint === "function" && ntRowLooseXeBonHint(r)) return true;
             return false;
@@ -1606,7 +1606,7 @@
         /** «Tên nhóm» trên «Nhật trình máy CT» — ưu tiên khớp «Xe bồn» hoặc «Xe ben». */
         function pickCtTenNhom(row) {
             const candidates = collectTenNhomCandidatesFromRow(row);
-            if (!candidates ? .length) return "";
+            if (!candidates ?.length) return "";
             for (const c of candidates) {
                 if (nhomTenLooksLikeXeBon(c) || nhomTenLooksLikeXeBen(c)) return c;
             }
@@ -1652,19 +1652,19 @@
 
         /** Khóa gom theo «Tên tài sản» (đồng nhất với pickField TenThietBi) */
         function assetKeyFromName(name) {
-            return normalizeKeyPart(String(name ? ? "").trim());
+            return normalizeKeyPart(String(name ?? "").trim());
         }
 
         function pickDanhSachTaiSanTen(r) {
             return cellDisplayString(
-                r["Tên tài sản"] ? ? r["Ten tai san"] ? ? r["TenTaiSan"] ? ? r["Tên thiết bị"] ? ? r["Ten thiet bi"] ? ? ""
+                r["Tên tài sản"] ?? r["Ten tai san"] ?? r["TenTaiSan"] ?? r["Tên thiết bị"] ?? r["Ten thiet bi"] ?? ""
             ).trim();
         }
 
         function pickDanhSachBienSoXe(r) {
             const keys = ["Biển số xe", "Bien so xe", "BienSoXe", "Biển số", "Bien so", "BSX"];
             for (const k of keys) {
-                const v = cellDisplayString(r[k] ? ? "").trim();
+                const v = cellDisplayString(r[k] ?? "").trim();
                 if (v) return v;
             }
             return "";
@@ -1673,7 +1673,7 @@
         function pickDanhSachNguonGoc(r) {
             const keys = ["Nguồn gốc", "Nguon goc", "Nguồn gốc xe", "Nguon goc xe", "Origin"];
             for (const k of keys) {
-                const v = cellDisplayString(r[k] ? ? "").trim();
+                const v = cellDisplayString(r[k] ?? "").trim();
                 if (v) return v;
             }
             return "";
@@ -1691,7 +1691,7 @@
                 "Loai xe"
             ];
             for (const k of keys) {
-                const v = cellDisplayString(r[k] ? ? "").trim();
+                const v = cellDisplayString(r[k] ?? "").trim();
                 if (v) return v;
             }
             for (const [k, v] of Object.entries(r || {})) {
@@ -1704,7 +1704,7 @@
         }
 
         function normLoaiText(s) {
-            return String(s ? ? "")
+            return String(s ?? "")
                 .trim()
                 .normalize("NFD")
                 .replace(/\u0300-\u036f/g, "")
@@ -1723,7 +1723,7 @@
 
         function buildTenLoaiByTaiSanFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ? .length) return map;
+            if (!dsRows ?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -1738,7 +1738,7 @@
         }
 
         function applyTenLoaiFromDanhSachTaiSan(normalizedRows, tenLoaiByTaiSan) {
-            if (!tenLoaiByTaiSan ? .size) return normalizedRows;
+            if (!tenLoaiByTaiSan ?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const k = assetKeyFromName(out.TenThietBi);
@@ -1749,8 +1749,8 @@
         }
 
         function filterMainRowsByTenLoaiXeOto(mainRows, tenLoaiByTaiSan, dsRows) {
-            if (!mainRows ? .length) return [];
-            if (!tenLoaiByTaiSan ? .size) return [];
+            if (!mainRows ?.length) return [];
+            if (!tenLoaiByTaiSan ?.size) return [];
             const dsXeOtoNames = (dsRows || [])
                 .filter((r) => tenLoaiIsXeOto(pickDanhSachTenLoai(r)))
                 .map((r) => pickDanhSachTaiSanTen(r))
@@ -1759,8 +1759,8 @@
 
             const allowedMainKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const mainKey = assetKeyFromName(asset);
                 if (!mainKey) continue;
@@ -1778,8 +1778,8 @@
             }
 
             return mainRows.filter((raw) => {
-                if (raw ? .groupRow || raw ? .subGroupRow) return false;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) return false;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
                 return !!key && allowedMainKeys.has(key);
             });
@@ -1788,7 +1788,7 @@
         /** «Tên tài sản» trên «Danh sách tài sản» → «Nguồn gốc» (khớp khóa với Tên thiết bị báo cáo) */
         function buildNguonGocByTaiSanFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ? .length) return map;
+            if (!dsRows ?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -1802,7 +1802,7 @@
         }
 
         function applyNguonGocFromDanhSachTaiSan(normalizedRows, nguonGocByTaiSan) {
-            if (!nguonGocByTaiSan ? .size) return normalizedRows;
+            if (!nguonGocByTaiSan ?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const k = assetKeyFromName(out.TenThietBi);
@@ -1815,7 +1815,7 @@
         /** «Tên tài sản» trên «Danh sách tài sản» → «Biển số xe» (khớp khóa với cột Tên thiết bị báo cáo) */
         function buildBienSoXeMapFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ? .length) return map;
+            if (!dsRows ?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -1829,7 +1829,7 @@
         }
 
         function applyBienSoXeFromDanhSachTaiSan(normalizedRows, bienSoByTaiSan) {
-            if (!bienSoByTaiSan ? .size) return normalizedRows;
+            if (!bienSoByTaiSan ?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const key = assetKeyFromName(out.TenThietBi);
@@ -1894,7 +1894,7 @@
             const tieuHaoByTaiSan = new Map();
             /** Chuỗi gốc cột định mức tiêu hao — hiển thị không làm tròn */
             const tieuHaoRawByTaiSan = new Map();
-            if (!dsRows ? .length) return {
+            if (!dsRows ?.length) return {
                 trongBinhByTaiSan,
                 tieuHaoByTaiSan,
                 tieuHaoRawByTaiSan
@@ -1928,14 +1928,14 @@
             const m2 = dinhMucMaps.tieuHaoByTaiSan;
             const m2raw = dinhMucMaps.tieuHaoRawByTaiSan;
             const hasAny =
-                (m1 ? .size ? ? 0) > 0 || (m2 ? .size ? ? 0) > 0 || (m2raw ? .size ? ? 0) > 0;
+                (m1 ?.size ?? 0) > 0 || (m2 ?.size ?? 0) > 0 || (m2raw ?.size ?? 0) > 0;
             if (!hasAny) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const key = assetKeyFromName(out.TenThietBi);
                 if (!key) return out;
-                if (m1 ? .has(key)) out.DinhMucTrongBinh = formatLitersDisplay(m1.get(key));
-                if (m2raw ? .has(key)) out.DinhMucTieuHao = m2raw.get(key);
+                if (m1 ?.has(key)) out.DinhMucTrongBinh = formatLitersDisplay(m1.get(key));
+                if (m2raw ?.has(key)) out.DinhMucTieuHao = m2raw.get(key);
                 return out;
             });
         }
@@ -1953,7 +1953,7 @@
                 "Công trường"
             ];
             for (const k of keys) {
-                const t = cellString(raw ? .[k]).trim();
+                const t = cellString(raw ?.[k]).trim();
                 if (t) return t;
             }
             for (const [k, v] of Object.entries(raw || {})) {
@@ -1966,10 +1966,10 @@
 
         function buildCongTruongByTaiSanFromNtMain(mainRows) {
             const byTaiSan = new Map();
-            if (!mainRows ? .length) return byTaiSan;
+            if (!mainRows ?.length) return byTaiSan;
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key || byTaiSan.has(key)) continue;
@@ -1980,7 +1980,7 @@
         }
 
         function applyCongTruongFromNtMainByTaiSan(mainRows, normalizedRows, congTruongByTaiSan) {
-            if (!congTruongByTaiSan ? .size) return normalizedRows;
+            if (!congTruongByTaiSan ?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
@@ -1998,12 +1998,12 @@
          */
         function buildGioHanhChinhSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2011,7 +2011,7 @@
             }
 
             for (const r of ctRows) {
-                const loai = r["Loại công việc"] ? ? r["Loai cong viec"] ? ? r["Loại CV"] ? ? "";
+                const loai = r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "";
                 if (!isLoaiTrongGioHC(loai)) continue;
                 const tg = getCtTongGioLvCell(r);
                 const n = parseHourCell(tg);
@@ -2020,7 +2020,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2030,12 +2030,12 @@
          */
         function buildGioTangCaSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2043,7 +2043,7 @@
             }
 
             for (const r of ctRows) {
-                const loai = r["Loại công việc"] ? ? r["Loai cong viec"] ? ? r["Loại CV"] ? ? "";
+                const loai = r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "";
                 if (!isLoaiGioTangCaTuNtCt(loai)) continue;
                 const tg = getCtTongGioLvCell(r);
                 const n = parseHourCell(tg);
@@ -2052,7 +2052,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2096,11 +2096,11 @@
 
         function getCtSoNgayLvThucTeCell(r) {
             return (
-                r["Số ngày lv thực tế"] ? ?
-                r["So ngay lv thuc te"] ? ?
-                r["SoNgayLvThucTe"] ? ?
-                r["Số ngày LV thực tế"] ? ?
-                r["So ngay LV thuc te"] ? ?
+                r["Số ngày lv thực tế"] ??
+                r["So ngay lv thuc te"] ??
+                r["SoNgayLvThucTe"] ??
+                r["Số ngày LV thực tế"] ??
+                r["So ngay LV thuc te"] ??
                 ""
             );
         }
@@ -2177,12 +2177,12 @@
          */
         function buildSoNgayLvThucTeSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2195,7 +2195,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2206,14 +2206,14 @@
          */
         function buildSoChuyenByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
-            const fromD = parseDateInputYmd(filters ? .fromDate);
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            const fromD = parseDateInputYmd(filters ?.fromDate);
             if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2231,7 +2231,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2242,14 +2242,14 @@
          */
         function buildTongKmT1ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
-            const fromD = parseDateInputYmd(filters ? .fromDate);
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            const fromD = parseDateInputYmd(filters ?.fromDate);
             if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2267,7 +2267,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2278,14 +2278,14 @@
          */
         function buildTongKmT2ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
-            const toD = parseDateInputYmd(filters ? .toDate);
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            const toD = parseDateInputYmd(filters ?.toDate);
             if (!toD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2303,7 +2303,7 @@
                 const ctAsset = pickCtTaiSanTen(r);
                 const key = assetKeyFromName(ctAsset);
                 if (!key || !mainAssetKeys.has(key)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + n);
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
             }
             return byKey;
         }
@@ -2311,11 +2311,11 @@
         function pickCtTaiSanTen(row) {
             if (!row || typeof row !== "object") return "";
             return String(
-                row["Tên tài sản"] ? ?
-                row["Ten tai san"] ? ?
-                row["TenTaiSan"] ? ?
-                row["Tên thiết bị"] ? ?
-                row["Ten thiet bi"] ? ?
+                row["Tên tài sản"] ??
+                row["Ten tai san"] ??
+                row["TenTaiSan"] ??
+                row["Tên thiết bị"] ??
+                row["Ten thiet bi"] ??
                 ""
             ).trim();
         }
@@ -2326,8 +2326,8 @@
         }
 
         function taiSanNamesLooselyEqual(a, b) {
-            const s1 = String(a ? ? "").trim();
-            const s2 = String(b ? ? "").trim();
+            const s1 = String(a ?? "").trim();
+            const s2 = String(b ?? "").trim();
             if (!s1 || !s2) return false;
             const n1 = normalizeKeyPart(s1);
             const n2 = normalizeKeyPart(s2);
@@ -2340,7 +2340,7 @@
         }
 
         function pickModeTenNhomFromVoteMap(voteMap) {
-            if (!voteMap ? .size) return "";
+            if (!voteMap ?.size) return "";
             let best = "";
             let bestN = -1;
             for (const [name, n] of voteMap) {
@@ -2359,12 +2359,12 @@
          */
         function buildTenNhomByTaiSanFromNtCt(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -2372,11 +2372,11 @@
             }
 
             function addVote(tally, assetKey, tenNhom) {
-                const g = String(tenNhom ? ? "").trim();
+                const g = String(tenNhom ?? "").trim();
                 if (!g || !assetKey) return;
                 if (!tally.has(assetKey)) tally.set(assetKey, new Map());
                 const m = tally.get(assetKey);
-                m.set(g, (m.get(g) ? ? 0) + 1);
+                m.set(g, (m.get(g) ?? 0) + 1);
             }
 
             const tallyTaiSan = new Map();
@@ -2400,7 +2400,7 @@
 
         function uniqueTenNhomFromCtRows(ctRows) {
             const set = new Set();
-            if (!ctRows ? .length) return [];
+            if (!ctRows ?.length) return [];
             for (const r of ctRows) {
                 const t = pickCtTenNhom(r);
                 if (t) set.add(t);
@@ -2409,7 +2409,7 @@
         }
 
         function parseCtSortOrder(row) {
-            const raw = row ? .["STT"] ? ? row ? .["Thứ tự"] ? ? row ? .["Thu tu"] ? ? row ? .["Dòng"] ? ? row ? .["Dong"] ? ? "";
+            const raw = row ?.["STT"] ?? row ?.["Thứ tự"] ?? row ?.["Thu tu"] ?? row ?.["Dòng"] ?? row ?.["Dong"] ?? "";
             const n = parseInt(cellString(raw), 10);
             return isNaN(n) ? Number.MAX_SAFE_INTEGER : n;
         }
@@ -2441,11 +2441,11 @@
         }
 
         function applyCongViecFromNtCtByTaiSan(mainRows, normalizedRows, ctRows) {
-            if (!ctRows ? .length || !mainRows ? .length) return normalizedRows;
+            if (!ctRows ?.length || !mainRows ?.length) return normalizedRows;
             const parsedCt = ctRows
                 .map((row) => ({
                     assetKey: assetKeyFromName(
-                        row["Tên tài sản"] ? ? row["Ten tai san"] ? ? row["TenTaiSan"] ? ? row["Tên thiết bị"] ? ? row["Ten thiet bi"] ? ? ""
+                        row["Tên tài sản"] ?? row["Ten tai san"] ?? row["TenTaiSan"] ?? row["Tên thiết bị"] ?? row["Ten thiet bi"] ?? ""
                     ),
                     task: pickCtCongViecText(row),
                     order: parseCtSortOrder(row)
@@ -2569,7 +2569,7 @@
 
         /** Chuẩn hóa chữ để so khớp «Xe bồn» (NFKC + bỏ dấu). */
         function normTextForXeBonMatch(s) {
-            return String(s ? ? "")
+            return String(s ?? "")
                 .trim()
                 .normalize("NFKC")
                 .normalize("NFD")
@@ -2579,7 +2579,7 @@
 
         /** Nhóm «Xe bồn» — so khớp lỏng (CT hoặc cột nhóm trên phiếu NT). */
         function nhomTenLooksLikeXeBon(s) {
-            const raw = String(s ? ? "").trim();
+            const raw = String(s ?? "").trim();
             if (!raw) return false;
             const t = normTextForXeBonMatch(raw);
             if (/\bxe\s*bon\b/.test(t) || t.includes("xe bon")) return true;
@@ -2661,7 +2661,7 @@
         }
 
         function pickPreferredTenNhomFromCandidates(candidates) {
-            if (!candidates ? .length) return "";
+            if (!candidates ?.length) return "";
             for (const c of candidates) {
                 if (nhomTenLooksLikeXeBon(c)) return c;
             }
@@ -2687,7 +2687,7 @@
         }
 
         function normColKeyForTg(k) {
-            return String(k ? ? "")
+            return String(k ?? "")
                 .trim()
                 .normalize("NFD")
                 .replace(/\u0300-\u036f/g, "")
@@ -2892,20 +2892,20 @@
          */
         function buildTongGioXeBonSumByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ? .length || !mainRows ? .length) return byKey;
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
                 mainAssetKeys.add(key);
             }
 
-            const from = parseDateInputYmd(filters ? .fromDate);
-            const to = parseDateInputYmd(filters ? .toDate);
+            const from = parseDateInputYmd(filters ?.fromDate);
+            const to = parseDateInputYmd(filters ?.toDate);
 
             for (const r of ctRows) {
                 if (from || to) {
@@ -2928,7 +2928,7 @@
                     if (nCtTong != null && !isNaN(nCtTong)) gio = nCtTong;
                 }
                 if (gio == null || isNaN(gio)) continue;
-                byKey.set(key, (byKey.get(key) ? ? 0) + gio);
+                byKey.set(key, (byKey.get(key) ?? 0) + gio);
             }
             return byKey;
         }
@@ -2937,10 +2937,10 @@
          * Xe bồn: «Tên nhóm» từ CT; cột nhóm trên phiếu NT; «Nguồn gốc» từ DS hoặc phiếu NT.
          */
         function rowIsNhomXeBon(raw, tenNhomByTaiSan, assetKey, nguonGocByTaiSan) {
-            const fromCt = assetKey && tenNhomByTaiSan ? .get ? tenNhomByTaiSan.get(assetKey) : "";
+            const fromCt = assetKey && tenNhomByTaiSan ?.get ? tenNhomByTaiSan.get(assetKey) : "";
             if (nhomTenLooksLikeXeBon(fromCt)) return true;
             if (nhomTenLooksLikeXeBon(pickNtMainTenNhom(raw))) return true;
-            const ngDs = assetKey && nguonGocByTaiSan ? .get ? nguonGocByTaiSan.get(assetKey) : "";
+            const ngDs = assetKey && nguonGocByTaiSan ?.get ? nguonGocByTaiSan.get(assetKey) : "";
             if (nhomTenLooksLikeXeBon(ngDs)) return true;
             if (nhomTenLooksLikeXeBon(pickField(raw, "NguonGoc"))) return true;
             if (ntRowLooseXeBonHint(raw)) return true;
@@ -2949,10 +2949,10 @@
 
         /** Có ít nhất một dòng dữ liệu (phiếu NT) thuộc nhóm Xe bồn — để hiện cột «Tổng giờ HĐ xe bồn». */
         function reportHasAnyXeBonRow(mainRows, tenNhomByTaiSan, nguonGocByTaiSan) {
-            if (!mainRows ? .length) return false;
+            if (!mainRows ?.length) return false;
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
                 if (rowIsNhomXeBon(raw, tenNhomByTaiSan, key, nguonGocByTaiSan)) return true;
             }
@@ -2989,7 +2989,7 @@
                 const key = assetKeyFromName(out.TenThietBi);
 
                 if (rowIsNhomXeBon(raw, tenNhomByTaiSan, key, nguonGocByTaiSan)) {
-                    const gio = key && sumXeBonHdByTaiSan ? .has(key) ? sumXeBonHdByTaiSan.get(key) : null;
+                    const gio = key && sumXeBonHdByTaiSan ?.has(key) ? sumXeBonHdByTaiSan.get(key) : null;
                     out.TongGioHoatDongXeBon = gio != null && !isNaN(gio) ? formatHourDisplay(gio) : "";
                     return out;
                 }
@@ -3015,8 +3015,8 @@
          * Giữ «-» và ô trống; cột chữ giữ nguyên.
          */
         function formatReportCellDisplay(column, rawVal) {
-            if (REPORT_TEXT_COLUMNS.has(column)) return String(rawVal ? ? "");
-            const s0 = String(rawVal ? ? "").trim();
+            if (REPORT_TEXT_COLUMNS.has(column)) return String(rawVal ?? "");
+            const s0 = String(rawVal ?? "").trim();
             if (s0 === "" || s0 === "-") return s0;
             if (column === "TT") {
                 const n = typeof rawVal === "number" ? rawVal : parseNumericForLiters(rawVal);
@@ -3052,14 +3052,14 @@
          */
         function buildNlFuelSumsByTaiSan(mainRows, nlRows, filters) {
             const sums = emptyNlFuelSumsByTaiSan();
-            if (!nlRows ? .length || !mainRows ? .length) return sums;
-            const from = parseDateInputYmd(filters ? .fromDate);
-            const to = parseDateInputYmd(filters ? .toDate);
+            if (!nlRows ?.length || !mainRows ?.length) return sums;
+            const from = parseDateInputYmd(filters ?.fromDate);
+            const to = parseDateInputYmd(filters ?.toDate);
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -3067,7 +3067,7 @@
             }
 
             function addToMap(targetMap, assetKey, q) {
-                targetMap.set(assetKey, (targetMap.get(assetKey) ? ? 0) + q);
+                targetMap.set(assetKey, (targetMap.get(assetKey) ?? 0) + q);
             }
 
             for (const r of nlRows) {
@@ -3078,11 +3078,11 @@
                     if (to && d > to) continue;
                 }
                 const tenNl =
-                    r["Tên nhiên liệu"] ? ?
-                    r["Ten nhien lieu"] ? ?
-                    r["Tên NL"] ? ?
-                    r["Loại nhiên liệu"] ? ?
-                    r["Loai nhien lieu"] ? ?
+                    r["Tên nhiên liệu"] ??
+                    r["Ten nhien lieu"] ??
+                    r["Tên NL"] ??
+                    r["Loại nhiên liệu"] ??
+                    r["Loai nhien lieu"] ??
                     "";
                 const col = classifyNlTenToFuelColumn(tenNl);
                 if (!col) continue;
@@ -3101,13 +3101,13 @@
         function buildNlTonBoundaryByTaiSan(mainRows, nlRows, filters) {
             const tonDauByTaiSan = new Map();
             const tonCuoiByTaiSan = new Map();
-            if (!nlRows ? .length || !mainRows ? .length) return {
+            if (!nlRows ?.length || !mainRows ?.length) return {
                 tonDauByTaiSan,
                 tonCuoiByTaiSan
             };
 
-            const fromD = parseDateInputYmd(filters ? .fromDate);
-            const toD = parseDateInputYmd(filters ? .toDate);
+            const fromD = parseDateInputYmd(filters ?.fromDate);
+            const toD = parseDateInputYmd(filters ?.toDate);
             const fromKey = dateKeyYmd(fromD);
             if (!fromKey && !toD) return {
                 tonDauByTaiSan,
@@ -3118,10 +3118,10 @@
 
             const parents = [];
             for (const raw of mainRows) {
-                if (raw ? .groupRow || raw ? .subGroupRow) continue;
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
                 const ids = getNtParentMatchIds(raw);
                 if (!ids.length) continue;
-                const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
                 if (!key) continue;
@@ -3203,9 +3203,9 @@
 
         function mergeFuelMapsByKey(a, b) {
             const out = new Map();
-            const keys = new Set([...(a ? .keys ? .() ? ? []), ...(b ? .keys ? .() ? ? [])]);
+            const keys = new Set([...(a ?.keys ?.() ?? []), ...(b ?.keys ?.() ?? [])]);
             for (const k of keys) {
-                const s = (a ? .get(k) ? ? 0) + (b ? .get(k) ? ? 0);
+                const s = (a ?.get(k) ?? 0) + (b ?.get(k) ?? 0);
                 out.set(k, s);
             }
             return out;
@@ -3215,10 +3215,10 @@
             const empty = () => new Map();
             return {
                 // Theo yêu cầu: 4 cột phụ chỉ lấy nguồn NXLC CT (bỏ nguồn Nhật trình NL).
-                TongMo: mergeFuelMapsByKey(empty(), nxlcSums ? .TongMo ? ? empty()),
-                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums ? .TongNhot ? ? empty()),
-                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums ? .DauThuyLuc ? ? empty()),
-                DauCau: mergeFuelMapsByKey(empty(), nxlcSums ? .DauCau ? ? empty())
+                TongMo: mergeFuelMapsByKey(empty(), nxlcSums ?.TongMo ?? empty()),
+                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums ?.TongNhot ?? empty()),
+                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums ?.DauThuyLuc ?? empty()),
+                DauCau: mergeFuelMapsByKey(empty(), nxlcSums ?.DauCau ?? empty())
             };
         }
 
@@ -3230,16 +3230,16 @@
                 DauThuyLuc: new Map(),
                 DauCau: new Map()
             };
-            if (!nxlcCtRows ? .length) return sums;
-            const from = parseDateInputYmd(filters ? .fromDate);
-            const to = parseDateInputYmd(filters ? .toDate);
+            if (!nxlcCtRows ?.length) return sums;
+            const from = parseDateInputYmd(filters ?.fromDate);
+            const to = parseDateInputYmd(filters ?.toDate);
 
             const mainAssetKeys = new Set();
             const mainAssetPairs = [];
-            if (mainRows ? .length) {
+            if (mainRows ?.length) {
                 for (const raw of mainRows) {
-                    if (raw ? .groupRow || raw ? .subGroupRow) continue;
-                    const asset = String(pickField(raw, "TenThietBi") ? ? "").trim();
+                    if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                    const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                     if (!asset) continue;
                     const key = assetKeyFromName(asset);
                     if (!key) continue;
@@ -3252,7 +3252,7 @@
             }
 
             function resolveMainAssetKeyByName(candidateName) {
-                const t = String(candidateName ? ? "").trim();
+                const t = String(candidateName ?? "").trim();
                 if (!t) return "";
                 const exact = assetKeyFromName(t);
                 if (exact && (!mainAssetKeys.size || mainAssetKeys.has(exact))) return exact;
@@ -3263,7 +3263,7 @@
             }
 
             const xuatParentIds = [];
-            if (nxlcRows ? .length) {
+            if (nxlcRows ?.length) {
                 for (const p of nxlcRows) {
                     if (!loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) continue;
                     for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
@@ -3307,7 +3307,7 @@
                 const q = parseNxlcSlCell(r);
                 if (q == null) continue;
                 const targetMap = sums[reportCol];
-                targetMap.set(key, (targetMap.get(key) ? ? 0) + q);
+                targetMap.set(key, (targetMap.get(key) ?? 0) + q);
             }
             return sums;
         }
@@ -3318,7 +3318,7 @@
         function applyNlLuongDauNhapFromNl(mainRows, normalizedRows, nlSums) {
             if (!nlSums) return normalizedRows;
             const m = nlSums.LuongDauNhap;
-            if (!m ? .size) return normalizedRows;
+            if (!m ?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
@@ -3333,7 +3333,7 @@
         /** 4 cột phụ: tổng «Nhật trình NL» + «NXLC CT» (cùng tài sản). */
         function applyMergedAuxiliaryFuelColumnsFromNlNxlc(mainRows, normalizedRows, mergedAux) {
             if (!mergedAux) return normalizedRows;
-            const hasAny = NXLC_AUX_FUEL_COLUMNS.some((c) => mergedAux[c] ? .size > 0);
+            const hasAny = NXLC_AUX_FUEL_COLUMNS.some((c) => mergedAux[c] ?.size > 0);
             if (!hasAny) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
@@ -3343,7 +3343,7 @@
                 if (!key) return out;
                 for (const c of NXLC_AUX_FUEL_COLUMNS) {
                     const map = mergedAux[c];
-                    if (map ? .has(key)) out[c] = formatLitersDisplay(map.get(key));
+                    if (map ?.has(key)) out[c] = formatLitersDisplay(map.get(key));
                 }
                 return out;
             });
@@ -3353,7 +3353,7 @@
             if (!tonBoundary) return normalizedRows;
             const tonDauMap = tonBoundary.tonDauByTaiSan;
             const tonCuoiMap = tonBoundary.tonCuoiByTaiSan;
-            const hasAny = (tonDauMap ? .size ? ? 0) > 0 || (tonCuoiMap ? .size ? ? 0) > 0;
+            const hasAny = (tonDauMap ?.size ?? 0) > 0 || (tonCuoiMap ?.size ?? 0) > 0;
             if (!hasAny) return normalizedRows;
 
             return normalizedRows.map((out, i) => {
@@ -3370,11 +3370,11 @@
                     return baseVal * dmTrongBinh;
                 };
 
-                if (tonDauMap ? .has(key)) {
+                if (tonDauMap ?.has(key)) {
                     const tonDauDaNhan = nhanDinhMuc(tonDauMap.get(key));
                     out.TonDauKy = formatLitersDisplay(tonDauDaNhan);
                 }
-                if (tonCuoiMap ? .has(key)) {
+                if (tonCuoiMap ?.has(key)) {
                     const tonCuoiDaNhan = nhanDinhMuc(tonCuoiMap.get(key));
                     out.TonCuoiKy = formatLitersDisplay(tonCuoiDaNhan);
                 }
@@ -3386,7 +3386,7 @@
         function applyFuelColumnsFromNxlcCt(mainRows, normalizedRows, fuelByTaiSan) {
             if (!fuelByTaiSan) return normalizedRows;
             const m = fuelByTaiSan.LuongDauTieuHao;
-            if (!m ? .size) return normalizedRows;
+            if (!m ?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
@@ -3404,10 +3404,10 @@
          * Áp dụng ở bước cuối để luôn ưu tiên công thức này so với mọi nguồn khác.
          */
         function applyLuongDauTieuHaoFromTonFormula(mainRows, normalizedRows) {
-            if (!normalizedRows ? .length) return normalizedRows;
+            if (!normalizedRows ?.length) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
-                const raw = mainRows ? .[i];
+                const raw = mainRows ?.[i];
                 if (!raw) return out;
 
                 const nTonDau = parseNumericForLiters(out.TonDauKy);
@@ -3426,10 +3426,10 @@
          * T1 dùng TongKmHoatDongT1; T2 dùng TongKmHoatDongT2 (hai cột này hiện lưu tổng giờ theo tháng).
          */
         function applyTieuHaoThucTeFromTongKm(mainRows, normalizedRows) {
-            if (!normalizedRows ? .length) return normalizedRows;
+            if (!normalizedRows ?.length) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
-                const raw = mainRows ? .[i];
+                const raw = mainRows ?.[i];
                 if (!raw) return out;
 
                 const nTieuHao = parseNumericForLiters(out.LuongDauTieuHao);
@@ -3444,14 +3444,14 @@
         }
 
         function countCtRowsTrongGioHC(ctRows) {
-            if (!ctRows ? .length) return 0;
+            if (!ctRows ?.length) return 0;
             return ctRows.filter((r) =>
-                isLoaiTrongGioHC(r["Loại công việc"] ? ? r["Loai cong viec"] ? ? r["Loại CV"] ? ? "")
+                isLoaiTrongGioHC(r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "")
             ).length;
         }
 
         function appSheetLooksLikeDateString(raw) {
-            const s = String(raw ? ? "").trim();
+            const s = String(raw ?? "").trim();
             if (!s) return false;
             if (/^\d{4}[/-]\d{1,2}[/-]\d{1,2}(?:[T\s,].*)?$/i.test(s)) return true;
             if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}(?:[T\s,].*)?$/i.test(s)) return true;
@@ -3459,9 +3459,9 @@
         }
 
         function normalizeAppSheetDateCell(value, keyHint) {
-            const keyLooksDate = /ng[aà]y|date/i.test(String(keyHint ? ? ""));
+            const keyLooksDate = /ng[aà]y|date/i.test(String(keyHint ?? ""));
             const normalizeString = (s) => {
-                const text = String(s ? ? "").trim();
+                const text = String(s ?? "").trim();
                 if (!text) return s;
                 if (!keyLooksDate && !appSheetLooksLikeDateString(text)) return s;
                 const d = parseDateFlexible(text);
@@ -3570,7 +3570,7 @@
             }
             const allRows = Array.isArray(result) ?
                 result :
-                Array.isArray(result ? .Rows) ?
+                Array.isArray(result ?.Rows) ?
                 result.Rows :
                 [];
             return allRows.map(normalizeAppSheetRowDates);
@@ -3693,9 +3693,9 @@
             const drv = new Set();
             for (const r of seedRows) {
                 if (r.groupRow || r.subGroupRow) continue;
-                const p = String(r.CongTruong ? ? "").trim();
+                const p = String(r.CongTruong ?? "").trim();
                 if (p) proj.add(p);
-                const d = String(r.TenLaiMay ? ? "").trim();
+                const d = String(r.TenLaiMay ?? "").trim();
                 if (d) drv.add(d);
             }
             fillFilterSelectElement(
@@ -3712,7 +3712,7 @@
         }
 
         function escapeHtml(value) {
-            return String(value ? ? "")
+            return String(value ?? "")
                 .replaceAll("&", "&amp;")
                 .replaceAll("<", "&lt;")
                 .replaceAll(">", "&gt;")
@@ -3787,6 +3787,45 @@
             "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html"
         };
 
+        const TOP_GROUP_TAB_MAP = {
+            "thiet-bi": new Set(["tab-trang-thiet-bi", "tab-xe-ben", "tab-xe-bon"]),
+            "nhien-lieu": new Set(["tab-chi-tiet-nl", "tab-ton-kho-nl", "tab-xuat-nl-theo-ct", "tab-th-xuat-ct"]),
+            "sua-chua": new Set(["tab-tong-hop-sc"]),
+            "kiem-ke": new Set(["tab-kiem-ke-thiet-bi"]),
+            "ke-hoach": new Set([])
+        };
+
+        function getCurrentTopGroup() {
+            return (new URLSearchParams(window.location.search).get("group") || "").trim();
+        }
+
+        function appendGroupToTarget(url) {
+            const group = getCurrentTopGroup();
+            if (!group) return url;
+            try {
+                const u = new URL(url, window.location.href);
+                u.searchParams.set("group", group);
+                return `${u.pathname}${u.search}${u.hash}`;
+            } catch (e) {
+                const sep = url.includes("?") ? "&" : "?";
+                return `${url}${sep}group=${encodeURIComponent(group)}`;
+            }
+        }
+
+        function applyGroupedTabVisibility() {
+            const allowed = TOP_GROUP_TAB_MAP[getCurrentTopGroup()];
+            if (!allowed) return;
+            const container = document.querySelector(".report-tabs-container");
+            if (!container) return;
+            let visible = 0;
+            container.querySelectorAll(".report-tab-btn").forEach((btn) => {
+                const show = allowed.has(btn.id || "");
+                btn.style.display = show ? "" : "none";
+                if (show) visible += 1;
+            });
+            if (!visible) container.style.display = "none";
+        }
+
         let currentReportTab = "trang-thiet-bi";
 
         function setActiveReportTabButton(tabId) {
@@ -3804,12 +3843,13 @@
                 currentReportTab = tabFromUrl;
             }
             setActiveReportTabButton(currentReportTab);
+            applyGroupedTabVisibility();
         }
 
         function switchReportTab(tabId) {
             const redirectUrl = REPORT_TAB_REDIRECTS[tabId];
             if (redirectUrl) {
-                window.location.href = redirectUrl;
+                window.location.href = appendGroupToTarget(redirectUrl);
                 return;
             }
             if (!LOCAL_REPORT_TABS.has(tabId)) return;
@@ -3900,7 +3940,7 @@
             if (value instanceof Date) return value;
             const ymd = parseDateInputYmd(value);
             if (ymd) return ymd;
-            const s = String(value ? ? "").trim();
+            const s = String(value ?? "").trim();
             if (!s) return null;
 
             // AppSheet thường trả ISO datetime như 2027-03-04T00:00:00.000Z.
@@ -4023,10 +4063,10 @@
 
         /** Lọc toàn bộ «Nhật trình máy CT» theo cột «Ngày làm việc». */
         function filterCtRowsByNgayLamViec(ctRows, filters) {
-            const from = parseDateInputYmd(filters ? .fromDate);
-            const to = parseDateInputYmd(filters ? .toDate);
+            const from = parseDateInputYmd(filters ?.fromDate);
+            const to = parseDateInputYmd(filters ?.toDate);
             if (!from && !to) return ctRows || [];
-            if (!ctRows ? .length) return [];
+            if (!ctRows ?.length) return [];
             return ctRows.filter((ct) => {
                 const d = parseCtNgayLamViec(ct);
                 if (!d || isNaN(d.getTime())) return false;
@@ -4041,10 +4081,10 @@
          * Khớp CT → phiếu chính bằng Tên tài sản và Ref/ID cha.
          */
         function applyNgayLamViecFilterByCt(mainRows, ctRows, filters) {
-            const from = parseDateInputYmd(filters ? .fromDate);
-            const to = parseDateInputYmd(filters ? .toDate);
+            const from = parseDateInputYmd(filters ?.fromDate);
+            const to = parseDateInputYmd(filters ?.toDate);
             if (!from && !to) return mainRows || [];
-            if (!mainRows ? .length) return [];
+            if (!mainRows ?.length) return [];
 
             const fallbackByMainDate = (rows) =>
                 (rows || []).filter((raw) => {
@@ -4055,9 +4095,9 @@
                     return true;
                 });
 
-            if (!ctRows ? .length) return fallbackByMainDate(mainRows);
+            if (!ctRows ?.length) return fallbackByMainDate(mainRows);
 
-            const mainAssetByIndex = mainRows.map((raw) => String(pickField(raw, "TenThietBi") ? ? "").trim());
+            const mainAssetByIndex = mainRows.map((raw) => String(pickField(raw, "TenThietBi") ?? "").trim());
             const mainByAssetKey = new Map();
             const mainIdsByIndex = mainRows.map((raw, index) => ({
                 index,
@@ -4091,7 +4131,7 @@
                 for (const rref of refs) {
                     if (!rref) continue;
                     for (const x of mainIdsByIndex) {
-                        if (!x.ids ? .length) continue;
+                        if (!x.ids ?.length) continue;
                         for (const pid of x.ids) {
                             if (parentIdsMatch(rref, pid)) {
                                 matchedMainIndexes.add(x.index);
@@ -4109,8 +4149,8 @@
 
         function updateDateRangeBanner(filters, rows) {
             if (!dateRangeEl) return;
-            const fromFilter = formatDateVn(filters ? .fromDate);
-            const toFilter = formatDateVn(filters ? .toDate);
+            const fromFilter = formatDateVn(filters ?.fromDate);
+            const toFilter = formatDateVn(filters ?.toDate);
             dateRangeEl.textContent = `(Từ ${fromFilter || "..."} đến ${toFilter || "..."})`;
         }
 
@@ -4126,8 +4166,8 @@
          * Cột km 2: T{tháng} theo «Đến ngày» (tới ngày) — không có «Đến ngày» thì để trống.
          */
         function getKmMonthLabelsFromFiltersOrRows(filters) {
-            const fromF = parseDateInputYmd(filters ? .fromDate);
-            const toF = parseDateInputYmd(filters ? .toDate);
+            const fromF = parseDateInputYmd(filters ?.fromDate);
+            const toF = parseDateInputYmd(filters ?.toDate);
             return {
                 line1: fromF ? monthTokenLabel(fromF) : "",
                 line2: toF ? monthTokenLabel(toF) : ""
@@ -4173,7 +4213,7 @@
 
         function updateSignatureDate(filters) {
             if (!signatureDateEl) return;
-            const d = parseDateInputYmd(filters ? .toDate) || new Date();
+            const d = parseDateInputYmd(filters ?.toDate) || new Date();
             if (!d || isNaN(d.getTime())) {
                 signatureDateEl.textContent = "";
                 return;
@@ -4197,7 +4237,7 @@
             if (!n) return true;
             const cols = FILTER_DROPDOWN_SOURCE_KEYS[filterKey] || [];
             for (const col of cols) {
-                const v = cellString(raw[col] ? ? "").trim();
+                const v = cellString(raw[col] ?? "").trim();
                 if (!v) continue;
                 if (v.toLowerCase() === n) return true;
                 if (v.toLowerCase().includes(n)) return true;
@@ -4207,17 +4247,17 @@
 
         function pickAssetNameForGroupSummary(raw) {
             return String(
-                raw ? .["Tên tài sản"] ? ?
-                raw ? .["Ten tai san"] ? ?
-                raw ? .["Tên thiết bị"] ? ?
-                raw ? .["Ten thiet bi"] ? ?
+                raw ?.["Tên tài sản"] ??
+                raw ?.["Ten tai san"] ??
+                raw ?.["Tên thiết bị"] ??
+                raw ?.["Ten thiet bi"] ??
                 ""
             ).trim();
         }
 
         function uniqueNguonGocFromDanhSachTaiSan(dsRows) {
             const set = new Set();
-            if (!dsRows ? .length) return [];
+            if (!dsRows ?.length) return [];
             for (const r of dsRows) {
                 const v = pickDanhSachNguonGoc(r);
                 if (v) set.add(v);
@@ -4227,7 +4267,7 @@
 
         function uniqueTenLoaiFromDanhSachTaiSan(dsRows) {
             const set = new Set();
-            if (!dsRows ? .length) return [];
+            if (!dsRows ?.length) return [];
             for (const r of dsRows) {
                 const v = pickDanhSachTenLoai(r);
                 if (v) set.add(v);
@@ -4238,9 +4278,9 @@
         function rawRowMatchesOriginFilter(raw, needle, nguonGocByTaiSan) {
             const n = needle.trim().toLowerCase();
             if (!n) return true;
-            const asset = pickAssetNameForGroupSummary(raw) || String(pickField(raw, "TenThietBi") ? ? "").trim();
+            const asset = pickAssetNameForGroupSummary(raw) || String(pickField(raw, "TenThietBi") ?? "").trim();
             const key = assetKeyFromName(asset);
-            const fromDs = key && nguonGocByTaiSan ? .get ? nguonGocByTaiSan.get(key) : "";
+            const fromDs = key && nguonGocByTaiSan ?.get ? nguonGocByTaiSan.get(key) : "";
             if (fromDs) {
                 const g = String(fromDs).trim().toLowerCase();
                 if (g === n) return true;
@@ -4254,7 +4294,7 @@
             if (!n) return true;
             const asset = pickAssetNameForGroupSummary(raw);
             const key = assetKeyFromName(asset);
-            const fromCt = key && tenNhomByTaiSan ? .get ? tenNhomByTaiSan.get(key) : "";
+            const fromCt = key && tenNhomByTaiSan ?.get ? tenNhomByTaiSan.get(key) : "";
             if (fromCt) {
                 const g = String(fromCt).trim().toLowerCase();
                 if (g === n) return true;
@@ -4264,11 +4304,11 @@
         }
 
         function applyRawTextFilters(rows, filters, tenNhomByTaiSan, nguonGocByTaiSan, tenLoaiByTaiSan) {
-            if (!rows ? .length) return rows || [];
+            if (!rows ?.length) return rows || [];
             return rows.filter((r) => {
-                const asset = String(pickField(r, "TenThietBi") ? ? "").trim();
+                const asset = String(pickField(r, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
-                const tenNhom = (key && tenNhomByTaiSan ? .get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+                const tenNhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
 
                 // Tab Xe Ben
                 if (currentReportTab === "xe-ben") {
@@ -4285,13 +4325,13 @@
                 }
 
                 for (const fk of["project", "driver"]) {
-                    const needle = (filters[fk] ? ? "").trim();
+                    const needle = (filters[fk] ?? "").trim();
                     if (!needle) continue;
                     if (!rawCellMatchesNeedle(r, fk, needle)) return false;
                 }
-                const oNeedle = (filters.origin ? ? "").trim();
+                const oNeedle = (filters.origin ?? "").trim();
                 if (oNeedle && !rawRowMatchesOriginFilter(r, oNeedle, nguonGocByTaiSan)) return false;
-                const gNeedle = (filters.group ? ? "").trim();
+                const gNeedle = (filters.group ?? "").trim();
                 if (gNeedle && !rawRowMatchesGroupFilter(r, gNeedle, tenNhomByTaiSan)) return false;
                 return true;
             });
@@ -4382,7 +4422,7 @@
          * Chèn dòng tổng ngang + chi tiết theo «Tên nhóm» (CT). Chỉ khi có ít nhất một tài sản đã gán nhóm từ CT.
          */
         function injectNhomTongRows(normalizedRows, tenNhomByTaiSan) {
-            if (!normalizedRows ? .length || !tenNhomByTaiSan ? .size) return normalizedRows;
+            if (!normalizedRows ?.length || !tenNhomByTaiSan ?.size) return normalizedRows;
             const dataRows = normalizedRows.filter((r) => !r.groupRow && !r.subGroupRow && !r.nhomTongRow);
             if (!dataRows.length) return normalizedRows;
 
@@ -4413,7 +4453,7 @@
             const out = [];
             for (const gName of groupNames) {
                 const list = byGroup.get(gName);
-                list.sort((a, b) => String(a.TenThietBi ? ? "").localeCompare(String(b.TenThietBi ? ? ""), "vi"));
+                list.sort((a, b) => String(a.TenThietBi ?? "").localeCompare(String(b.TenThietBi ?? ""), "vi"));
                 out.push(buildNhomTongAggregateRow(list, gName));
                 out.push(...list);
             }
@@ -4485,7 +4525,7 @@
                         const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column) ?
                             "text-left" :
                             "";
-                        const rawVal = column === "TT" ? "" : (row[column] ? ? "");
+                        const rawVal = column === "TT" ? "" : (row[column] ?? "");
                         const displayVal = column === "TT" ? "" : formatReportCellDisplay(column, rawVal);
                         return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
                     }).join("");
@@ -4503,7 +4543,7 @@
                     const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column) ?
                         "text-left" :
                         "";
-                    const rawVal = column === "TT" ? sttAuto : (row[column] ? ? "");
+                    const rawVal = column === "TT" ? sttAuto : (row[column] ?? "");
                     const displayVal = formatReportCellDisplay(column, rawVal);
                     return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
                 }).join("");
@@ -4516,7 +4556,7 @@
                     const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "CongViec", "CongTruong"].includes(column) ?
                         "text-left" :
                         "";
-                    const rawVal = column === "TT" ? "" : (grand[column] ? ? "");
+                    const rawVal = column === "TT" ? "" : (grand[column] ?? "");
                     const displayVal = column === "TT" ? "" : formatReportCellDisplay(column, rawVal);
                     return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
                 }).join("");
@@ -4691,10 +4731,10 @@
                     if (bienSoByTaiSan.size > 0) {
                         ctPart += `; biển số: ${bienSoByTaiSan.size} tài sản từ «${TABLE_DS_TAI_SAN}» (khớp Tên tài sản ↔ Tên thiết bị)`;
                     }
-                    const nDmBinh = dinhMucByTaiSanFromDs ? .trongBinhByTaiSan ? .size ? ? 0;
+                    const nDmBinh = dinhMucByTaiSanFromDs ?.trongBinhByTaiSan ?.size ?? 0;
                     const nDmTh = Math.max(
-                        dinhMucByTaiSanFromDs ? .tieuHaoRawByTaiSan ? .size ? ? 0,
-                        dinhMucByTaiSanFromDs ? .tieuHaoByTaiSan ? .size ? ? 0
+                        dinhMucByTaiSanFromDs ?.tieuHaoRawByTaiSan ?.size ?? 0,
+                        dinhMucByTaiSanFromDs ?.tieuHaoByTaiSan ?.size ?? 0
                     );
                     if (nDmBinh > 0 || nDmTh > 0) {
                         ctPart += `; định mức: ${nDmBinh} tài sản «ĐM đo bình_cm», ${nDmTh} tài sản «ĐM tiêu hao NL_lít_giờ» từ «${TABLE_DS_TAI_SAN}»`;
@@ -4707,8 +4747,8 @@
                     if (nTypes > 0) {
                         ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
                     }
-                    const nTonDau = tonBoundaryByTaiSan ? .tonDauByTaiSan ? .size ? ? 0;
-                    const nTonCuoi = tonBoundaryByTaiSan ? .tonCuoiByTaiSan ? .size ? ? 0;
+                    const nTonDau = tonBoundaryByTaiSan ?.tonDauByTaiSan ?.size ?? 0;
+                    const nTonCuoi = tonBoundaryByTaiSan ?.tonCuoiByTaiSan ?.size ?? 0;
                     if (filters.fromDate && nTonDau > 0) {
                         ctPart += `; tồn đầu kỳ: ${nTonDau} tài sản lấy «Tồn trước khi nhập» tại ngày ${formatDateVn(filters.fromDate)}`;
                     }
@@ -4719,7 +4759,7 @@
                 if (nxlcCtLoadError) {
                     ctPart += ` — không tải «${TABLE_NXLC_CT}»: ${nxlcCtLoadError.message}`;
                 } else if (nxlcCtRows.length && fuelByTaiSanFromNxlc) {
-                    const nFuelCols = NXLC_FUEL_REPORT_COLUMNS.filter((c) => fuelByTaiSanFromNxlc[c] ? .size > 0).length;
+                    const nFuelCols = NXLC_FUEL_REPORT_COLUMNS.filter((c) => fuelByTaiSanFromNxlc[c] ?.size > 0).length;
                     if (nFuelCols > 0) {
                         ctPart += `; NL từ «${TABLE_NXLC_CT}»: ${nFuelCols} cột lấy tổng «SL» theo Tên nhiên liệu (Loại phiếu = Xuất)`;
                     }
@@ -4731,7 +4771,7 @@
                 if (usedNtCache) cacheBits.push("phiếu NT");
                 if (usedAuxCache) cacheBits.push("bảng phụ");
                 const cacheHint = cacheBits.length ? ` — dùng cache (${cacheBits.join(" + ")})` : "";
-                const hasDateFilter = !!(filters ? .fromDate || filters ? .toDate);
+                const hasDateFilter = !!(filters ?.fromDate || filters ?.toDate);
                 const ctDateHint = hasDateFilter ? ` (CT: ${ctRowsByDate.length}/${ctRows.length} dòng sau lọc ngày)` : "";
                 setStatus(`Đã hiển thị ${rows.length} dòng phù hợp.${cacheHint}${ctDateHint}`);
             } catch (error) {
@@ -4855,7 +4895,7 @@
                 }
 
                 const title = "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG";
-                const periodText = (document.getElementById("report-date-range") ? .textContent || "").trim();
+                const periodText = (document.getElementById("report-date-range") ?.textContent || "").trim();
 
                 /* Vùng A1:B2 để logo; chữ PHÒNG VẬT TƯ ở A3 để không đè ảnh. Ảnh nhúng trước merge để Excel hiển thị ổn định. */
                 worksheet.mergeCells(1, 1, 2, 2);
@@ -4958,7 +4998,7 @@
                 };
 
                 const exportRowsNormalized = (lastNormalizedRowsForExport || []).filter(
-                    (r) => !r ? .groupRow && !r ? .subGroupRow && !r ? .nhomTongRow
+                    (r) => !r ?.groupRow && !r ?.subGroupRow && !r ?.nhomTongRow
                 );
 
                 /* Sau dòng tiêu đề (5–6), một dòng trống (7), bảng bắt đầu 8 — không còn khối filter trong Excel. */
@@ -5009,7 +5049,7 @@
                         const fontSize = Number.parseFloat(st.fontSize || "10");
                         const isBold = Number(st.fontWeight) >= 600 || st.fontWeight === "bold";
                         excelCell.font = {
-                            name: st.fontFamily ? .includes("Arial") ? "Arial" : "Times New Roman",
+                            name: st.fontFamily ?.includes("Arial") ? "Arial" : "Times New Roman",
                             size: Math.max(8, Math.round(fontSize)),
                             bold: !!isBold,
                             color: fgArgb ? {
@@ -5192,7 +5232,7 @@
                             size: 10
                         };
                         const wch = worksheet.getColumn(colIdx + 1).width || 9;
-                        const s = String(displayVal ? ? "");
+                        const s = String(displayVal ?? "");
                         const paras = s.split(/\r?\n/);
                         const longest = paras.reduce((m, line) => Math.max(m, line.length), 0);
                         const charsPerLine = Math.max(4, Math.round(wch * 0.52));

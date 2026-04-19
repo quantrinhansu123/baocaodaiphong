@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Báo cáo nhiên liệu</title>
+    <title>View Tổng hợp báo cáo</title>
     <style>
         :root {
             --primary: #0b57d0;
@@ -32,6 +32,7 @@
 
         .tabs {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             padding: 10px 12px;
             border-bottom: 1px solid var(--border);
@@ -70,51 +71,105 @@
         .tab-panel.active {
             display: block;
         }
+
+        @media (max-width: 1100px) {
+            .tab-btn {
+                font-size: 12px;
+                padding: 7px 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="app">
         <div class="tabs">
-            <button class="tab-btn active" data-tab="main" type="button">Báo cáo tiêu hao nhiên liệu</button>
-            <button class="tab-btn" data-tab="thietbi" type="button">Báo cáo tiêu hao nhiên liệu thiết bị</button>
+            <button class="tab-btn active" data-tab="bc-thiet-bi" type="button">BC thiết bị (Thiết bị máy, Xe ben, Xe bồn)</button>
+            <button class="tab-btn" data-tab="bc-nhien-lieu" type="button">BC nhiên liệu (Tồn kho, Bảng kê NL, TH xuất NL theo Công trình)</button>
+            <button class="tab-btn" data-tab="bc-sua-chua" type="button">BC sửa chữa (BC01, BC02...)</button>
+            <button class="tab-btn" data-tab="bc-kiem-ke" type="button">BC kiểm kê</button>
+            <button class="tab-btn" data-tab="bc-ke-hoach" type="button">BC kế hoạch bảo dưỡng</button>
         </div>
 
         <div class="tab-panels">
             <iframe
-                id="panel-main"
+                id="panel-report"
                 class="tab-panel active"
-                src="./Baocaotieuhaonhienlieu.html?v=20260417a"
-                title="Báo cáo tiêu hao nhiên liệu">
-            </iframe>
-
-            <iframe
-                id="panel-thietbi"
-                class="tab-panel"
-                src="./Baocaotieuhaonhienlieuthietbi.html?v=20260417a"
-                title="Báo cáo tiêu hao nhiên liệu thiết bị">
+                src="./Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi"
+                title="View tổng hợp báo cáo">
             </iframe>
         </div>
     </div>
 
     <script>
         const buttons = Array.from(document.querySelectorAll(".tab-btn"));
-        const panels = {
-            main: document.getElementById("panel-main"),
-            thietbi: document.getElementById("panel-thietbi")
+        const panel = document.getElementById("panel-report");
+        let currentTopTab = "bc-thiet-bi";
+
+        const TAB_SOURCES = {
+            "bc-thiet-bi": "./Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi",
+            "bc-nhien-lieu": "./BaocaoNL.html?group=nhien-lieu",
+            "bc-sua-chua": "./BaocaoTonghopCPSuachua.html?group=sua-chua",
+            "bc-kiem-ke": "./BaocaoKiemKeThietBi.html?group=kiem-ke",
+            "bc-ke-hoach": "./BaocaoSCnam2025.html?group=ke-hoach"
         };
 
+        const CHILD_TAB_GROUPS = {
+            "bc-thiet-bi": new Set(["tab-trang-thiet-bi", "tab-xe-ben", "tab-xe-bon"]),
+            "bc-nhien-lieu": new Set(["tab-ton-kho-nl", "tab-chi-tiet-nl", "tab-xuat-nl-theo-ct"]),
+            "bc-sua-chua": new Set(["tab-tong-hop-sc"]),
+            "bc-kiem-ke": new Set(["tab-kiem-ke-thiet-bi"]),
+            "bc-ke-hoach": new Set([])
+        };
+
+        function applyChildTabGrouping() {
+            if (!panel) return;
+            let doc;
+            try {
+                doc = panel.contentDocument;
+            } catch (e) {
+                return;
+            }
+            if (!doc) return;
+
+            const container = doc.querySelector(".report-tabs-container");
+            if (!container) return;
+
+            const allowed = CHILD_TAB_GROUPS[currentTopTab] || new Set();
+            const childButtons = container.querySelectorAll(".report-tab-btn");
+
+            childButtons.forEach((btn) => {
+                const id = btn.id || "";
+                if (!allowed.size) {
+                    btn.style.display = "none";
+                    return;
+                }
+                btn.style.display = allowed.has(id) ? "" : "none";
+            });
+
+            const anyVisible = Array.from(childButtons).some((btn) => btn.style.display !== "none");
+            container.style.display = anyVisible ? "flex" : "none";
+        }
+
         function activateTab(tab) {
+            currentTopTab = tab;
             buttons.forEach((btn) => {
                 btn.classList.toggle("active", btn.dataset.tab === tab);
             });
-            Object.entries(panels).forEach(([key, panel]) => {
-                panel.classList.toggle("active", key === tab);
-            });
+            const src = TAB_SOURCES[tab];
+            if (!src || !panel) return;
+            if (panel.getAttribute("src") !== src) {
+                panel.setAttribute("src", src);
+            } else {
+                applyChildTabGrouping();
+            }
         }
 
         buttons.forEach((btn) => {
             btn.addEventListener("click", () => activateTab(btn.dataset.tab));
         });
+
+        panel.addEventListener("load", applyChildTabGrouping);
+        activateTab(currentTopTab);
     </script>
 </body>
 </html>
