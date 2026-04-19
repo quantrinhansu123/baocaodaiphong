@@ -1275,6 +1275,7 @@
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
+            const sLc = s.toLowerCase();
             if (
                 s.includes("dầu thủy lực") ||
                 noAccent.includes("dau thuy luc") ||
@@ -1289,10 +1290,10 @@
                 compact.includes("daucau") ||
                 compact.includes("nhotcau")
             ) return "DauCau";
-            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (sLc.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauTieuHao";
-            if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
+            if ((noAccent.includes("dau") || sLc.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
             return null;
         }
 
@@ -1417,6 +1418,7 @@
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
+            const sLc = s.toLowerCase();
 
             if (
                 s.includes("dầu thủy lực") ||
@@ -1432,10 +1434,10 @@
                 compact.includes("daucau") ||
                 compact.includes("nhotcau")
             ) return "DauCau";
-            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (sLc.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
-            if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
+            if ((noAccent.includes("dau") || sLc.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
             return null;
         }
 
@@ -3069,11 +3071,11 @@
         function buildMergedAuxiliaryFuelMapsFromNlAndNxlc(nlSums, nxlcSums) {
             const empty = () => new Map();
             return {
-                // Theo yêu cầu: 4 cột phụ chỉ lấy nguồn NXLC CT (bỏ nguồn Nhật trình NL).
-                TongMo: mergeFuelMapsByKey(empty(), nxlcSums?.TongMo ?? empty()),
-                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums?.TongNhot ?? empty()),
-                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums?.DauThuyLuc ?? empty()),
-                DauCau: mergeFuelMapsByKey(empty(), nxlcSums?.DauCau ?? empty())
+                // 4 cột phụ = tổng «Nhật trình NL» + «NXLC CT» theo tài sản (khớp applyMergedAuxiliaryFuelColumnsFromNlNxlc).
+                TongMo: mergeFuelMapsByKey(nlSums?.TongMo ?? empty(), nxlcSums?.TongMo ?? empty()),
+                TongNhot: mergeFuelMapsByKey(nlSums?.TongNhot ?? empty(), nxlcSums?.TongNhot ?? empty()),
+                DauThuyLuc: mergeFuelMapsByKey(nlSums?.DauThuyLuc ?? empty(), nxlcSums?.DauThuyLuc ?? empty()),
+                DauCau: mergeFuelMapsByKey(nlSums?.DauCau ?? empty(), nxlcSums?.DauCau ?? empty())
             };
         }
 
