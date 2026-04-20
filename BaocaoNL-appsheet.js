@@ -4,7 +4,7 @@
  * tổng «Số lượng NL» theo «Tên nhiên liệu» → 5 cột báo cáo.
  * «Công trình» = cột «Tên nơi quản lý» trên «Nhật trình máy CT» (khớp Tên tài sản/XMTB ↔ Tên thiết bị UI qua DS).
  * «Tên nơi quản lý» (cột LM) = «Tên LM» trên «Danh sách tài sản».
- * «Tồn đầu kỳ» (dòng tổng): «Nhật trình NL» — cột «Tồn trước khi nhập», tổng các dòng có month(Ngày)=month(Từ ngày), khớp Tên tài sản ↔ Tên thiết bị.
+ * «Tồn đầu kỳ» (dòng tổng): «Tồn kho ĐK» — cột «Sl tồn ĐK», lọc «Ngày nhập số dư ĐK» theo khoảng Từ ngày..Đến ngày.
  */
 (function () {
     "use strict";
@@ -18,6 +18,7 @@
     const TABLE_NT_NL = "Nhật trình NL";
     const TABLE_DS_TAI_SAN = "Danh sách tài sản";
     const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
+    const TABLE_TON_KHO_DK = "Tồn kho ĐK";
 
     const NT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
     const CT_FILTER_DATE_COLUMNS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
@@ -131,6 +132,9 @@
     let cacheNtCtRows = null;
     /** Cache «Nhật trình NL» — «Tồn trước khi nhập» / Ngày cho dòng tổng «Tồn đầu kỳ». */
     let cacheNtNlRows = null;
+    /** Cache «Tồn kho ĐK» — nguồn dòng tổng «Tồn đầu kỳ». */
+    let cacheTonKhoDkRows = null;
+    const NL_PREVIEW_ROW_CAP = 500;
 
     function cellString(v) {
         if (v == null) return "";
@@ -233,6 +237,109 @@
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;");
+    }
+
+    function isLikelyDateTimeColumnKey(k) {
+        const s = String(k ?? "");
+        const n = s
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "")
+            .toLowerCase();
+        if (/^ngay\b|^date\b|^time\b|ngay_|_ngay$/i.test(s)) return true;
+        if (/\bngay\b/.test(n)) return true;
+        if (/\bdate\b|\btime\b|thoi\s*gian|gio\s*tai|created|modified/i.test(n)) return true;
+        return false;
+    }
+
+    function looksLikeRawDateString(text) {
+        const t = String(text ?? "").trim();
+        if (!t) return false;
+        if (/^\d{4}-\d{2}-\d{2}/.test(t)) return true;
+        if (/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/.test(t)) return true;
+        if (/\d{4}-\d{2}-\d{2}T/.test(t)) return true;
+        return false;
+    }
+
+    function cellValueToDdMmYyyyStr(v) {
+        if (v == null || v === "") return "";
+        if (v instanceof Date && !isNaN(v.getTime())) return formatDateVn(v);
+        const s = cellDisplayString(v).trim();
+        if (!s) return "";
+        const d = parseDateFlexible(s);
+        return d && !isNaN(d.getTime()) ? formatDateVn(d) : "";
+    }
+
+    function orderPreviewColumnKeys(keys) {
+        const all = keys.filter(Boolean);
+        const pri = all.filter(isLikelyDateTimeColumnKey).sort((a, b) => a.localeCompare(b, "vi"));
+        const rest = all.filter((k) => !isLikelyDateTimeColumnKey(k)).sort((a, b) => a.localeCompare(b, "vi"));
+        return [...pri, ...rest];
+    }
+
+    function collectKeysFromRows(rows) {
+        const set = new Set();
+        if (!rows?.length) return [];
+        const n = Math.min(rows.length, 20000);
+        for (let i = 0; i < n; i++) {
+            const r = rows[i];
+            if (r && typeof r === "object") Object.keys(r).forEach((k) => set.add(k));
+        }
+        return orderPreviewColumnKeys([...set]);
+    }
+
+    function previewCellValueForModal(v, columnKey) {
+        if (v == null) return "";
+        const col = columnKey != null ? String(columnKey) : "";
+        const rawDisp = cellDisplayString(v).trim();
+        const shouldFormatDate =
+            (col && isLikelyDateTimeColumnKey(col)) || (rawDisp && looksLikeRawDateString(rawDisp));
+        if (shouldFormatDate) {
+            const dd = cellValueToDdMmYyyyStr(v);
+            if (dd) return dd.length > 800 ? `${dd.slice(0, 800)}...` : dd;
+        }
+
+        let s = rawDisp;
+        if (!s && typeof v === "object" && v !== null) {
+            const raw = v.Value ?? v.value ?? v.DisplayValue ?? v.displayValue ?? v.Text ?? v.text;
+            if (raw != null) s = String(raw).trim();
+        }
+        if (!s && typeof v === "object" && v !== null) {
+            try {
+                const j = JSON.stringify(v);
+                if (j && j !== "{}" && j !== "null") s = j;
+            } catch (_) {
+                s = "[object]";
+            }
+        }
+        if (!s) s = String(v);
+        return s.length > 800 ? `${s.slice(0, 800)}...` : s;
+    }
+
+    function buildRawPreviewTableHtml(rows) {
+        const r = rows ?? [];
+        if (!r.length) return '<p class="nl-prev-note">Không có dòng.</p>';
+        const total = r.length;
+        const show = r.slice(0, NL_PREVIEW_ROW_CAP);
+        const keys = collectKeysFromRows(r);
+        if (!keys.length) return `<p class="nl-prev-note">${total} dòng - không có khóa cột.</p>`;
+        const thead = `<tr>${keys.map((k) => `<th>${escapeHtml(k)}</th>`).join("")}</tr>`;
+        const tbody = show
+            .map(
+                (row) =>
+                    `<tr>${keys
+                        .map((k) => `<td>${escapeHtml(previewCellValueForModal(row[k], k))}</td>`)
+                        .join("")}</tr>`
+            )
+            .join("");
+        const note =
+            (total > NL_PREVIEW_ROW_CAP ? `Hiển thị tối đa ${NL_PREVIEW_ROW_CAP} / ${total} dòng. ` : `${total} dòng. `) +
+            "Cột ngày/giờ xếp trước; giá trị ngày hiển thị dd/mm/yyyy. Kéo ngang nếu bảng rộng.";
+        return `<p class="nl-prev-note">${escapeHtml(note)}</p><div class="nl-prev-scroll"><table class="nl-prev-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+    }
+
+    function formatPreviewTabCount(filteredCount, totalCount) {
+        if (filteredCount === totalCount) return String(totalCount);
+        return `${filteredCount}/${totalCount}`;
     }
 
     function buildStrictDate(y, mm, dd) {
@@ -1290,11 +1397,169 @@
         return "";
     }
 
+    function parseTonKhoDkNgayCellCandidates(raw) {
+        function uniqueValidDates(list) {
+            const out = [];
+            const seen = new Set();
+            for (const d of list) {
+                if (!d || isNaN(d.getTime())) continue;
+                const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                if (seen.has(k)) continue;
+                seen.add(k);
+                out.push(d);
+            }
+            return out;
+        }
+
+        function parseAppSheetLikeDateCandidates(v) {
+            if (v == null || v === "") return [];
+            if (v instanceof Date && !isNaN(v.getTime())) return [v];
+            const s = cellDisplayString(v).trim();
+            if (!s) return [];
+            let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+            if (m) {
+                const d = buildStrictDate(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
+                return d ? [d] : [];
+            }
+            m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:[\s,].*)?$/);
+            if (m) {
+                const a = parseInt(m[1], 10);
+                const b = parseInt(m[2], 10);
+                const y = parseInt(m[3], 10);
+                const cands = [];
+                if (a > 12 && b <= 12) cands.push(buildStrictDate(y, b, a)); // d/m
+                else if (a <= 12 && b > 12) cands.push(buildStrictDate(y, a, b)); // m/d
+                else {
+                    // Mơ hồ: giữ cả 2 cách hiểu để khớp range linh hoạt.
+                    cands.push(buildStrictDate(y, b, a)); // d/m
+                    cands.push(buildStrictDate(y, a, b)); // m/d
+                }
+                return uniqueValidDates(cands);
+            }
+            const d = parseDateFlexible(s);
+            return d && !isNaN(d.getTime()) ? [d] : [];
+        }
+
+        return uniqueValidDates(parseAppSheetLikeDateCandidates(raw));
+    }
+
+    function parseTonKhoDkNgayCell(row) {
+        const keys = [
+            "Ngày nhập số dư ĐK",
+            "Ngay nhap so du DK",
+            "Ngày nhập số dư DK",
+            "Ngay nhap so du ĐK",
+            "Ngày nhập SD ĐK",
+            "Ngay nhap SD DK",
+            "Ngày",
+            "Ngay"
+        ];
+        for (const k of keys) {
+            const cands = parseTonKhoDkNgayCellCandidates(row?.[k]);
+            if (cands.length) return cands[0];
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/ng[aà]y|date/i.test(String(k))) continue;
+            const cands = parseTonKhoDkNgayCellCandidates(v);
+            if (cands.length) return cands[0];
+        }
+        return null;
+    }
+
+    function tonKhoDkRowDateInRange(row, dateRange) {
+        if (!dateRange) return true;
+        const keys = [
+            "Ngày nhập số dư ĐK",
+            "Ngay nhap so du DK",
+            "Ngày nhập số dư DK",
+            "Ngay nhap so du ĐK",
+            "Ngày nhập SD ĐK",
+            "Ngay nhap SD DK",
+            "Ngày",
+            "Ngay"
+        ];
+        for (const k of keys) {
+            const cands = parseTonKhoDkNgayCellCandidates(row?.[k]);
+            if (cands.some((d) => rowDateInRange(d, dateRange))) return true;
+            if (cands.length) return false;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/ng[aà]y|date/i.test(String(k))) continue;
+            const cands = parseTonKhoDkNgayCellCandidates(v);
+            if (cands.some((d) => rowDateInRange(d, dateRange))) return true;
+            if (cands.length) return false;
+        }
+        return false;
+    }
+
+    function parseTonKhoDkTenNlCell(row) {
+        const keys = [
+            "Tên NL",
+            "Ten NL",
+            "Tên nhiên liệu",
+            "Ten nhien lieu",
+            "Mã NL",
+            "Ma NL",
+            "Mã nhiên liệu",
+            "Ma nhien lieu",
+            "Loại nhiên liệu",
+            "Loai nhien lieu"
+        ];
+        for (const k of keys) {
+            const t = cellDisplayString(row?.[k]).trim();
+            if (t) return t;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            const kn = String(k)
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+            if (!/ten\s*nl|ten\s*nhien\s*lieu|loai\s*nhien\s*lieu|ma\s*nl|ma\s*nhien\s*lieu/.test(kn)) continue;
+            const t = cellDisplayString(v).trim();
+            if (t) return t;
+        }
+        return "";
+    }
+
+    function parseTonKhoDkSlTonCell(row) {
+        const keys = ["Sl tồn ĐK", "SL tồn ĐK", "Sl tồn DK", "SL tồn DK", "SL ton DK", "Sl ton DK"];
+        for (const k of keys) {
+            const q = parseNumericForLiters(row?.[k]);
+            if (q != null && !isNaN(q)) return q;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/sl\s*t[oô]n\s*[đd]k|sl\s*ton\s*dk/i.test(String(k))) continue;
+            const q = parseNumericForLiters(v);
+            if (q != null && !isNaN(q)) return q;
+        }
+        return null;
+    }
+
+    function classifyTonKhoDkTenNlToReportColumn(tenRaw) {
+        const s = normalizeTenNhienLieuLabel(tenRaw);
+        if (!s) return null;
+        const n = s
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+        const compact = n.replace(/[^a-z0-9]/g, "");
+
+        // Khớp đúng theo rule user chốt cho «Tồn kho ĐK».
+        if (n === "dau diezel" || compact === "daudiezel" || compact === "daudiesel") return "LuongDauTieuHao";
+        if (n === "mo" || compact === "mo") return "TongMo";
+        if (n === "nhot" || compact === "nhot") return "TongNhot";
+        if (n === "dau thuy luc" || compact === "dauthuyluc") return "DauThuyLuc";
+        if (n === "dau cau" || compact === "daucau") return "DauCau";
+        return null;
+    }
+
     /**
-     * Tổng «Tồn trước khi nhập» trên «Nhật trình NL» theo loại nhiên liệu (cột báo cáo),
-     * chỉ các dòng có cùng tháng/năm với «Từ ngày», khớp tài sản ↔ Tên thiết bị trên bảng.
+     * Tổng «Tồn đầu kỳ» theo 5 cột nhiên liệu từ «Tồn kho ĐK».
+     * Điều kiện: «Ngày nhập số dư ĐK» nằm trong khoảng Từ ngày..Đến ngày.
      */
-    function buildTonDauKyTotalsFromNhatTrinhNl(reportRows, nlRows, filters, dsRows) {
+    function buildTonDauKyTotalsFromTonKhoDk(tonKhoDkRows, filters) {
         const keys = ["LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
         const empty = () => ({
             LuongDauTieuHao: 0,
@@ -1304,37 +1569,88 @@
             DauCau: 0,
             hasAny: false
         });
-        const fromD = parseDateInputYmd(filters?.fromDate);
-        if (!fromD || !nlRows?.length || !reportRows?.length) return empty();
+        const dateRange = buildDateRangeFromFilters(filters);
+        if (!dateRange || !tonKhoDkRows?.length) return empty();
 
         const totals = empty();
-        const reportKeys = new Set();
-        for (const raw of reportRows) {
-            const k = assetKeyFromName(String(raw.TenThietBi ?? "").trim());
-            if (k) reportKeys.add(k);
-        }
+        for (const r of tonKhoDkRows) {
+            if (!tonKhoDkRowDateInRange(r, dateRange)) continue;
 
-        for (const r of nlRows) {
-            const ngay = parseNlNgayCell(r);
-            if (!ngay || isNaN(ngay.getTime())) continue;
-            if (ngay.getFullYear() !== fromD.getFullYear() || ngay.getMonth() !== fromD.getMonth()) continue;
-
-            const ak = findReportAssetKeyForNlJournalRow(r, reportRows, dsRows);
-            if (!ak || !reportKeys.has(ak)) continue;
-
-            const ton = parseNlTonTruocCell(r);
+            const ton = parseTonKhoDkSlTonCell(r);
             if (ton == null || isNaN(ton)) continue;
 
-            const tenNl =
-                r["Tên nhiên liệu"] ?? r["Ten nhien lieu"] ?? r["Loại nhiên liệu"] ?? r["Loai nhien lieu"] ?? "";
-            const col = classifyNlTenToFuelColumn(tenNl);
+            const tenNl = parseTonKhoDkTenNlCell(r);
+            const col = classifyTonKhoDkTenNlToReportColumn(tenNl);
             if (!col) continue;
-            const repK = col === "LuongDauNhap" ? "LuongDauTieuHao" : col;
-            if (!keys.includes(repK)) continue;
-            totals[repK] += ton;
+            if (!keys.includes(col)) continue;
+            totals[col] += ton;
             totals.hasAny = true;
         }
 
+        return totals;
+    }
+
+    /**
+     * Tổng «Nhập trong tháng» theo 5 cột nhiên liệu từ «Nhập xuất luân chuyển CT».
+     * Điều kiện: Loại phiếu = Nhập, month(Ngày) = month(Từ ngày), và khớp thiết bị đang có trên báo cáo.
+     */
+    function buildNhapTrongThangTotalsFromNxlcCt(reportRows, nxlcCtRows, filters) {
+        const empty = () => ({
+            LuongDauTieuHao: 0,
+            TongMo: 0,
+            TongNhot: 0,
+            DauThuyLuc: 0,
+            DauCau: 0,
+            hasAny: false
+        });
+        const fromD = parseDateInputYmd(filters?.fromDate);
+        if (!fromD || !nxlcCtRows?.length || !reportRows?.length) return empty();
+
+        const totals = empty();
+        const mainAssetKeys = new Set();
+        const mainAssetPairs = [];
+        for (const raw of reportRows) {
+            const ten = String(raw?.TenThietBi ?? "").trim();
+            if (!ten) continue;
+            const k = assetKeyFromName(ten);
+            if (!k) continue;
+            mainAssetKeys.add(k);
+            mainAssetPairs.push({ key: k, name: ten });
+        }
+        if (!mainAssetKeys.size) return totals;
+
+        function resolveMainAssetKeyByName(candidateName) {
+            const t = String(candidateName ?? "").trim();
+            if (!t) return "";
+            const exact = assetKeyFromName(t);
+            if (exact && mainAssetKeys.has(exact)) return exact;
+            for (const p of mainAssetPairs) {
+                if (taiSanNamesLooselyEqual(t, p.name)) return p.key;
+            }
+            return "";
+        }
+
+        for (const r of nxlcCtRows) {
+            const d = parseNxlcCtNgayCell(r);
+            if (!d || isNaN(d.getTime())) continue;
+            if (d.getFullYear() !== fromD.getFullYear() || d.getMonth() !== fromD.getMonth()) continue;
+
+            const loaiPhieu = getLoaiPhieuOnRow(r);
+            if (!loaiPhieuIsNhap(loaiPhieu)) continue;
+
+            const assetKey = resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys);
+            if (!assetKey) continue;
+
+            const tenNl = getNxlcTenNhienLieuCell(r);
+            const col = classifyNxlcTenNhienLieuToReportFiveColumns(tenNl);
+            if (!col) continue;
+
+            const q = parseNxlcSlCell(r);
+            if (q == null || isNaN(q)) continue;
+
+            totals[col] += q;
+            totals.hasAny = true;
+        }
         return totals;
     }
 
@@ -2265,7 +2581,7 @@
         return s;
     }
 
-    function renderNlTable(rows, tonDauKyFooter) {
+    function renderNlTable(rows, tonDauKyFooter, nhapTrongThangFooter) {
         const tbody = document.getElementById("nl-tbody");
         if (!tbody) return;
 
@@ -2304,7 +2620,7 @@
         }
 
         const leaf = data;
-        function sumCol(key) {
+        function sumColNumber(key) {
             let s = 0;
             let any = false;
             for (const r of leaf) {
@@ -2314,21 +2630,42 @@
                     any = true;
                 }
             }
-            return any ? formatLitersDisplay(s) : "-";
+            return any ? s : null;
         }
-        const tXuat = sumCol("LuongDauTieuHao");
-        const tMo = sumCol("TongMo");
-        const tNhot = sumCol("TongNhot");
-        const tTl = sumCol("DauThuyLuc");
-        const tCau = sumCol("DauCau");
+        const xuat = {
+            LuongDauTieuHao: sumColNumber("LuongDauTieuHao"),
+            TongMo: sumColNumber("TongMo"),
+            TongNhot: sumColNumber("TongNhot"),
+            DauThuyLuc: sumColNumber("DauThuyLuc"),
+            DauCau: sumColNumber("DauCau")
+        };
+        function displayNumberOrDash(n) {
+            return n == null || isNaN(n) ? "-" : formatLitersDisplay(n);
+        }
+        function displayFooterByKey(footer, key) {
+            if (!footer?.hasAny) return "-";
+            const v = footer[key];
+            if (v == null || isNaN(v)) return "-";
+            return formatLitersDisplay(v);
+        }
+        function closingCellDisplay(key) {
+            const hasB = tonDauKyFooter?.hasAny && tonDauKyFooter[key] != null && !isNaN(tonDauKyFooter[key]);
+            const hasC = nhapTrongThangFooter?.hasAny && nhapTrongThangFooter[key] != null && !isNaN(nhapTrongThangFooter[key]);
+            const hasA = xuat[key] != null && !isNaN(xuat[key]);
+            if (!hasB && !hasC && !hasA) return "-";
+            const b = hasB ? tonDauKyFooter[key] : 0;
+            const c = hasC ? nhapTrongThangFooter[key] : 0;
+            const a = hasA ? xuat[key] : 0;
+            return formatLitersDisplay(b + c - a);
+        }
 
         html += `<tr class="bg-teal">
             <td></td><td class="text-left">Tổng xuất</td><td></td>
-            <td class="text-center">${escapeHtml(tXuat)}</td>
-            <td class="text-center">${escapeHtml(tMo)}</td>
-            <td class="text-center">${escapeHtml(tNhot)}</td>
-            <td class="text-center">${escapeHtml(tTl)}</td>
-            <td class="text-center">${escapeHtml(tCau)}</td>
+            <td class="text-center">${escapeHtml(displayNumberOrDash(xuat.LuongDauTieuHao))}</td>
+            <td class="text-center">${escapeHtml(displayNumberOrDash(xuat.TongMo))}</td>
+            <td class="text-center">${escapeHtml(displayNumberOrDash(xuat.TongNhot))}</td>
+            <td class="text-center">${escapeHtml(displayNumberOrDash(xuat.DauThuyLuc))}</td>
+            <td class="text-center">${escapeHtml(displayNumberOrDash(xuat.DauCau))}</td>
             <td class="text-center">A</td>
         </tr>`;
         html += `<tr class="bg-teal">
@@ -2342,18 +2679,136 @@
         </tr>`;
         html += `<tr class="bg-teal">
             <td></td><td class="text-left">Nhập trong tháng</td><td></td>
-            <td class="text-center">-</td>
-            <td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>
+            <td class="text-center">${escapeHtml(displayFooterByKey(nhapTrongThangFooter, "LuongDauTieuHao"))}</td>
+            <td class="text-center">${escapeHtml(displayFooterByKey(nhapTrongThangFooter, "TongMo"))}</td>
+            <td class="text-center">${escapeHtml(displayFooterByKey(nhapTrongThangFooter, "TongNhot"))}</td>
+            <td class="text-center">${escapeHtml(displayFooterByKey(nhapTrongThangFooter, "DauThuyLuc"))}</td>
+            <td class="text-center">${escapeHtml(displayFooterByKey(nhapTrongThangFooter, "DauCau"))}</td>
             <td class="text-center">C</td>
         </tr>`;
         html += `<tr class="bg-teal">
             <td></td><td class="text-left">Tồn cuối tháng</td><td></td>
-            <td class="text-center">-</td>
-            <td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td>
+            <td class="text-center">${escapeHtml(closingCellDisplay("LuongDauTieuHao"))}</td>
+            <td class="text-center">${escapeHtml(closingCellDisplay("TongMo"))}</td>
+            <td class="text-center">${escapeHtml(closingCellDisplay("TongNhot"))}</td>
+            <td class="text-center">${escapeHtml(closingCellDisplay("DauThuyLuc"))}</td>
+            <td class="text-center">${escapeHtml(closingCellDisplay("DauCau"))}</td>
             <td class="text-center">D=B+C-A</td>
         </tr>`;
 
         tbody.innerHTML = html;
+    }
+
+    function buildDateRangeFromFilters(filters) {
+        let from = parseDateInputYmd(filters?.fromDate);
+        let to = parseDateInputYmd(filters?.toDate);
+        if (!from && !to) return null;
+        if (!from) from = to;
+        if (!to) to = from;
+        let start = new Date(from.getFullYear(), from.getMonth(), from.getDate(), 0, 0, 0, 0);
+        let end = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999);
+        if (start > end) {
+            const tmp = start;
+            start = end;
+            end = tmp;
+        }
+        return { start, end };
+    }
+
+    function rowDateInRange(dateValue, dateRange) {
+        if (!dateRange) return true;
+        if (!dateValue || isNaN(dateValue.getTime())) return false;
+        return dateValue >= dateRange.start && dateValue <= dateRange.end;
+    }
+
+    function rowMatchesSelectedProjectsByRawColumns(row, selectedProjects) {
+        if (!selectedProjects?.length) return true;
+        for (const p of selectedProjects) {
+            if (rawCellMatchesNeedle(row, "project", p)) return true;
+        }
+        return false;
+    }
+
+    function rowMatchesSelectedCongTrinhLabel(row, selectedProjects) {
+        if (!selectedProjects?.length) return true;
+        const label = pickNtCtTenNoiQuanLy(row);
+        if (!label) return false;
+        return selectedProjects.some((p) => p === label || taiSanNamesLooselyEqual(p, label));
+    }
+
+    function switchNlLoadedTab(which) {
+        document.querySelectorAll(".nl-loaded-tab").forEach((b) => {
+            b.classList.toggle("active", b.getAttribute("data-nl-prev") === which);
+        });
+        document.querySelectorAll(".nl-loaded-panel").forEach((p) => {
+            p.classList.toggle("is-visible", p.id === `nl-loaded-panel-${which}`);
+        });
+    }
+
+    function closeNlLoadedDataModal() {
+        const modal = document.getElementById("nl-loaded-data-modal");
+        if (!modal) return;
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function openNlLoadedDataModal() {
+        const modal = document.getElementById("nl-loaded-data-modal");
+        if (!modal) return;
+        if (cacheNxlcCtRows == null) {
+            alert("Chưa tải dữ liệu AppSheet. Bấm «Tải dữ liệu AppSheet» trước.");
+            return;
+        }
+
+        const filters = getNlFilters();
+        const dateRange = buildDateRangeFromFilters(filters);
+        const selectedProjects = filters.projectsSelected || [];
+
+        const nxlcAll = cacheNxlcCtRows ?? [];
+        const nxlcView = nxlcAll.filter(
+            (r) => rowDateInRange(parseNxlcCtNgayCell(r), dateRange) && rowMatchesSelectedProjectsByRawColumns(r, selectedProjects)
+        );
+
+        const ntCtAll = cacheNtCtRows ?? [];
+        const ntCtDateFiltered = filterCtRowsByNgayLamViec(ntCtAll, filters);
+        const ntCtView = ntCtDateFiltered.filter((r) => rowMatchesSelectedCongTrinhLabel(r, selectedProjects));
+
+        const ntNlAll = cacheNtNlRows ?? [];
+        const ntNlView = ntNlAll.filter((r) => rowDateInRange(parseNlNgayCell(r), dateRange));
+
+        const dkAll = cacheTonKhoDkRows ?? [];
+        const dkView = dkAll.filter((r) => tonKhoDkRowDateInRange(r, dateRange));
+
+        const dsAll = cacheDsTaiSanRows ?? [];
+        const dsView = dsAll;
+
+        const nxEl = document.getElementById("nl-loaded-panel-nxlc");
+        const dkEl = document.getElementById("nl-loaded-panel-dk");
+        const ctEl = document.getElementById("nl-loaded-panel-ntct");
+        const nlEl = document.getElementById("nl-loaded-panel-ntnl");
+        const dsEl = document.getElementById("nl-loaded-panel-ds");
+        if (nxEl) nxEl.innerHTML = buildRawPreviewTableHtml(nxlcView);
+        if (dkEl) dkEl.innerHTML = buildRawPreviewTableHtml(dkView);
+        if (ctEl) ctEl.innerHTML = buildRawPreviewTableHtml(ntCtView);
+        if (nlEl) nlEl.innerHTML = buildRawPreviewTableHtml(ntNlView);
+        if (dsEl) dsEl.innerHTML = buildRawPreviewTableHtml(dsView);
+
+        const tNx = document.getElementById("nl-tab-nxlc");
+        const tDk = document.getElementById("nl-tab-dk");
+        const tCt = document.getElementById("nl-tab-ntct");
+        const tNl = document.getElementById("nl-tab-ntnl");
+        const tDs = document.getElementById("nl-tab-ds");
+        if (tNx) tNx.textContent = `Nhập xuất luân chuyển CT (${formatPreviewTabCount(nxlcView.length, nxlcAll.length)})`;
+        if (tDk) tDk.textContent = `Tồn kho ĐK (${formatPreviewTabCount(dkView.length, dkAll.length)})`;
+        if (tCt) tCt.textContent = `Nhật trình máy CT (${formatPreviewTabCount(ntCtView.length, ntCtAll.length)})`;
+        if (tNl) tNl.textContent = `Nhật trình NL (${formatPreviewTabCount(ntNlView.length, ntNlAll.length)})`;
+        if (tDs) tDs.textContent = `Danh sách tài sản (${formatPreviewTabCount(dsView.length, dsAll.length)})`;
+
+        switchNlLoadedTab("nxlc");
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
     }
 
     async function loadFromAppSheet(forceRefresh) {
@@ -2368,6 +2823,7 @@
                 cacheDsTaiSanRows = null;
                 cacheNtCtRows = null;
                 cacheNtNlRows = null;
+                cacheTonKhoDkRows = null;
             }
 
             if (!cacheNxlcCtRows) {
@@ -2381,6 +2837,9 @@
             }
             if (!cacheNtNlRows) {
                 cacheNtNlRows = await fetchAppSheetTable(TABLE_NT_NL);
+            }
+            if (!cacheTonKhoDkRows) {
+                cacheTonKhoDkRows = await fetchAppSheetTable(TABLE_TON_KHO_DK);
             }
             populateNlCongTrinhCheckboxList(cacheNtCtRows);
 
@@ -2399,13 +2858,9 @@
                 NguoiPhuTrach: resolveTenLmForTenXmtb(row.TenThietBi, tenLmByKey, cacheDsTaiSanRows)
             }));
             normalized = filterNlRowsBySelectedCongTrinh(normalized, filters.projectsSelected);
-            const tonDauKyFooter = buildTonDauKyTotalsFromNhatTrinhNl(
-                normalized,
-                cacheNtNlRows,
-                filters,
-                cacheDsTaiSanRows
-            );
-            renderNlTable(normalized, tonDauKyFooter);
+            const tonDauKyFooter = buildTonDauKyTotalsFromTonKhoDk(cacheTonKhoDkRows, filters);
+            const nhapTrongThangFooter = buildNhapTrongThangTotalsFromNxlcCt(normalized, cacheNxlcCtRows, filters);
+            renderNlTable(normalized, tonDauKyFooter, nhapTrongThangFooter);
 
             syncNlDateRangeBanner();
             syncNlCongTrinhTitleBanner();
@@ -2472,6 +2927,21 @@
                 }
             });
         }
+
+        document.getElementById("nl-btn-view-loaded-tables")?.addEventListener("click", openNlLoadedDataModal);
+        document.getElementById("nl-loaded-close")?.addEventListener("click", closeNlLoadedDataModal);
+        document.getElementById("nl-loaded-data-modal")?.addEventListener("click", (e) => {
+            if (e.target && e.target.id === "nl-loaded-data-modal") closeNlLoadedDataModal();
+        });
+        document.querySelectorAll(".nl-loaded-tab").forEach((btnTab) => {
+            btnTab.addEventListener("click", () => switchNlLoadedTab(btnTab.getAttribute("data-nl-prev") || "nxlc"));
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape") return;
+            const modal = document.getElementById("nl-loaded-data-modal");
+            if (!modal || modal.getAttribute("aria-hidden") !== "false") return;
+            closeNlLoadedDataModal();
+        });
 
         loadFromAppSheet(false);
     }

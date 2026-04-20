@@ -127,6 +127,153 @@
             background: #fff;
             color: #2b7132;
         }
+
+        .nl-loaded-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.45);
+        }
+
+        .nl-loaded-dialog {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            max-width: min(1200px, 96vw);
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-size: 12px;
+        }
+
+        .nl-loaded-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .nl-loaded-close {
+            border: none;
+            background: #f1f5f9;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .nl-loaded-close:hover {
+            background: #e2e8f0;
+        }
+
+        .nl-loaded-tabbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px 10px 0;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .nl-loaded-tab {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            background: #e2e8f0;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .nl-loaded-tab:hover {
+            background: #d8dee9;
+        }
+
+        .nl-loaded-tab.active {
+            background: #0047ab;
+            color: #fff;
+            border-color: #0047ab;
+        }
+
+        .nl-loaded-panels {
+            flex: 1;
+            min-height: 0;
+            padding: 10px 12px 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nl-loaded-panel {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .nl-loaded-panel.is-visible {
+            display: flex;
+        }
+
+        .nl-prev-note {
+            margin: 0 0 8px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .nl-prev-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .nl-prev-table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+            font-size: 10px;
+        }
+
+        .nl-prev-table th,
+        .nl-prev-table td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            max-width: 280px;
+            word-break: break-word;
+        }
+
+        .nl-prev-table thead th {
+            background: #4a8694;
+            color: #fff;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .nl-prev-table tbody tr:nth-child(even) {
+            background: #f1f5f9;
+        }
         
         .report-tabs-container {
             display: flex;
@@ -414,6 +561,7 @@
                         <div class="flex items-center gap-1.5 w-full lg:w-[280px] justify-end flex-wrap">
                             <button type="button" id="nl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
                             <button type="button" id="nl-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
+                            <button type="button" id="nl-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
                             <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
                             <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
                         </div>
@@ -451,6 +599,29 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="nl-loaded-data-modal" class="print-hide nl-loaded-modal" aria-hidden="true">
+        <div class="nl-loaded-dialog" role="dialog" aria-modal="true" aria-labelledby="nl-loaded-title">
+            <div class="nl-loaded-head">
+                <span id="nl-loaded-title">Dữ liệu AppSheet đã tải (theo bộ lọc hiện tại)</span>
+                <button type="button" id="nl-loaded-close" class="nl-loaded-close" aria-label="Đóng">×</button>
+            </div>
+            <div class="nl-loaded-tabbar">
+                <button type="button" class="nl-loaded-tab active" data-nl-prev="nxlc" id="nl-tab-nxlc">Nhập xuất luân chuyển CT</button>
+                <button type="button" class="nl-loaded-tab" data-nl-prev="dk" id="nl-tab-dk">Tồn kho ĐK</button>
+                <button type="button" class="nl-loaded-tab" data-nl-prev="ntct" id="nl-tab-ntct">Nhật trình máy CT</button>
+                <button type="button" class="nl-loaded-tab" data-nl-prev="ntnl" id="nl-tab-ntnl">Nhật trình NL</button>
+                <button type="button" class="nl-loaded-tab" data-nl-prev="ds" id="nl-tab-ds">Danh sách tài sản</button>
+            </div>
+            <div class="nl-loaded-panels">
+                <div id="nl-loaded-panel-nxlc" class="nl-loaded-panel is-visible"></div>
+                <div id="nl-loaded-panel-dk" class="nl-loaded-panel"></div>
+                <div id="nl-loaded-panel-ntct" class="nl-loaded-panel"></div>
+                <div id="nl-loaded-panel-ntnl" class="nl-loaded-panel"></div>
+                <div id="nl-loaded-panel-ds" class="nl-loaded-panel"></div>
+            </div>
         </div>
     </div>
 

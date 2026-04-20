@@ -286,41 +286,55 @@
             vertical-align: middle;
             word-wrap: break-word;
             overflow-wrap: anywhere;
+            font-size: 10.5px;
+            line-height: 1.12;
         }
         
         thead th {
             background-color: #4a8694;
-            color: white;
-            font-weight: normal;
-            line-height: 1.2;
-            font-size: 9px;
+            color: #ffffff;
+            font-weight: 700;
+            line-height: 1.08;
+            font-size: 11.2px;
+            letter-spacing: 0.05px;
+            text-shadow: none;
+            padding: 3px 1px;
+            vertical-align: middle;
         }
+
+        thead > tr:not(.number-row) th {
+            min-height: 0;
+        }
+
+        thead > tr:not(.number-row) th.report-col-xe-bon-hd { font-size: inherit; }
         
         .number-row th {
             background-color: white;
             color: black;
             font-weight: bold;
-            padding: 2px 1px;
+            font-size: 10px;
+            line-height: 1.02;
+            padding: 2px 0;
         }
         /* Row highlighting */
         
         .group-a-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10.5px;
         }
         
         .sub-group-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10.5px;
         }
         /** Dòng tổng theo nhóm «Tên nhóm» (Nhật trình máy CT) */
         
         .nhom-tong-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10.5px;
         }
         
         .grand-total-row td {
@@ -403,10 +417,16 @@
             }
             th,
             td {
-                padding: 2px 1px;
+                padding: 2px 1.5px;
+                font-size: 9.8px;
             }
             thead th {
-                font-size: 8.5px;
+                font-size: 10.4px;
+                line-height: 1.04;
+                padding: 2px 1px;
+            }
+            .number-row th {
+                font-size: 9.5px;
             }
             .filter-input,
             .filter-select {
@@ -622,67 +642,36 @@
 
             <!-- TABLE SECTION -->
             <div class="table-wrapper bg-white">
-                <table>
-                    <!-- Bảng không hiển thị cột «Tổng giờ HĐ xe bồn» -->
-                    <colgroup>
-                        <col span="24" />
-                    </colgroup>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead>
-                        <!-- Tổng width: 100% -->
-                        <tr>
+                        <tr style="background-color: #f2f2f2;">
                             <th rowspan="2" style="width: 2%;">STT</th>
-                            <th rowspan="2" style="width: 11.5%;">Tên thiết bị</th>
-                            <th rowspan="2" style="width: 3.5%;">Biển số xe</th>
-                            <th rowspan="2" style="width: 5.5%;">Tên lái xe</th>
-                            <th rowspan="2" style="width: 3%;">Số ngày<br>hoạt động</th>
-                            <th rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
-                            <th rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
-                            <th rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T12 (h)</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T11 (h)</th>
-                            <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
-                            <th rowspan="2" style="width: 4%;">Dầu xuất<br>trong tháng (L)</th>
-                            <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
-                            <th rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
-                            <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>trong bình</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>tiêu hao</th>
-                            <th rowspan="2" style="width: 9%;">Công việc</th>
-                            <th rowspan="2" style="width: 6%;">Công trường</th>
+                            <th rowspan="2" style="width: 12%;">Tên thiết bị</th>
+                            <th rowspan="2" style="width: 7%;">Biển số</th>
+                            <th rowspan="2" style="width: 10%;">Lái xe</th>
+                            <th rowspan="2" style="width: 3%;">Ngày HĐ</th>
+                            <th rowspan="2" style="width: 3%;">Số chuyến</th>
+                            <th rowspan="2" style="width: 3%;">Giờ HC</th>
+                            <th rowspan="2" style="width: 3%;">Tăng ca</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 4%;">Tổng giờ T12</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 4%;">Tổng giờ T11</th>
+                            <th rowspan="2" style="width: 4%;">Tồn đầu (L)</th>
+                            <th rowspan="2" style="width: 4%;">Dầu xuất (L)</th>
+                            <th rowspan="2" style="width: 4%;">Tồn cuối (L)</th>
+                            <th rowspan="2" style="width: 4%;">Tiêu hao (L)</th>
+                            <th colspan="4" style="width: 12%;">Nhiên liệu phụ</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 4%;">TH thực tế T12</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 4%;">TH thực tế T11</th>
+                            <th rowspan="2" style="width: 3%;">ĐM bình</th>
+                            <th rowspan="2" style="width: 3%;">ĐM tiêu hao</th>
+                            <th rowspan="2" style="width: 8%;">Công việc</th>
+                            <th rowspan="2" style="width: 7%;">Công trường</th>
                         </tr>
-                        <tr>
-                            <th style="width: 3.5%;">Tổng<br>mỡ (kg)</th>
-                            <th style="width: 3.5%;">Tổng<br>nhớt (L)</th>
-                            <th style="width: 3.5%;">Dầu thủy<br>lực (L)</th>
-                            <th style="width: 3.5%;">Dầu<br>cầu (L)</th>
-                        </tr>
-                        <tr class="number-row">
-                            <th>(1)</th>
-                            <th>(2)</th>
-                            <th>(3)</th>
-                            <th>(4)</th>
-                            <th>(5)</th>
-                            <th>(6)</th>
-                            <th>(7)</th>
-                            <th>(8)</th>
-                            <th>(9)</th>
-                            <th>(10)</th>
-                            <th>(11)</th>
-                            <th>(12)</th>
-                            <th>(13)</th>
-                            <th>(14)</th>
-                            <th>(15)</th>
-                            <th>(16)</th>
-                            <th>(17)</th>
-                            <th>(18)</th>
-                            <th>(19)</th>
-                            <th>(20)</th>
-                            <th>(21)</th>
-                            <th>(22)</th>
-                            <th>(23)</th>
-                            <th>(24)</th>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="width: 3%;">Mỡ (kg)</th>
+                            <th style="width: 3%;">Nhớt (L)</th>
+                            <th style="width: 3%;">T.Lực (L)</th>
+                            <th style="width: 3%;">Cầu (L)</th>
                         </tr>
                     </thead>
                     <tbody id="report-body"></tbody>
@@ -2657,6 +2646,74 @@
                 if (raw.subGroupRow) out.subGroupRow = true;
                 return out;
             });
+        }
+
+        function rowMergeKeyByAssetAndSite(row) {
+            const tenTb = normalizeKeyPart(row ?.TenThietBi ?? "");
+            const congTruong = normalizeKeyPart(row ?.CongTruong ?? "");
+            return `${tenTb}__${congTruong}`;
+        }
+
+        function rowFilledValueScore(row) {
+            let score = 0;
+            for (const col of REPORT_COLUMNS) {
+                if (col === "TT") continue;
+                const v = cellString(row ?. [col]).trim();
+                if (v) score += 1;
+            }
+            return score;
+        }
+
+        /**
+         * Gộp trùng theo «Tên thiết bị + Công trường».
+         * Giữ dòng có nhiều dữ liệu nhất, sau đó bù các ô trống từ các dòng cùng khóa.
+         */
+        function mergeRowsByTenThietBiAndCongTruong(rows) {
+            if (!rows ?.length) return rows || [];
+            const byKey = new Map();
+            for (const row of rows) {
+                if (row ?.groupRow || row ?.subGroupRow || row ?.nhomTongRow) continue;
+                const key = rowMergeKeyByAssetAndSite(row);
+                if (!byKey.has(key)) byKey.set(key, []);
+                byKey.get(key).push(row);
+            }
+            if (!byKey.size) return rows;
+
+            const out = [];
+            const pushedKey = new Set();
+            for (const row of rows) {
+                if (row ?.groupRow || row ?.subGroupRow || row ?.nhomTongRow) {
+                    out.push(row);
+                    continue;
+                }
+                const key = rowMergeKeyByAssetAndSite(row);
+                if (pushedKey.has(key)) continue;
+                pushedKey.add(key);
+
+                const group = byKey.get(key) || [row];
+                let base = group[0];
+                let bestScore = rowFilledValueScore(base);
+                for (let i = 1; i < group.length; i += 1) {
+                    const s = rowFilledValueScore(group[i]);
+                    if (s > bestScore) {
+                        bestScore = s;
+                        base = group[i];
+                    }
+                }
+                const merged = { ...base };
+                for (const g of group) {
+                    if (g === base) continue;
+                    for (const col of REPORT_COLUMNS) {
+                        if (col === "TT") continue;
+                        const cur = cellString(merged[col]).trim();
+                        if (cur) continue;
+                        const alt = cellString(g[col]).trim();
+                        if (alt) merged[col] = g[col];
+                    }
+                }
+                out.push(merged);
+            }
+            return out;
         }
 
         function applyGioLamHanhChinhFromNtCt(mainRows, normalizedRows, sumByTaiSan) {
@@ -5171,6 +5228,7 @@
                 normalized = applyFuelColumnsFromNxlcCt(rows, normalized, fuelByTaiSanFromNxlc);
                 normalized = applyLuongDauTieuHaoFromTonFormula(rows, normalized, fuelByTaiSanFromNxlc);
                 normalized = applyTieuHaoThucTeFromTongKm(rows, normalized);
+                normalized = mergeRowsByTenThietBiAndCongTruong(normalized);
                 normalized = injectNhomTongRows(normalized, tenNhomByTaiSan);
                 cachedRawRowsForBanner = rows;
                 lastNormalizedRowsForExport = normalized;

@@ -43,65 +43,6 @@
             min-width: 0;
         }
         
-        .tkh-page-head {
-            padding: 8px 14px 4px;
-            border-bottom: 1px solid #d4dbe5;
-        }
-        
-        .tkh-page-head-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            font-weight: 700;
-            color: #1f2937;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-        
-        .tkh-page-head-right {
-            text-align: right;
-            line-height: 1.15;
-        }
-        
-        .tkh-page-head-right small {
-            display: block;
-            font-size: 12px;
-            text-transform: none;
-            font-weight: 700;
-        }
-        
-        .tkh-title-bar {
-            margin-top: 6px;
-            background: #3e8395;
-            color: #fff;
-            text-align: center;
-            font-weight: 800;
-            font-size: 34px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-            padding: 5px 10px 4px;
-            line-height: 1.05;
-        }
-        
-        .tkh-title-sub {
-            text-align: center;
-            font-weight: 700;
-            color: #1f2937;
-            font-size: 20px;
-            margin-top: 4px;
-            text-transform: uppercase;
-        }
-        
-        .tkh-title-month {
-            text-align: center;
-            font-weight: 700;
-            color: #374151;
-            font-size: 15px;
-            margin-top: 1px;
-            text-transform: uppercase;
-        }
-        
         .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
@@ -151,6 +92,59 @@
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
         
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .date-filter-field {
+            height: 22px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        
+        .date-filter-field .filter-input {
+            max-width: none;
+            border-radius: 9999px 0 0 9999px;
+            border-right: none;
+        }
+        
+        .date-cal-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 22px;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #94a3b8;
+            border-left: 1px solid #cbd5e1;
+            border-radius: 0 9999px 9999px 0;
+            background: #eef2f7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .date-cal-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .date-cal-btn:focus-visible {
+            outline: 2px solid rgba(43, 113, 50, 0.35);
+            outline-offset: 0;
+        }
+        
+        .tkh-date-filter-wrap {
+            min-width: 0;
+        }
+        
         .action-btn {
             height: 26px;
             border-radius: 9999px;
@@ -161,6 +155,153 @@
             background: #2b7132;
             color: #fff;
             cursor: pointer;
+        }
+
+        .tkh-loaded-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.45);
+        }
+
+        .tkh-loaded-dialog {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            max-width: min(1100px, 96vw);
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-size: 12px;
+        }
+
+        .tkh-loaded-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .tkh-loaded-close {
+            border: none;
+            background: #f1f5f9;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .tkh-loaded-close:hover {
+            background: #e2e8f0;
+        }
+
+        .tkh-loaded-tabbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px 10px 0;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tkh-loaded-tab {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            background: #e2e8f0;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .tkh-loaded-tab:hover {
+            background: #d8dee9;
+        }
+
+        .tkh-loaded-tab.active {
+            background: #0047ab;
+            color: #fff;
+            border-color: #0047ab;
+        }
+
+        .tkh-loaded-panels {
+            flex: 1;
+            min-height: 0;
+            padding: 10px 12px 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tkh-loaded-panel {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .tkh-loaded-panel.is-visible {
+            display: flex;
+        }
+
+        .tkh-prev-note {
+            margin: 0 0 8px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .tkh-prev-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .tkh-prev-table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+            font-size: 10px;
+        }
+
+        .tkh-prev-table th,
+        .tkh-prev-table td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            max-width: 280px;
+            word-break: break-word;
+        }
+
+        .tkh-prev-table thead th {
+            background: #4a8694;
+            color: #fff;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .tkh-prev-table tbody tr:nth-child(even) {
+            background: #f1f5f9;
         }
         
         .tkh-info-wrap {
@@ -377,6 +518,16 @@
             background-color: #e5e7eb;
             font-weight: bold;
         }
+
+        .tkh-val-cell {
+            text-align: right !important;
+        }
+
+        #tkh-appsheet-status {
+            font-size: 11px;
+            margin-left: 8px;
+            color: #374151;
+        }
         
         .signature-section {
             margin: 14px 0 8px;
@@ -463,17 +614,27 @@
             <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
         </div>
 
-        <div class="tkh-page-head">
-            <div class="tkh-page-head-top">
-                <div>CTY CP XD HT ĐẠI PHONG</div>
-                <div class="tkh-page-head-right">
-                    CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
-                    <small>Độc lập - Tự do - Hạnh phúc</small>
+        <!-- HEADER — giống BaocaoNL / Baocaotieuhaonhienlieu -->
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
                 </div>
             </div>
-            <div class="tkh-title-bar">BÁO CÁO TỔNG HỢP TỒN KHO NHIÊN LIỆU</div>
-            <div class="tkh-title-sub">CT HỐ SÓI - SÔNG ĐUỐNG</div>
-            <div class="tkh-title-month">THÁNG 11 NĂM 2025</div>
+        </div>
+
+        <!-- TITLE BANNER -->
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỔNG HỢP TỒN KHO NHIÊN LIỆU</h1>
+            <p id="tkh-banner-cong-trinh-line" class="font-bold text-sm text-[#0047ab] mb-1 px-2">CT HỐ SÓI - SÔNG ĐUỐNG</p>
+            <p id="tkh-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
@@ -489,52 +650,64 @@
                     </div>
                     <div class="tkh-info-line">
                         <label>Tên nhà cung cấp</label>
-                        <select class="tkh-select-line">
+                        <select id="tkh-filter-ncc" class="tkh-select-line" title="Lọc theo cột «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
                             <option value="">-- Tất cả --</option>
-                            <option value="ncc-1">Nhà cung cấp 1</option>
-                            <option value="ncc-2">Nhà cung cấp 2</option>
                         </select>
                     </div>
                     <div class="tkh-info-line">
                         <label>Công trình</label>
-                        <select class="tkh-select-line">
+                        <select id="tkh-filter-cong-trinh" class="tkh-select-line" title="Lọc theo «Tên nơi nhập» trên «Nhập xuất luân chuyển CT»">
                             <option value="">-- Tất cả --</option>
-                            <option value="ct-ho-soi">CT Hố Sói</option>
-                            <option value="ct-song-duong">CT Sông Đuống</option>
                         </select>
                     </div>
                     <div class="tkh-info-line">
                         <label>Tên kho</label>
-                        <select class="tkh-select-line">
+                        <select id="tkh-filter-ten-kho" class="tkh-select-line" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
                             <option value="">-- Tất cả --</option>
-                            <option value="kho-1">Kho 1</option>
-                            <option value="kho-2">Kho 2</option>
                         </select>
                     </div>
                 </div>
                 <div class="tkh-info-col">
                     <div class="tkh-info-line">
                         <label>Từ ngày</label>
-                        <input type="datetime-local" class="tkh-line-input" placeholder="">
+                        <div class="tkh-date-filter-wrap flex min-w-0 items-center">
+                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                                <input id="tkh-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                                <button type="button" id="tkh-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </button>
+                            </div>
+                            <input type="date" id="tkh-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                        </div>
                     </div>
                     <div class="tkh-info-line">
                         <label>Đến ngày</label>
-                        <input type="datetime-local" class="tkh-line-input" placeholder="">
+                        <div class="tkh-date-filter-wrap flex min-w-0 items-center">
+                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
+                                <input id="tkh-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                                <button type="button" id="tkh-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </button>
+                            </div>
+                            <input type="date" id="tkh-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                        </div>
                     </div>
                 </div>
 
             </div>
 
-            <div class="tkh-action-row">
-                <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
-                <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+            <div class="tkh-action-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+                <button type="button" id="tkh-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                <button type="button" id="tkh-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
                 <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
                 <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                <span id="tkh-appsheet-status"></span>
             </div>
 
-            <div class="tkh-search-row">
+            <div class="tkh-search-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
                 <span class="tkh-search-label">🔎 Tìm kiếm</span>
-                <input type="text" class="tkh-search-input" placeholder="">
+                <input type="text" id="tkh-search" class="tkh-search-input" placeholder="">
+                <button type="button" id="tkh-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
             </div>
         </div>
 
@@ -563,111 +736,9 @@
                         <th>Giá trị</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-empty-row">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="inventory-total-row">
-                        <td></td>
-                        <td>TỔNG CỘNG</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                <tbody id="tkh-tbody">
+                    <tr>
+                        <td colspan="13" style="padding:12px;">Đang tải «Danh sách tài sản» từ AppSheet…</td>
                     </tr>
                 </tbody>
             </table>
@@ -683,6 +754,25 @@
                     <div class="signature-title">NGƯỜI LẬP BIỂU</div>
                     <div class="signature-note">(ký, họ tên)</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tkh-loaded-data-modal" class="print-hide tkh-loaded-modal" aria-hidden="true">
+        <div class="tkh-loaded-dialog" role="dialog" aria-labelledby="tkh-loaded-title">
+            <div class="tkh-loaded-head">
+                <span id="tkh-loaded-title">Dữ liệu AppSheet đã tải</span>
+                <button type="button" id="tkh-loaded-close" aria-label="Đóng">×</button>
+            </div>
+            <div class="tkh-loaded-tabbar">
+                <button type="button" class="tkh-loaded-tab active" data-tkh-prev="ds" id="tkh-tab-ds">Danh sách tài sản</button>
+                <button type="button" class="tkh-loaded-tab" data-tkh-prev="dk" id="tkh-tab-dk">Tồn kho ĐK</button>
+                <button type="button" class="tkh-loaded-tab" data-tkh-prev="nxlc" id="tkh-tab-nxlc">Nhập xuất luân chuyển CT</button>
+            </div>
+            <div class="tkh-loaded-panels">
+                <div id="tkh-loaded-panel-ds" class="tkh-loaded-panel is-visible"></div>
+                <div id="tkh-loaded-panel-dk" class="tkh-loaded-panel"></div>
+                <div id="tkh-loaded-panel-nxlc" class="tkh-loaded-panel"></div>
             </div>
         </div>
     </div>
@@ -827,6 +917,7 @@
             exportPdfBtn.addEventListener("click", exportPageToPdf);
         }
     </script>
+    <script src="BaocaoTonkhoNhienlieu-appsheet.js"></script>
 </body>
 
 </html>

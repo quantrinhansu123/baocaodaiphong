@@ -243,6 +243,141 @@
             justify-content: flex-end;
             gap: 8px;
         }
+
+        .repair-appsheet-status {
+            margin-left: 6px;
+            font-size: 11px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .repair-appsheet-status.err {
+            color: #b91c1c;
+        }
+
+        .sc-loaded-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            background: rgba(2, 6, 23, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .sc-loaded-dialog {
+            width: min(1200px, 96vw);
+            max-height: 88vh;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.32);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sc-loaded-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #dbe3ef;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .sc-loaded-head button {
+            border: none;
+            background: transparent;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .sc-loaded-tabbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .sc-loaded-tab {
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        .sc-loaded-tab.active {
+            background: #0047ab;
+            color: #fff;
+            border-color: #0047ab;
+        }
+
+        .sc-loaded-panels {
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .sc-loaded-panel {
+            display: none;
+        }
+
+        .sc-loaded-panel.is-visible {
+            display: block;
+        }
+
+        .sc-prev-note {
+            margin: 0 0 8px;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .sc-prev-scroll {
+            overflow: auto;
+            max-height: 58vh;
+            border: 1px solid #dbe3ef;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .sc-prev-table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .sc-prev-table th,
+        .sc-prev-table td {
+            border: 1px solid #d7dee8;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        .sc-prev-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #eef2f7;
+            color: #0f172a;
+            font-weight: 700;
+        }
         
         @media (max-width: 1024px) {
             .repair-filter-bar {
@@ -371,29 +506,31 @@
 
         <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
             <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]" style="font-size: 1.55rem;">BÁO CÁO TỔNG HỢP CHI PHÍ SỬA CHỮA</h1>
-            <p class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+            <p id="sc-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
             <div class="repair-filter-bar">
                 <div class="repair-filter-dates">
                     <span class="repair-filter-label">TỪ NGÀY GIỜ</span>
-                    <input type="datetime-local" class="filter-input" aria-label="Từ ngày giờ">
+                    <input type="datetime-local" id="sc-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
                     <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
-                    <input type="datetime-local" class="filter-input" aria-label="Đến ngày giờ">
+                    <input type="datetime-local" id="sc-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
                 </div>
                 <div class="repair-filter-actions">
-                    <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
-                    <button type="button" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <button type="button" id="sc-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" id="sc-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <button type="button" id="sc-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet">Xem</button>
                     <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
                     <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                    <span id="sc-appsheet-status" class="repair-appsheet-status"></span>
                 </div>
             </div>
         </div>
 
         <div class="table-wrapper bg-white">
             <table class="repair-summary-table">
-                <thead>
+                <thead id="sc-thead">
                     <tr>
                         <th rowspan="2" style="width: 38%;">DIỄN GIẢI</th>
                         <th colspan="2" style="width: 24%;">Năm 2024</th>
@@ -407,7 +544,7 @@
                         <th>Tỷ trọng</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="sc-tbody">
                     <tr class="group-row">
                         <td class="text-left">01. ĐỘI THẢM</td>
                         <td class="text-right">1,127,579,080</td>
@@ -610,6 +747,21 @@
         </div>
     </div>
 
+    <div id="sc-loaded-data-modal" class="print-hide sc-loaded-modal" aria-hidden="true">
+        <div class="sc-loaded-dialog" role="dialog" aria-labelledby="sc-loaded-title">
+            <div class="sc-loaded-head">
+                <span id="sc-loaded-title">Dữ liệu AppSheet đã tải</span>
+                <button type="button" id="sc-loaded-close" aria-label="Đóng">×</button>
+            </div>
+            <div class="sc-loaded-tabbar">
+                <button type="button" class="sc-loaded-tab active" data-sc-prev="nxlc" id="sc-tab-nxlc">Nhập xuất luân chuyển CT</button>
+            </div>
+            <div class="sc-loaded-panels">
+                <div id="sc-loaded-panel-nxlc" class="sc-loaded-panel is-visible"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const REPORT_TAB_URLS = {
             "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
@@ -750,6 +902,7 @@
             exportPdfBtn.addEventListener("click", exportPageToPdf);
         }
     </script>
+    <script src="BaocaoTonghopCPSuachua-appsheet.js"></script>
 </body>
 
 </html>
