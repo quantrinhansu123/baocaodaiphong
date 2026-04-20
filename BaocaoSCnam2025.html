@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo kế hoạch bảo dưỡng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+        
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .top-header {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px;
+        }
+        
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+        
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+        }
+        
+        .header-right-title {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            align-self: flex-start;
+            margin-top: 8px;
+        }
+        
+        .title-band {
+            background: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 8px;
+            border-top: 1px solid #9ca3af;
+            border-bottom: 1px solid #9ca3af;
+        }
+        
+        .title-band h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin: 8px 12px;
+        }
+        
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+            padding: 0 12px 12px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        
+        .plan-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1200px;
+            table-layout: fixed;
+        }
+        
+        .plan-table th,
+        .plan-table td {
+            border: 1px solid #9ca3af;
+            padding: 4px;
+            font-size: 12px;
+            line-height: 1.2;
+            vertical-align: middle;
+        }
+        
+        .plan-table thead th {
+            background: #4a8694 !important;
+            color: #fff !important;
+            text-align: center;
+            font-weight: 800;
+            font-size: 9pt;
+        }
+        
+        .text-left {
+            text-align: left;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            .toolbar {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .header-right-title {
+                font-size: 14pt;
+            }
+            .plan-table th,
+            .plan-table td {
+                font-size: 7pt;
+                padding: 2px;
+            }
+            .plan-table thead th {
+                background: #4a8694 !important;
+                color: #fff !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <div class="top-header">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="title-band">
+            <h1>KẾ HOẠCH BẢO DƯỠNG THIẾT BỊ NĂM 2025</h1>
+        </div>
+
+        <div class="toolbar">
+            <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="plan-table">
+                <thead>
+                    <tr>
+                        <th style="width: 6%;">STT</th>
+                        <th style="width: 20%;">Thiết bị</th>
+                        <th style="width: 12%;">Biển số / Mã</th>
+                        <th style="width: 10%;">Hạng mục bảo dưỡng</th>
+                        <th style="width: 10%;">Chu kỳ</th>
+                        <th style="width: 10%;">Kế hoạch tháng</th>
+                        <th style="width: 10%;">Đơn vị phụ trách</th>
+                        <th style="width: 10%;">Dự toán chi phí</th>
+                        <th style="width: 12%;">Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">Lu Kawasaki 2 Thân</td>
+                        <td>18A-11601</td>
+                        <td>Bảo dưỡng định kỳ</td>
+                        <td>3 tháng/lần</td>
+                        <td>T03, T06, T09, T12</td>
+                        <td>Phòng Vật tư</td>
+                        <td class="text-right">45,000,000</td>
+                        <td class="text-left">Theo định mức NSX</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td class="text-left">Máy Giải Thảm</td>
+                        <td>18A-11689</td>
+                        <td>Đại tu hệ thủy lực</td>
+                        <td>1 năm/lần</td>
+                        <td>T07</td>
+                        <td>Đội cơ khí</td>
+                        <td class="text-right">80,000,000</td>
+                        <td class="text-left">Kết hợp thay lọc toàn bộ</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td class="text-left">Lu Rung Sakai 621/0067</td>
+                        <td>621/0067</td>
+                        <td>Thay lọc + dầu</td>
+                        <td>2 tháng/lần</td>
+                        <td>T02, T04, T06, T08, T10, T12</td>
+                        <td>Đội vận hành</td>
+                        <td class="text-right">32,000,000</td>
+                        <td class="text-left">Ưu tiên trước cao điểm thi công</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table || !window.ExcelJS) {
+                alert("Không thể xuất Excel ở thời điểm này.");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) => String(cell.innerText || "").replace(/\s+/g, " ").trim())
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".plan-table", "bao-cao-ke-hoach-bao-duong"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+    </script>
+</body>
+
+</html>

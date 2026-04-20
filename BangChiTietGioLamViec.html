@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng chi tiết giờ làm việc</title>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        :root {
+            --border: #222;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 6px;
+            background: #f3f4f6;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
+            padding: 8px;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px;
+            border-bottom: 1px solid #b4d6dc;
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+
+        .logo-container img {
+            width: 100%;
+            max-width: 145px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .company-block {
+            flex: 1;
+            margin-top: 8px;
+        }
+
+        .company-title {
+            font-size: 17px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1.05;
+        }
+
+        .company-address {
+            font-size: 13px;
+            margin: 4px 0 0;
+            font-style: italic;
+        }
+
+        .company-contact {
+            display: flex;
+            flex-wrap: wrap;
+            width: 400px;
+            max-width: 100%;
+            margin-top: 2px;
+            font-size: 13px;
+        }
+
+        .company-contact p {
+            width: 50%;
+            min-width: 160px;
+            margin: 0;
+        }
+
+        .title {
+            text-align: center;
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            color: #111827;
+        }
+
+        .title-band {
+            text-align: center;
+            border-bottom: 1px solid #b7c7d7;
+            padding: 8px 8px 7px;
+            margin: 2px 0 6px;
+            color: #0047ab;
+        }
+
+        .title-subline {
+            margin: 4px 0 0;
+            font-size: 12px;
+            font-weight: 700;
+            font-style: italic;
+            color: #0047ab;
+        }
+
+        .meta {
+            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .meta-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .meta .label {
+            font-weight: 700;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 0 0 6px;
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .action-btn.action-btn-secondary {
+            background: #fff;
+            color: #2b7132;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            text-align: center;
+            vertical-align: middle;
+            padding: 2px 2px;
+            font-size: 9pt;
+            line-height: 1.1;
+        }
+
+        th {
+            font-weight: 700;
+            background: #4a8694;
+            color: #fff;
+        }
+
+        .h-main th {
+            font-size: 9pt;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            background: #4a8694;
+            color: #fff;
+        }
+
+        .h-shifts th {
+            font-size: 9pt;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            background: #4a8694;
+            color: #fff;
+        }
+
+        .h-sub th {
+            font-size: 9pt;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            background: #5b93a0;
+            color: #fff;
+        }
+
+        .h-num th {
+            font-size: 9pt;
+            height: 24px;
+            background: #fff;
+            color: #111;
+            font-weight: 700;
+        }
+
+        .body-row td {
+            height: 24px;
+            border-top-style: dotted;
+            border-bottom-style: dotted;
+        }
+
+        .body-row td:first-child,
+        .body-row td:nth-child(2),
+        .body-row td:nth-child(9),
+        .body-row td:nth-child(10),
+        .body-row td:nth-child(11),
+        .body-row td:last-child {
+            border-top-style: solid;
+            border-bottom-style: solid;
+        }
+
+        .left {
+            text-align: left;
+            padding-left: 6px;
+        }
+
+        .sum-row td {
+            font-weight: 700;
+            font-size: 13px;
+            background: #fafafa;
+        }
+
+        .sum-row .sum-label {
+            text-transform: uppercase;
+        }
+
+        .footer-date {
+            text-align: right;
+            margin-top: 8px;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .signatures {
+            margin-top: 2px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .sign-title {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .sign-note {
+            font-size: 13px;
+            font-style: italic;
+            line-height: 1.1;
+        }
+
+        @media print {
+            @page {
+                size: auto;
+                margin: 8mm;
+            }
+
+            html,
+            body,
+            .page,
+            table,
+            th,
+            td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            thead th {
+                background: #4a8694 !important;
+                color: #fff !important;
+            }
+
+            .h-sub th {
+                background: #5b93a0 !important;
+                color: #fff !important;
+            }
+
+            .h-num th {
+                background: #fff !important;
+                color: #111 !important;
+            }
+
+            .print-hide {
+                display: none !important;
+            }
+
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .page {
+                box-shadow: none;
+                border: none;
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="top-header">
+            <div class="logo-container">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="company-block">
+                <div class="company-title">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</div>
+                <p class="company-address">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="company-contact">
+                    <p>Điện thoại: 0228.3823 484</p>
+                    <p>Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="title-band">
+            <h1 class="title">BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
+            <p class="title-subline">(Từ 26/2/2025 đến 25/3/2026)</p>
+        </div>
+
+        <div class="meta">
+            <div><span class="label">Đơn vị cho thuê :</span> Phạm Văn Vinh</div>
+            <div class="meta-row">
+                <div><span class="label">Lái máy :</span> Nguyễn Văn Diêm</div>
+            </div>
+            <div><span class="label">Tên máy :</span> Máy xúc SK200 - Đường gom đê Đông Anh</div>
+        </div>
+
+        <div class="toolbar print-hide">
+            <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
+            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+        </div>
+
+        <table>
+            <colgroup>
+                <col style="width:4.5%">
+                <col style="width:11%">
+                <col style="width:7.2%">
+                <col style="width:7.2%">
+                <col style="width:7.2%">
+                <col style="width:7.2%">
+                <col style="width:7.2%">
+                <col style="width:7.2%">
+                <col style="width:8.2%">
+                <col style="width:8.2%">
+                <col style="width:6.8%">
+                <col style="width:8.3%">
+            </colgroup>
+            <thead>
+                <tr class="h-main">
+                    <th rowspan="3">TT</th>
+                    <th rowspan="3">Ngày</th>
+                    <th colspan="6">Thời gian làm việc</th>
+                    <th rowspan="3">Tổng giờ HC</th>
+                    <th rowspan="3">Tổng giờ tăng ca</th>
+                    <th rowspan="3">Số ngày LV</th>
+                    <th rowspan="3">Ghi chú</th>
+                </tr>
+                <tr class="h-shifts">
+                    <th colspan="2">Sáng</th>
+                    <th colspan="2">Chiều</th>
+                    <th colspan="2">Tối</th>
+                </tr>
+                <tr class="h-sub">
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                </tr>
+                <tr class="h-num">
+                    <th>(1)</th>
+                    <th>(2)</th>
+                    <th>(3)</th>
+                    <th>(4)</th>
+                    <th>(5)</th>
+                    <th>(6)</th>
+                    <th>(7)</th>
+                    <th>(8)</th>
+                    <th>(9)</th>
+                    <th>(10)</th>
+                    <th>(11)</th>
+                    <th>(12)</th>
+                </tr>
+            </thead>
+            <tbody id="work-body"></tbody>
+            <tfoot>
+                <tr class="sum-row">
+                    <td colspan="8" class="sum-label">CỘNG</td>
+                    <td>0,00</td>
+                    <td>0,00</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer-date">Ý Yên, Ngày ... tháng 2 năm 2026</div>
+
+        <div class="signatures">
+            <div>
+                <div class="sign-title">XÁC NHẬN CHỈ HUY CÔNG TRƯỜNG</div>
+                <div class="sign-note">(Ký, ghi họ tên)</div>
+            </div>
+            <div>
+                <div class="sign-title">NGƯỜI LẬP</div>
+                <div class="sign-note">(Ký, ghi họ tên)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table || !window.ExcelJS) {
+                alert("Không thể xuất Excel ở thời điểm này.");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) => String(cell.innerText || "").replace(/\s+/g, " ").trim())
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel("table", "bao-cao-cong-viec"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+
+        (function renderRows() {
+            const tbody = document.getElementById("work-body");
+            if (!tbody) return;
+
+            const start = new Date(2026, 1, 26);
+            const end = new Date(2026, 2, 25);
+            let stt = 1;
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const day = String(d.getDate()).padStart(2, "0");
+                const month = String(d.getMonth() + 1).padStart(2, "0");
+                const year = d.getFullYear();
+
+                const tr = document.createElement("tr");
+                tr.className = "body-row";
+                tr.innerHTML = `
+                    <td>${stt}</td>
+                    <td>${day}/${month}/${year}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>0:00</td>
+                    <td>0:00</td>
+                    <td>0,0</td>
+                    <td></td>
+                `;
+                tbody.appendChild(tr);
+                stt += 1;
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo thuê thiết bị</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: #fff;
+            border-color: #0047ab;
+        }
+
+        body {
+            margin: 0;
+            padding: 8px;
+            background: #f9fafb;
+            font-family: 'Times New Roman', Times, serif;
+            color: #111;
+        }
+
+        .page-container {
+            width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .header-wrap {
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .title-band {
+            text-align: center;
+            border-top: 1px solid #b7c7d7;
+            border-bottom: 1px solid #b7c7d7;
+            padding: 6px 8px 7px;
+            color: #0047ab;
+        }
+
+        .title-band h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #111827;
+            letter-spacing: 0.2px;
+        }
+
+        .title-band .sub-title {
+            margin-top: 3px;
+            font-size: 12px;
+            font-weight: 700;
+            font-style: italic;
+            color: #0047ab;
+        }
+
+        .title-band .meta-line {
+            display: none;
+        }
+
+        .meta-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            padding: 6px 10px 4px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .meta-strip div {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 0 10px 6px;
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .action-btn.action-btn-secondary {
+            background: #fff;
+            color: #2b7132;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            padding: 0 8px 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1500px;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        th,
+        td {
+            border: 1px solid #222;
+            padding: 4px 4px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        thead th {
+            background: #4a8694;
+            color: #fff;
+            font-size: 9pt;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        thead tr:nth-child(2) th {
+            background: #5b93a0;
+        }
+
+        thead tr.number-row th {
+            background: #fff;
+            color: #111;
+        }
+
+        thead tr:nth-child(1) th {
+            font-size: 9pt;
+            padding: 3px 4px;
+        }
+
+        thead tr:nth-child(2) th {
+            font-size: 9pt;
+            padding: 2px 4px;
+        }
+
+        thead tr:nth-child(3) th {
+            font-size: 9pt;
+            padding: 2px 4px;
+        }
+
+        thead tr.number-row th {
+            font-size: 9pt;
+            font-weight: 700;
+        }
+
+        tbody td {
+            height: 26px;
+            font-size: 12px;
+        }
+
+        .left {
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        .blank-row td {
+            height: 28px;
+        }
+
+        @media (max-width: 1100px) {
+            .report-tab-btn {
+                font-size: 10px;
+                padding: 5px 10px;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .print-hide {
+                display: none !important;
+            }
+
+            .page-container {
+                box-shadow: none;
+            }
+
+            .table-wrap {
+                overflow: visible;
+            }
+
+            thead th,
+            tbody td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button">Báo cáo thiết bị máy</button>
+            <button id="tab-thue-thiet-bi" class="report-tab-btn active" type="button">BC thuê thiết bị</button>
+        </div>
+
+        <div class="header-wrap">
+            <div class="flex items-start p-2 bg-white">
+                <div class="logo-container mr-6">
+                    <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                    <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+                </div>
+                <div class="flex-1 mt-2">
+                    <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                    <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                    <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                        <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                        <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="title-band">
+            <h1>BÁO CÁO THUÊ THIẾT BỊ</h1>
+            <div class="sub-title">(Từ ... đến ...)</div>
+        </div>
+
+        <div class="meta-strip">
+            <div>Mũi thi công: số 2</div>
+            <div>CB Phụ trách: Hoàng Đình Mạnh</div>
+            <div>Chức vụ: Chỉ huy mũi</div>
+        </div>
+
+        <div class="toolbar print-hide">
+            <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
+            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <colgroup>
+                    <col style="width: 4.5%;">
+                    <col style="width: 14.5%;">
+                    <col style="width: 10%;">
+                    <col style="width: 11%;">
+                    <col style="width: 9%;">
+                    <col style="width: 15%;">
+                    <col style="width: 4.5%;">
+                    <col style="width: 4.5%;">
+                    <col style="width: 5.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 12.5%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th rowspan="2">TT</th>
+                        <th rowspan="2">CBKT</th>
+                        <th rowspan="2">CB Phụ trách</th>
+                        <th rowspan="2">Tên lái máy</th>
+                        <th rowspan="2">Loại máy</th>
+                        <th rowspan="2">Nội dung công việc</th>
+                        <th colspan="2">Lý trình</th>
+                        <th rowspan="2">ĐVT</th>
+                        <th colspan="2">Khối lượng</th>
+                        <th colspan="2">Thời gian</th>
+                        <th rowspan="2">Ghi chú</th>
+                    </tr>
+                    <tr>
+                        <th>Từ</th>
+                        <th>Đến</th>
+                        <th>Kế hoạch</th>
+                        <th>Thực tế</th>
+                        <th>Kế hoạch</th>
+                        <th>Thực tế</th>
+                    </tr>
+                    <tr class="number-row">
+                        <th>(1)</th>
+                        <th>(2)</th>
+                        <th>(3)</th>
+                        <th>(4)</th>
+                        <th>(5)</th>
+                        <th>(6)</th>
+                        <th>(7)</th>
+                        <th>(8)</th>
+                        <th>(9)</th>
+                        <th>(10)</th>
+                        <th>(11)</th>
+                        <th>(12)</th>
+                        <th>(13)</th>
+                        <th>(14)</th>
+                    </tr>
+                </thead>
+                <tbody id="work-table-body">
+                    <tr>
+                        <td>1</td>
+                        <td class="left">Tự nhảy theo mã NV</td>
+                        <td class="left">Tự nhảy theo mã</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function getTimestampForFileName() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
+        async function exportPageTableToExcel(tableSelector, filePrefix) {
+            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            if (!table || !window.ExcelJS) {
+                alert("Không thể xuất Excel ở thời điểm này.");
+                return;
+            }
+
+            const button = document.getElementById("export-excel");
+            if (button) button.disabled = true;
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("BaoCao");
+                const rows = Array.from(table.rows).map((row) =>
+                    Array.from(row.cells).map((cell) => String(cell.innerText || "").replace(/\s+/g, " ").trim())
+                );
+                rows.forEach((r) => worksheet.addRow(r));
+
+                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function exportPageToPdf() {
+            window.print();
+        }
+
+        const exportExcelBtn = document.getElementById("export-excel");
+        const exportPdfBtn = document.getElementById("export-pdf");
+
+        if (exportExcelBtn) {
+            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel("table", "bao-cao-thue-thiet-bi"));
+        }
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+
+        const TAB_REDIRECTS = {
+            "tab-xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben&group=thiet-bi",
+            "tab-xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon&group=thiet-bi",
+            "tab-trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi",
+            "tab-thue-thiet-bi": "BaocaoThueThietBi.html"
+        };
+
+        function activateCurrentTab() {
+            document.querySelectorAll('.report-tab-btn').forEach((btn) => btn.classList.remove('active'));
+            const active = document.getElementById('tab-thue-thiet-bi');
+            if (active) active.classList.add('active');
+        }
+
+        function gotoTab(tabId) {
+            const target = TAB_REDIRECTS[tabId];
+            if (!target) return;
+            window.location.href = target;
+        }
+
+        document.querySelectorAll('.report-tab-btn').forEach((btn) => {
+            btn.addEventListener('click', () => gotoTab(btn.id));
+        });
+
+        activateCurrentTab();
+    </script>
+</body>
+</html>

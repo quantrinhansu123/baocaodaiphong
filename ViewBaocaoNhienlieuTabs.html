@@ -88,6 +88,7 @@
             <button class="tab-btn" data-tab="bc-sua-chua" type="button">BC sửa chữa</button>
             <button class="tab-btn" data-tab="bc-kiem-ke" type="button">BC kiểm kê</button>
             <button class="tab-btn" data-tab="bc-ke-hoach" type="button">BC kế hoạch bảo dưỡng</button>
+            <button class="tab-btn" data-tab="bc-cong-viec" type="button">BC công việc</button>
         </div>
 
         <div class="tab-panels">
@@ -111,15 +112,17 @@
             "bc-nhien-lieu": `./BaocaoNL.html?v=${CACHE_VER}&group=nhien-lieu`,
             "bc-sua-chua": `./BaocaoTonghopCPSuachua.html?v=${CACHE_VER}&group=sua-chua`,
             "bc-kiem-ke": `./BaocaoKiemKeThietBi.html?v=${CACHE_VER}&group=kiem-ke`,
-            "bc-ke-hoach": `./BaocaoSCnam2025.html?v=${CACHE_VER}&group=ke-hoach`
+            "bc-ke-hoach": `./BaocaoSCnam2025.html?v=${CACHE_VER}&group=ke-hoach`,
+            "bc-cong-viec": `./BangChiTietGioLamViec.html?v=${CACHE_VER}&group=cong-viec`
         };
 
         const CHILD_TAB_GROUPS = {
-            "bc-thiet-bi": new Set(["tab-trang-thiet-bi", "tab-xe-ben", "tab-xe-bon"]),
+            "bc-thiet-bi": new Set(["tab-trang-thiet-bi", "tab-xe-ben", "tab-xe-bon", "tab-thue-thiet-bi"]),
             "bc-nhien-lieu": new Set(["tab-ton-kho-nl", "tab-chi-tiet-nl", "tab-xuat-nl-theo-ct"]),
-            "bc-sua-chua": new Set(["tab-tong-hop-sc"]),
+            "bc-sua-chua": new Set(["tab-sc-bc01", "tab-sc-bc02", "tab-sc-bc03", "tab-sc-bc04"]),
             "bc-kiem-ke": new Set(["tab-kiem-ke-thiet-bi"]),
-            "bc-ke-hoach": new Set([])
+            "bc-ke-hoach": new Set([]),
+            "bc-cong-viec": new Set([])
         };
 
         function applyChildTabGrouping() {
@@ -148,7 +151,20 @@
             });
 
             const anyVisible = Array.from(childButtons).some((btn) => btn.style.display !== "none");
-            container.style.display = anyVisible ? "flex" : "none";
+            if (!anyVisible) {
+                container.style.display = "none";
+                container.style.gridTemplateColumns = "";
+                return;
+            }
+
+            const visibleCount = Array.from(childButtons).filter((btn) => btn.style.display !== "none").length;
+            if (currentTopTab === "bc-nhien-lieu" && visibleCount > 1) {
+                container.style.display = "grid";
+                container.style.gridTemplateColumns = `repeat(${visibleCount}, minmax(0, 1fr))`;
+            } else {
+                container.style.display = "flex";
+                container.style.gridTemplateColumns = "";
+            }
         }
 
         function activateTab(tab) {
