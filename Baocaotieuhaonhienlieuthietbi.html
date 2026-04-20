@@ -652,8 +652,8 @@
                             <th rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
                             <th rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
                             <th rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T12 (h)</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động T11 (h)</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
                             <th rowspan="2" style="width: 4%;">Dầu nhập<br>trong tháng (L)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
@@ -667,10 +667,10 @@
                             <th rowspan="2" style="width: 6%;">Công trường</th>
                         </tr>
                         <tr style="background-color: #f2f2f2;">
-                            <th style="width: 3%;">Mỡ (kg)</th>
-                            <th style="width: 3%;">Nhớt (L)</th>
-                            <th style="width: 3%;">T.Lực (L)</th>
-                            <th style="width: 3%;">Cầu (L)</th>
+                            <th style="width: 3%;">Tổng mỡ<br>(kg)</th>
+                            <th style="width: 3%;">Tổng nhớt<br>(L)</th>
+                            <th style="width: 3%;">Dầu thủy lực<br>(L)</th>
+                            <th style="width: 3%;">Dầu cầu<br>(L)</th>
                         </tr>
                     </thead>
                     <tbody id="report-body"></tbody>
@@ -4227,7 +4227,7 @@
             dateRangeEl.textContent = `(Từ ${fromFilter || "..."} đến ${toFilter || "..."})`;
         }
 
-        /** Nhãn tháng cho tiêu đề cột km (vd: «T03» — tháng của «Từ ngày» hoặc «Đến ngày»). */
+        /** Nhãn tháng cho tiêu đề cột (vd: «T04» — tháng của «Từ ngày» / «Đến ngày», luôn 2 chữ số). */
         function monthTokenLabel(d) {
             if (!d || isNaN(d.getTime())) return "";
             const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -4237,6 +4237,7 @@
         /**
          * Cột km 1: T{tháng} theo «Từ ngày» — không có «Từ ngày» thì để trống.
          * Cột km 2: T{tháng} theo «Đến ngày» (tới ngày) — không có «Đến ngày» thì để trống.
+         * «Tiêu hao thực tế» dùng cùng hai mã tháng này (chỉ tháng, không lấy cả ngày).
          */
         function getKmMonthLabelsFromFiltersOrRows(filters) {
             const fromF = parseDateInputYmd(filters ?.fromDate);
@@ -4245,6 +4246,12 @@
                 line1: fromF ? monthTokenLabel(fromF) : "",
                 line2: toF ? monthTokenLabel(toF) : ""
             };
+        }
+
+        /** «Tổng giờ hoạt động Txx (h)» — layout xuống dòng như mẫu in/bảng. */
+        function thietBiTongGioHoatDongHeaderHtml(monthToken) {
+            if (!monthToken) return "Tổng<br>giờ<br>hoạt động<br>(h)";
+            return `Tổng<br>giờ<br>hoạt động<br>${escapeHtml(monthToken)} (h)`;
         }
 
         function updateKmColumnHeaders(filters) {
@@ -4257,22 +4264,19 @@
                 line1,
                 line2
             } = getKmMonthLabelsFromFiltersOrRows(filters);
-            th1.innerHTML = line1 ?
-                `Giờ HĐ<br>${escapeHtml(line1)} (h)` :
-                "Giờ HĐ (h)";
-            th2.innerHTML = line2 ?
-                `Giờ HĐ<br>${escapeHtml(line2)} (h)` :
-                "Giờ HĐ (h)";
+            const tieuHaoUnit = "L/h";
+            th1.innerHTML = thietBiTongGioHoatDongHeaderHtml(line1);
+            th2.innerHTML = thietBiTongGioHoatDongHeaderHtml(line2);
 
             if (thTieuHao1) {
                 thTieuHao1.innerHTML = line1 ?
-                    `TH thực tế<br>${escapeHtml(line1)}` :
-                    "TH thực tế";
+                    `Tiêu hao<br>thực tế<br>${escapeHtml(line1)}<br>(${tieuHaoUnit})` :
+                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
             }
             if (thTieuHao2) {
                 thTieuHao2.innerHTML = line2 ?
-                    `TH thực tế<br>${escapeHtml(line2)}` :
-                    "TH thực tế";
+                    `Tiêu hao<br>thực tế<br>${escapeHtml(line2)}<br>(${tieuHaoUnit})` :
+                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
             }
         }
 

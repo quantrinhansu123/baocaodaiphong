@@ -703,8 +703,8 @@
                             <th id="th-gio-tc" rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
                             <th id="th-xe-bon-hd" rowspan="2" style="width: 3.5%;">Tổng giờ<br>HĐ xe bồn</th>
                             <th id="th-an-khi-in" rowspan="2" style="width: 2.5%;">Ăn khi<br>in</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng km</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng km</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
                             <th rowspan="2" style="width: 4%;">Dầu nhập<br>trong tháng (L)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
@@ -718,10 +718,10 @@
                             <th rowspan="2" style="width: 6%;">Công trường</th>
                         </tr>
                         <tr>
-                            <th id="th-nlphu-mo" style="width: 3.5%;">Mỡ<br>(kg)</th>
-                            <th id="th-nlphu-nhot" style="width: 3.5%;">Nhớt<br>(L)</th>
-                            <th id="th-nlphu-thuyluc" style="width: 3.5%;">TL<br>(L)</th>
-                            <th id="th-nlphu-daucau" style="width: 3.5%;">Cầu<br>(L)</th>
+                            <th id="th-nlphu-mo" style="width: 3.5%;">Tổng mỡ<br>(kg)</th>
+                            <th id="th-nlphu-nhot" style="width: 3.5%;">Tổng nhớt<br>(L)</th>
+                            <th id="th-nlphu-thuyluc" style="width: 3.5%;">Dầu thủy lực<br>(L)</th>
+                            <th id="th-nlphu-daucau" style="width: 3.5%;">Dầu cầu<br>(L)</th>
                         </tr>
                         <tr class="number-row">
                             <th>(1)</th>
@@ -4342,7 +4342,7 @@
             dateRangeEl.textContent = `(Từ ${fromFilter || "..."} đến ${toFilter || "..."})`;
         }
 
-        /** Nhãn tháng cho tiêu đề cột km (vd: «T03» — tháng của «Từ ngày» hoặc «Đến ngày»). */
+        /** Nhãn tháng cho tiêu đề cột (vd: «T04» — tháng của «Từ ngày» / «Đến ngày», luôn 2 chữ số). */
         function monthTokenLabel(d) {
             if (!d || isNaN(d.getTime())) return "";
             const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -4352,6 +4352,7 @@
         /**
          * Cột km 1: T{tháng} theo «Từ ngày» — không có «Từ ngày» thì để trống.
          * Cột km 2: T{tháng} theo «Đến ngày» (tới ngày) — không có «Đến ngày» thì để trống.
+         * «Tiêu hao thực tế» dùng cùng hai mã tháng này (chỉ tháng, không lấy cả ngày).
          */
         function getKmMonthLabelsFromFiltersOrRows(filters) {
             const fromF = parseDateInputYmd(filters ?.fromDate);
@@ -4360,6 +4361,12 @@
                 line1: fromF ? monthTokenLabel(fromF) : "",
                 line2: toF ? monthTokenLabel(toF) : ""
             };
+        }
+
+        /** «Tổng giờ hoạt động Txx (h)» — layout xuống dòng như mẫu in/bảng. */
+        function thietBiTongGioHoatDongHeaderHtml(monthToken) {
+            if (!monthToken) return "Tổng<br>giờ<br>hoạt động<br>(h)";
+            return `Tổng<br>giờ<br>hoạt động<br>${escapeHtml(monthToken)} (h)`;
         }
 
         function updateKmColumnHeaders(filters) {
@@ -4380,30 +4387,29 @@
             } = getKmMonthLabelsFromFiltersOrRows(filters);
             const thietBiTab = currentReportTab === "trang-thiet-bi";
             const xeTab = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
-            const compactThietBi = thietBiTab;
             const tieuHaoUnit = thietBiTab ? "L/h" : "L/km";
             th1.innerHTML =
                 line1 ?
                 (thietBiTab ?
-                    (compactThietBi ? `Giờ HĐ<br>${escapeHtml(line1)} (h)` : `Giờ HĐ<br>${escapeHtml(line1)} (h)`) :
+                    thietBiTongGioHoatDongHeaderHtml(line1) :
                     (xeTab ? `Tổng km<br>${escapeHtml(line1)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`) ) :
-                (thietBiTab ? "Giờ HĐ (h)" : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
+                (thietBiTab ? thietBiTongGioHoatDongHeaderHtml("") : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
             th2.innerHTML =
                 line2 ?
                 (thietBiTab ?
-                    (compactThietBi ? `Giờ HĐ<br>${escapeHtml(line2)} (h)` : `Giờ HĐ<br>${escapeHtml(line2)} (h)`) :
+                    thietBiTongGioHoatDongHeaderHtml(line2) :
                     (xeTab ? `Tổng km<br>${escapeHtml(line2)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`) ) :
-                (thietBiTab ? "Giờ HĐ (h)" : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
+                (thietBiTab ? thietBiTongGioHoatDongHeaderHtml("") : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
 
             if (thTieuHao1) {
                 thTieuHao1.innerHTML = line1 ?
-                    (compactThietBi ? `TH thực tế<br>${escapeHtml(line1)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line1)} (${tieuHaoUnit})`) :
-                    (compactThietBi ? `TH thực tế<br>(${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
+                    `Tiêu hao<br>thực tế<br>${escapeHtml(line1)}<br>(${tieuHaoUnit})` :
+                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
             }
             if (thTieuHao2) {
                 thTieuHao2.innerHTML = line2 ?
-                    (compactThietBi ? `TH thực tế<br>${escapeHtml(line2)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line2)} (${tieuHaoUnit})`) :
-                    (compactThietBi ? `TH thực tế<br>(${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
+                    `Tiêu hao<br>thực tế<br>${escapeHtml(line2)}<br>(${tieuHaoUnit})` :
+                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
             }
 
             if (thSoNgay) thSoNgay.innerHTML = "Số ngày xe<br>hoạt động";
@@ -4412,16 +4418,6 @@
             if (thGioTc) thGioTc.innerHTML = "Giờ tăng<br>ca / tháng";
             if (thXeBonHd) thXeBonHd.innerHTML = "Tổng giờ<br>HĐ xe bồn";
             if (thAnKhiIn) thAnKhiIn.innerHTML = "Ăn khi<br>in";
-
-            th1.innerHTML = line1 ?
-                `Tổng km<br>HĐ ${escapeHtml(line1)} (km)` :
-                "Tổng km";
-            th2.innerHTML = line2 ?
-                `Tổng km<br>HĐ ${escapeHtml(line2)} (km)` :
-                "Tổng km";
-
-            if (thTieuHao1) thTieuHao1.innerHTML = "Tiêu hao<br>thực tế T1 (l/km)";
-            if (thTieuHao2) thTieuHao2.innerHTML = "Tiêu hao<br>thực tế T12 (l/km)";
         }
 
         function updateCompactHeadersForTab() {
@@ -4441,10 +4437,17 @@
             setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Dầu TH<br>(L)");
             setHtml("th-dm-trong-binh", "Định mức<br>trong bình (L/h)", "ĐM bình<br>(L/h)");
             setHtml("th-dm-tieu-hao", "Định mức<br>tiêu hao (L/h)", "ĐM TH<br>(L/h)");
-            setHtml("th-nlphu-mo", "Tổng<br>mỡ (kg)", "Mỡ<br>(kg)");
-            setHtml("th-nlphu-nhot", "Tổng<br>nhớt (L)", "Nhớt<br>(L)");
-            setHtml("th-nlphu-thuyluc", "Dầu thủy<br>lực (L)", "TL<br>(L)");
-            setHtml("th-nlphu-daucau", "Dầu<br>cầu (L)", "Cầu<br>(L)");
+            /** Nhiên liệu phụ: chỉ xe ben/bồn dùng nhãn ngắn; «Báo cáo thiết bị máy» và tab khác dùng đúng nhãn mẫu (ảnh). */
+            const setNlphuHeader = (id, fullHtml, compactHtml) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const compactXeOnly = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
+                el.innerHTML = compactXeOnly ? compactHtml : fullHtml;
+            };
+            setNlphuHeader("th-nlphu-mo", "Tổng mỡ<br>(kg)", "Mỡ<br>(kg)");
+            setNlphuHeader("th-nlphu-nhot", "Tổng nhớt<br>(L)", "Nhớt<br>(L)");
+            setNlphuHeader("th-nlphu-thuyluc", "Dầu thủy lực<br>(L)", "TL<br>(L)");
+            setNlphuHeader("th-nlphu-daucau", "Dầu cầu<br>(L)", "Cầu<br>(L)");
         }
 
         function updateCompactHeaderWidthsForTab() {
