@@ -91,6 +91,18 @@
             opacity: 0.65;
             cursor: not-allowed;
         }
+
+        .action-btn.secondary {
+            border-color: #0047ab;
+            background: #fff;
+            color: #0047ab;
+        }
+
+        .action-btn.ghost {
+            border-color: #94a3b8;
+            background: #fff;
+            color: #334155;
+        }
         
         .table-wrapper {
             overflow-x: auto;
@@ -236,6 +248,103 @@
             font-size: 12px;
             margin-top: 2px;
         }
+
+        .kktb-loaded-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.45);
+        }
+
+        .kktb-loaded-dialog {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            max-width: min(1200px, 96vw);
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-size: 12px;
+        }
+
+        .kktb-loaded-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .kktb-loaded-close {
+            border: none;
+            background: #f1f5f9;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .kktb-loaded-close:hover {
+            background: #e2e8f0;
+        }
+
+        .kktb-loaded-panel {
+            flex: 1;
+            min-height: 0;
+            padding: 10px 12px 14px;
+            overflow: auto;
+        }
+
+        .kktb-prev-note {
+            margin: 0 0 6px;
+            color: #334155;
+            font-size: 11px;
+        }
+
+        .kktb-prev-scroll {
+            overflow: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            max-height: 65vh;
+            background: #fff;
+        }
+
+        .kktb-prev-table {
+            border-collapse: collapse;
+            min-width: 900px;
+            width: max-content;
+            table-layout: auto;
+            font-size: 11px;
+            color: #0f172a;
+        }
+
+        .kktb-prev-table th,
+        .kktb-prev-table td {
+            border: 1px solid #e2e8f0;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        .kktb-prev-table th {
+            background: #f1f5f9;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            font-weight: 700;
+        }
         
         @media print {
             @page {
@@ -343,9 +452,13 @@
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
             <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                <button type="button" id="kktb-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                <button type="button" id="kktb-btn-refresh" class="action-btn ghost">Làm mới</button>
+                <button type="button" id="kktb-btn-view-loaded" class="action-btn secondary" title="Xem dữ liệu đã tải từ bảng Nhập xuất luân chuyển CT">Xem</button>
                 <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
                 <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
             </div>
+            <p id="kktb-appsheet-status" class="text-xs font-semibold text-[#2b7132] mt-2"></p>
         </div>
 
         <div class="check-info-section">
@@ -400,117 +513,9 @@
                         <th>Giá trị</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="group-row">
-                        <td>1</td>
-                        <td class="text-left">NHÓM MÁY XÚC:</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="child-row">
-                        <td>1.1</td>
-                        <td class="text-left">Máy xúc PC 200-6/062</td>
-                        <td>MX-062</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">2,500,000</td>
-                        <td class="text-right">2,500,000</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">2,500,000</td>
-                        <td class="text-right">2,500,000</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td></td>
-                    </tr>
-                    <tr class="child-row">
-                        <td>1.2</td>
-                        <td class="text-left">Máy xúc PC 200-8/013</td>
-                        <td>MX-013</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">1,800,000</td>
-                        <td class="text-right">1,800,000</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">1,800,000</td>
-                        <td class="text-right">1,800,000</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td></td>
-                    </tr>
-                    <tr class="group-row">
-                        <td>2</td>
-                        <td class="text-left">NHÓM MÁY LU:</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr class="child-row">
-                        <td>2.1</td>
-                        <td class="text-left">Máy xúc PC22SLU-1/051</td>
-                        <td>LU-051</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">5,500,000</td>
-                        <td class="text-right">5,500,000</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">5,500,000</td>
-                        <td class="text-right">5,500,000</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td></td>
-                    </tr>
-                    <tr class="child-row">
-                        <td>2.2</td>
-                        <td class="text-left">Máy xúc SK 200-3077</td>
-                        <td>LU-077</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">3,200,000</td>
-                        <td class="text-right">3,200,000</td>
-                        <td class="text-right">1</td>
-                        <td class="text-right">3,200,000</td>
-                        <td class="text-right">3,200,000</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td></td>
-                    </tr>
+                <tbody id="kktb-tbody">
                     <tr>
-                        <td colspan="13" style="height: 26px;"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="13" style="height: 26px;"></td>
-                    </tr>
-                    <tr class="grand-total-row">
-                        <td></td>
-                        <td class="text-left">TỔNG CỘNG</td>
-                        <td></td>
-                        <td class="text-right">4</td>
-                        <td class="text-right">13,000,000</td>
-                        <td class="text-right">13,000,000</td>
-                        <td class="text-right">4</td>
-                        <td class="text-right">13,000,000</td>
-                        <td class="text-right">13,000,000</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td class="text-right">0</td>
-                        <td></td>
+                        <td colspan="13" class="text-center" style="padding: 10px;">Bấm "Tải dữ liệu AppSheet" để lấy dữ liệu từ bảng "Nhập xuất luân chuyển CT".</td>
                     </tr>
                 </tbody>
             </table>
@@ -527,6 +532,16 @@
                     <div class="signature-note">(ký, họ tên)</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="kktb-loaded-data-modal" class="print-hide kktb-loaded-modal" aria-hidden="true">
+        <div class="kktb-loaded-dialog" role="dialog" aria-labelledby="kktb-loaded-title" aria-modal="true">
+            <div class="kktb-loaded-head">
+                <span id="kktb-loaded-title">Dữ liệu đã tải từ AppSheet (Nhập xuất luân chuyển CT)</span>
+                <button type="button" id="kktb-loaded-close" class="kktb-loaded-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="kktb-loaded-panel" class="kktb-loaded-panel"></div>
         </div>
     </div>
 
@@ -670,6 +685,7 @@
             exportPdfBtn.addEventListener("click", exportPageToPdf);
         }
     </script>
+    <script src="BaocaoKiemKeThietBi-appsheet.js"></script>
 </body>
 
 </html>

@@ -638,39 +638,39 @@
         </div>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-            <div class="tkh-info-wrap">
-                <div class="tkh-info-col">
-                    <div class="tkh-info-line">
-                        <label>Nhóm nhà cc</label>
-                        <select class="tkh-select-line">
-                            <option value="">-- Tất cả --</option>
-                            <option value="nhom-a">Nhóm A</option>
-                            <option value="nhom-b">Nhóm B</option>
-                        </select>
+            <div class="flex flex-col gap-2 max-w-[1400px]">
+                <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
+                    <div class="w-full lg:w-[46%] space-y-1">
+                        <div class="flex items-center gap-1">
+                            <span class="w-[118px] shrink-0">NHÓM NHÀ CC</span>
+                            <select class="filter-input max-w-none flex-1 min-w-0">
+                                <option value="">-- Tất cả --</option>
+                                <option value="nhom-a">Nhóm A</option>
+                                <option value="nhom-b">Nhóm B</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="w-[118px] shrink-0">TÊN NHÀ CUNG CẤP</span>
+                            <select id="tkh-filter-ncc" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo cột «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
+                                <option value="">-- Tất cả --</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
+                            <select id="tkh-filter-cong-trinh" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo «Tên nơi nhập» trên «Nhập xuất luân chuyển CT»">
+                                <option value="">-- Tất cả --</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="w-[118px] shrink-0">TÊN KHO</span>
+                            <select id="tkh-filter-ten-kho" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
+                                <option value="">-- Tất cả --</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="tkh-info-line">
-                        <label>Tên nhà cung cấp</label>
-                        <select id="tkh-filter-ncc" class="tkh-select-line" title="Lọc theo cột «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
-                            <option value="">-- Tất cả --</option>
-                        </select>
-                    </div>
-                    <div class="tkh-info-line">
-                        <label>Công trình</label>
-                        <select id="tkh-filter-cong-trinh" class="tkh-select-line" title="Lọc theo «Tên nơi nhập» trên «Nhập xuất luân chuyển CT»">
-                            <option value="">-- Tất cả --</option>
-                        </select>
-                    </div>
-                    <div class="tkh-info-line">
-                        <label>Tên kho</label>
-                        <select id="tkh-filter-ten-kho" class="tkh-select-line" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
-                            <option value="">-- Tất cả --</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="tkh-info-col">
-                    <div class="tkh-info-line">
-                        <label>Từ ngày</label>
-                        <div class="tkh-date-filter-wrap flex min-w-0 items-center">
+                    <div class="w-full lg:w-[50%] space-y-1 flex flex-col items-end lg:pr-2">
+                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                            <span class="w-[72px] shrink-0">TỪ NGÀY</span>
                             <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
                                 <input id="tkh-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
                                 <button type="button" id="tkh-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
@@ -679,10 +679,8 @@
                             </div>
                             <input type="date" id="tkh-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                         </div>
-                    </div>
-                    <div class="tkh-info-line">
-                        <label>Đến ngày</label>
-                        <div class="tkh-date-filter-wrap flex min-w-0 items-center">
+                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
+                            <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
                             <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
                                 <input id="tkh-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
                                 <button type="button" id="tkh-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
@@ -691,24 +689,22 @@
                             </div>
                             <input type="date" id="tkh-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
                         </div>
+                        <div class="flex items-center gap-1.5 w-full lg:w-[460px] justify-end flex-wrap">
+                            <button type="button" id="tkh-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                            <button type="button" id="tkh-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                            <button type="button" id="tkh-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
+                            <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                            <span id="tkh-appsheet-status"></span>
+                        </div>
                     </div>
                 </div>
-
             </div>
+        </div>
 
-            <div class="tkh-action-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-                <button type="button" id="tkh-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
-                <button type="button" id="tkh-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
-                <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
-                <span id="tkh-appsheet-status"></span>
-            </div>
-
-            <div class="tkh-search-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
-                <span class="tkh-search-label">🔎 Tìm kiếm</span>
-                <input type="text" id="tkh-search" class="tkh-search-input" placeholder="">
-                <button type="button" id="tkh-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
-            </div>
+        <div class="px-2 pb-1 bg-white print-hide flex items-center gap-2">
+            <span class="text-blue-600 font-bold text-xs whitespace-nowrap">🔍 Tìm kiếm</span>
+            <input type="text" id="tkh-search" class="filter-input max-w-none flex-1" placeholder="">
         </div>
 
         <div class="table-wrapper bg-white">

@@ -218,6 +218,104 @@
             pointer-events: none;
             color: #387c2b;
         }
+
+        .tbx-loaded-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.45);
+        }
+
+        .tbx-loaded-dialog {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            max-width: min(1100px, 96vw);
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-size: 12px;
+        }
+
+        .tbx-loaded-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .tbx-loaded-close {
+            border: none;
+            background: #f1f5f9;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        .tbx-loaded-close:hover {
+            background: #e2e8f0;
+        }
+
+        .tbx-loaded-panel {
+            flex: 1;
+            min-height: 0;
+            padding: 10px 12px 14px;
+            overflow: auto;
+        }
+
+        .tbx-prev-note {
+            margin: 0 0 6px;
+            color: #334155;
+            font-size: 11px;
+        }
+
+        .tbx-prev-scroll {
+            overflow: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            max-height: 65vh;
+            background: #fff;
+        }
+
+        .tbx-prev-table {
+            border-collapse: collapse;
+            min-width: 900px;
+            width: max-content;
+            table-layout: auto;
+            font-size: 11px;
+            color: #0f172a;
+        }
+
+        .tbx-prev-table th,
+        .tbx-prev-table td {
+            border: 1px solid #e2e8f0;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        .tbx-prev-table th {
+            background: #f1f5f9;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            font-weight: 700;
+        }
         
         @media print {
             html,
@@ -355,6 +453,7 @@
                     <div class="flex flex-wrap justify-end gap-2 mt-1">
                         <button type="button" id="tbx-btn-load" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Tải dữ liệu AppSheet</button>
                         <button type="button" id="tbx-btn-refresh" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Làm mới toàn bộ</button>
+                        <button type="button" id="tbx-btn-view-loaded-tables" class="px-4 py-2 rounded-md bg-[#0047ab] text-white text-xs font-bold shadow-sm border border-[#003a8d]" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
                         <button type="button" id="tbx-btn-export-excel" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Xuất Excel</button>
                         <button type="button" id="tbx-btn-export-pdf" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Xuất PDF</button>
                     </div>
@@ -412,6 +511,16 @@
         <!-- Thêm không gian trống bên dưới để giống với hình -->
         <div class="h-20"></div>
 
+    </div>
+
+    <div id="tbx-loaded-data-modal" class="print-hide tbx-loaded-modal" aria-hidden="true">
+        <div class="tbx-loaded-dialog" role="dialog" aria-labelledby="tbx-loaded-title" aria-modal="true">
+            <div class="tbx-loaded-head">
+                <span id="tbx-loaded-title">Dữ liệu AppSheet đã tải (theo bộ lọc hiện tại)</span>
+                <button type="button" id="tbx-loaded-close" class="tbx-loaded-close" aria-label="Đóng">×</button>
+            </div>
+            <div id="tbx-loaded-panel" class="tbx-loaded-panel"></div>
+        </div>
     </div>
 
     <script>

@@ -11,8 +11,13 @@
     };
 
     const TABLE_DS_TAI_SAN = "Danh sách tài sản";
+    const TABLE_TON_KHO_DK = "Tồn kho ĐK";
+    const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
+    const TBX_PREVIEW_ROW_CAP = 500;
 
     let cacheDsRows = null;
+    let cacheTonKhoDkRows = null;
+    let cacheNxlcCtRows = null;
 
     function cellString(v) {
         if (v == null) return "";
@@ -114,6 +119,67 @@
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;");
+    }
+
+    function collectPreviewKeys(rows) {
+        const set = new Set();
+        for (const r of rows || []) {
+            if (!r || typeof r !== "object") continue;
+            for (const k of Object.keys(r)) set.add(k);
+        }
+        return [...set].sort((a, b) => String(a).localeCompare(String(b), "vi"));
+    }
+
+    function previewCellValue(v) {
+        if (v == null) return "";
+        const s = cellDisplayString(v).trim();
+        if (s) return s.length > 800 ? `${s.slice(0, 800)}...` : s;
+        try {
+            const j = JSON.stringify(v);
+            if (j && j !== "{}" && j !== "null") return j.length > 800 ? `${j.slice(0, 800)}...` : j;
+        } catch (_) {}
+        return String(v);
+    }
+
+    function buildRawPreviewTableHtml(rows) {
+        const all = rows || [];
+        if (!all.length) return '<p class="tbx-prev-note">Không có dòng.</p>';
+        const total = all.length;
+        const show = all.slice(0, TBX_PREVIEW_ROW_CAP);
+        const keys = collectPreviewKeys(all);
+        if (!keys.length) return `<p class="tbx-prev-note">${total} dòng - không có khóa cột.</p>`;
+        const thead = `<tr>${keys.map((k) => `<th>${escapeHtml(k)}</th>`).join("")}</tr>`;
+        const tbody = show
+            .map((row) => `<tr>${keys.map((k) => `<td>${escapeHtml(previewCellValue(row[k]))}</td>`).join("")}</tr>`)
+            .join("");
+        const note =
+            (total > TBX_PREVIEW_ROW_CAP ? `Hiển thị tối đa ${TBX_PREVIEW_ROW_CAP}/${total} dòng. ` : `${total} dòng. `) +
+            "Kéo ngang nếu bảng rộng.";
+        return `<p class="tbx-prev-note">${escapeHtml(note)}</p><div class="tbx-prev-scroll"><table class="tbx-prev-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+    }
+
+    function closeLoadedDataModal() {
+        const modal = document.getElementById("tbx-loaded-data-modal");
+        if (!modal) return;
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function openLoadedDataModal() {
+        const modal = document.getElementById("tbx-loaded-data-modal");
+        const panel = document.getElementById("tbx-loaded-panel");
+        if (!modal || !panel) return;
+        if (cacheDsRows == null) {
+            alert("Chưa tải dữ liệu AppSheet. Bấm «Tải dữ liệu AppSheet» trước.");
+            return;
+        }
+        const filters = getFilters();
+        const view = (cacheDsRows || []).filter((r) => rowMatchesFilters(r, filters));
+        panel.innerHTML = buildRawPreviewTableHtml(view);
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
     }
 
     function pickFirstCell(row, keys) {
@@ -218,6 +284,225 @@
 
     function pickDsGhiChu(row) {
         return pickFirstCell(row, ["Ghi chú", "Ghi chu", "GhiChu", "Mô tả", "Mo ta"]);
+    }
+
+    function normalizeNameKey(s) {
+        return String(s ?? "")
+            .trim()
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+    }
+
+    function parseTonKhoDkTenNlCell(row) {
+        const keys = [
+            "Tên NL",
+            "Ten NL",
+            "Tên nhiên liệu",
+            "Ten nhien lieu",
+            "Loại nhiên liệu",
+            "Loai nhien lieu",
+            "Mã NL",
+            "Ma NL"
+        ];
+        for (const k of keys) {
+            const t = cellDisplayString(row?.[k]).trim();
+            if (t) return t;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            const kn = String(k)
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+            if (!/ten\s*nl|ten\s*nhien\s*lieu|loai\s*nhien\s*lieu|ma\s*nl/.test(kn)) continue;
+            const t = cellDisplayString(v).trim();
+            if (t) return t;
+        }
+        return "";
+    }
+
+    function parseTonKhoDkSlTonCell(row) {
+        const keys = ["Sl tồn ĐK", "SL tồn ĐK", "Sl tồn DK", "SL tồn DK", "SL ton DK", "Sl ton DK"];
+        for (const k of keys) {
+            const q = parseNumeric(row?.[k]);
+            if (q != null && !isNaN(q)) return q;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/sl\s*t[oô]n\s*[đd]k|sl\s*ton\s*dk/i.test(String(k))) continue;
+            const q = parseNumeric(v);
+            if (q != null && !isNaN(q)) return q;
+        }
+        return null;
+    }
+
+    function getNxlcTenNhienLieuCell(row) {
+        const keys = ["Tên nhiên liệu", "Ten nhien lieu", "Tên NL", "Ten NL", "Loại nhiên liệu", "Loai nhien lieu"];
+        for (const k of keys) {
+            const t = cellDisplayString(row?.[k]).trim();
+            if (t) return t;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            const kn = String(k)
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase();
+            if (!/ten\s*nhien\s*lieu|ten\s*nl|loai\s*nhien\s*lieu/.test(kn)) continue;
+            const t = cellDisplayString(v).trim();
+            if (t) return t;
+        }
+        return "";
+    }
+
+    function parseNxlcSoLuongNlCell(row) {
+        const keys = [
+            "Số lượng NL",
+            "So luong NL",
+            "Số lượng nhiên liệu",
+            "So luong nhien lieu",
+            "SL NL",
+            "SL",
+            "Sl"
+        ];
+        for (const k of keys) {
+            const q = parseNumeric(row?.[k]);
+            if (q != null && !isNaN(q)) return q;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/so\s*luong.*nl|s[oố]\s*l[ưu]ợ?ng.*nl|sl.*nl/i.test(String(k))) continue;
+            const q = parseNumeric(v);
+            if (q != null && !isNaN(q)) return q;
+        }
+        return null;
+    }
+
+    function parseNxlcThanhTienNlCell(row) {
+        const keys = ["Thành tiền NL", "Thanh tien NL", "Thành tiền nhiên liệu", "Thanh tien nhien lieu", "Tiền NL"];
+        for (const k of keys) {
+            const q = parseNumeric(row?.[k]);
+            if (q != null && !isNaN(q)) return q;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!/thanh\s*tien.*nl|th[aà]nh\s*ti[eề]n.*nl|tien.*nl/i.test(String(k))) continue;
+            const q = parseNumeric(v);
+            if (q != null && !isNaN(q)) return q;
+        }
+        return null;
+    }
+
+    function loaiPhieuIsNhap(rawVal) {
+        const n = String(rawVal ?? "")
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "");
+        if (!n) return false;
+        const compact = n.replace(/[^a-z0-9]/g, "");
+        if (compact === "nhap" || compact === "nhp") return true;
+        if (compact.startsWith("nhap")) return true;
+        if (compact.includes("phieunhap") || compact.includes("nhapkho") || compact.includes("nhaphang")) return true;
+        return false;
+    }
+
+    function loaiPhieuIsXuat(rawVal) {
+        const n = String(rawVal ?? "")
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "");
+        if (!n) return false;
+        const compact = n.replace(/[^a-z0-9]/g, "");
+        if (compact === "xuat" || compact === "xut") return true;
+        if (compact.startsWith("xuat")) return true;
+        if (compact.includes("phieuxuat") || compact.includes("xuatkho") || compact.includes("xuathang")) return true;
+        return false;
+    }
+
+    function getNxlcLoaiPhieuCell(row) {
+        const keys = ["Loại phiếu", "Loai phieu", "Loại phiếu NX", "Loai phieu NX", "Kiểu phiếu", "Kieu phieu"];
+        for (const k of keys) {
+            const t = cellDisplayString(row?.[k]).trim();
+            if (t) return t;
+        }
+        for (const [k, v] of Object.entries(row || {})) {
+            if (v == null || String(v).trim() === "") continue;
+            if (/lo[aạ]i\s*phi[ếe]u|loai\s*phieu/i.test(String(k))) return v;
+        }
+        for (const v of Object.values(row || {})) {
+            if (v == null || String(v).trim() === "") continue;
+            if (loaiPhieuIsNhap(v) || loaiPhieuIsXuat(v)) return v;
+        }
+        return "";
+    }
+
+    /**
+     * Theo yêu cầu nghiệp vụ:
+     * «NHẬP TRONG KỲ» lấy từ «Nhập xuất luân chuyển CT» với «Loại phiếu = Nhập»,
+     * khớp «Tên nhiên liệu» với «TÊN THIẾT BỊ».
+     * - «Số lượng NL» -> cột SL
+     * - «Thành tiền NL» -> cột GIÁ TRỊ
+     */
+    function buildNhapTrongKyByTenThietBiFromNxlcCt(nxlcCtRows) {
+        const map = new Map();
+        for (const r of nxlcCtRows || []) {
+            const loaiPhieu = getNxlcLoaiPhieuCell(r);
+            if (!loaiPhieuIsNhap(loaiPhieu)) continue;
+            const tenNl = getNxlcTenNhienLieuCell(r);
+            const key = normalizeNameKey(tenNl);
+            if (!key) continue;
+            const sl = parseNxlcSoLuongNlCell(r);
+            const gt = parseNxlcThanhTienNlCell(r);
+            if ((sl == null || isNaN(sl)) && (gt == null || isNaN(gt))) continue;
+            if (!map.has(key)) map.set(key, { nhapSl: 0, nhapGt: 0 });
+            const cur = map.get(key);
+            if (sl != null && !isNaN(sl)) cur.nhapSl += sl;
+            if (gt != null && !isNaN(gt)) cur.nhapGt += gt;
+        }
+        return map;
+    }
+
+    /**
+     * Theo yêu cầu nghiệp vụ:
+     * «XUẤT TRONG KỲ» lấy từ «Nhập xuất luân chuyển CT» với «Loại phiếu = Xuất»,
+     * khớp «Tên nhiên liệu» với «TÊN THIẾT BỊ».
+     * - «Số lượng NL» -> cột SL
+     * - «Thành tiền NL» -> cột GIÁ TRỊ
+     */
+    function buildXuatTrongKyByTenThietBiFromNxlcCt(nxlcCtRows) {
+        const map = new Map();
+        for (const r of nxlcCtRows || []) {
+            const loaiPhieu = getNxlcLoaiPhieuCell(r);
+            if (!loaiPhieuIsXuat(loaiPhieu)) continue;
+            const tenNl = getNxlcTenNhienLieuCell(r);
+            const key = normalizeNameKey(tenNl);
+            if (!key) continue;
+            const sl = parseNxlcSoLuongNlCell(r);
+            const gt = parseNxlcThanhTienNlCell(r);
+            if ((sl == null || isNaN(sl)) && (gt == null || isNaN(gt))) continue;
+            if (!map.has(key)) map.set(key, { xuatSl: 0, xuatGt: 0 });
+            const cur = map.get(key);
+            if (sl != null && !isNaN(sl)) cur.xuatSl += sl;
+            if (gt != null && !isNaN(gt)) cur.xuatGt += gt;
+        }
+        return map;
+    }
+
+    /**
+     * Theo yêu cầu nghiệp vụ:
+     * «TỒN ĐẦU KỲ» cột SL lấy từ bảng «Tồn kho ĐK»,
+     * khớp «Tên NL» với «TÊN THIẾT BỊ», và lấy tổng «Sl tồn ĐK».
+     */
+    function buildTonDauSlByTenThietBiFromTonKhoDk(tonKhoDkRows) {
+        const map = new Map();
+        for (const r of tonKhoDkRows || []) {
+            const tenNl = parseTonKhoDkTenNlCell(r);
+            const key = normalizeNameKey(tenNl);
+            if (!key) continue;
+            const slTon = parseTonKhoDkSlTonCell(r);
+            if (slTon == null || isNaN(slTon)) continue;
+            map.set(key, (map.get(key) ?? 0) + slTon);
+        }
+        return map;
     }
 
     /** Đọc ô số theo danh sách tên cột ưu tiên; nếu không có thì quét tên cột khớp regex. */
@@ -492,7 +777,7 @@
         return groups;
     }
 
-    function renderTable(groups) {
+    function renderTable(groups, tonDauSlByTenThietBi, nhapTrongKyByTenThietBi, xuatTrongKyByTenThietBi) {
         const tbody = document.getElementById("tbx-tbody");
         if (!tbody) return;
 
@@ -509,6 +794,14 @@
             tonCuoiGt: 0
         };
         let anyNum = false;
+
+        function calcTonCuoiByFormula(tonDau, nhap, xuat) {
+            const a = tonDau != null && !isNaN(tonDau) ? tonDau : null;
+            const b = nhap != null && !isNaN(nhap) ? nhap : null;
+            const c = xuat != null && !isNaN(xuat) ? xuat : null;
+            if (a == null && b == null && c == null) return null;
+            return (a ?? 0) + (b ?? 0) - (c ?? 0);
+        }
 
         function addTot(st) {
             for (const k of Object.keys(totals)) {
@@ -530,9 +823,31 @@
 
             for (const r of rows) {
                 const st = extractStockCells(r);
-                addTot(st);
                 const ma = pickDsMaThietBi(r);
                 const ten = pickDsTenThietBi(r);
+                const tonKey = normalizeNameKey(ten);
+                if (tonKey && tonDauSlByTenThietBi?.has(tonKey)) st.tonDauSl = tonDauSlByTenThietBi.get(tonKey);
+                else st.tonDauSl = null;
+                if (tonKey && nhapTrongKyByTenThietBi?.has(tonKey)) {
+                    const nx = nhapTrongKyByTenThietBi.get(tonKey);
+                    st.nhapSl = nx?.nhapSl ?? null;
+                    st.nhapGt = nx?.nhapGt ?? null;
+                } else {
+                    st.nhapSl = null;
+                    st.nhapGt = null;
+                }
+                if (tonKey && xuatTrongKyByTenThietBi?.has(tonKey)) {
+                    const xx = xuatTrongKyByTenThietBi.get(tonKey);
+                    st.xuatSl = xx?.xuatSl ?? null;
+                    st.xuatGt = xx?.xuatGt ?? null;
+                } else {
+                    st.xuatSl = null;
+                    st.xuatGt = null;
+                }
+                // Theo yêu cầu nghiệp vụ: Tồn cuối kỳ = Tồn đầu kỳ + Nhập trong kỳ - Xuất trong kỳ.
+                st.tonCuoiSl = calcTonCuoiByFormula(st.tonDauSl, st.nhapSl, st.xuatSl);
+                st.tonCuoiGt = calcTonCuoiByFormula(st.tonDauGt, st.nhapGt, st.xuatGt);
+                addTot(st);
                 const dvt = pickDsDvt(r);
                 const nhom = pickDsNhomThietBi(r);
                 const gc = pickDsGhiChu(r);
@@ -590,19 +905,36 @@
         if (btn) btn.disabled = true;
         setStatus("Đang tải AppSheet…", false);
         try {
-            if (forceRefresh) cacheDsRows = null;
+            if (forceRefresh) {
+                cacheDsRows = null;
+                cacheTonKhoDkRows = null;
+                cacheNxlcCtRows = null;
+            }
             if (!cacheDsRows) {
                 setStatus(`Đang tải «${TABLE_DS_TAI_SAN}»…`, false);
                 cacheDsRows = await fetchAppSheetTable(TABLE_DS_TAI_SAN);
             }
+            if (!cacheTonKhoDkRows) {
+                setStatus(`Đang tải «${TABLE_TON_KHO_DK}»…`, false);
+                cacheTonKhoDkRows = await fetchAppSheetTable(TABLE_TON_KHO_DK);
+            }
+            if (!cacheNxlcCtRows) {
+                setStatus(`Đang tải «${TABLE_NXLC_CT}»…`, false);
+                cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
+            }
             populateFilterCheckboxes(cacheDsRows);
             const filters = getFilters();
             const groups = buildGroupedReport(cacheDsRows, filters);
-            renderTable(groups);
+            const tonDauSlByTenThietBi = buildTonDauSlByTenThietBiFromTonKhoDk(cacheTonKhoDkRows);
+            const nhapTrongKyByTenThietBi = buildNhapTrongKyByTenThietBiFromNxlcCt(cacheNxlcCtRows);
+            const xuatTrongKyByTenThietBi = buildXuatTrongKyByTenThietBiFromNxlcCt(cacheNxlcCtRows);
+            renderTable(groups, tonDauSlByTenThietBi, nhapTrongKyByTenThietBi, xuatTrongKyByTenThietBi);
             syncDateRangeBanner();
-            const n = cacheDsRows?.length ?? 0;
+            const nDs = cacheDsRows?.length ?? 0;
+            const nDk = cacheTonKhoDkRows?.length ?? 0;
+            const nCt = cacheNxlcCtRows?.length ?? 0;
             const g = groups.length;
-            setStatus(`Đã tải ${n} dòng «${TABLE_DS_TAI_SAN}» — ${g} nhóm nơi quản lý.`, false);
+            setStatus(`Đã tải ${nDs} dòng «${TABLE_DS_TAI_SAN}», ${nDk} dòng «${TABLE_TON_KHO_DK}», ${nCt} dòng «${TABLE_NXLC_CT}» — ${g} nhóm nơi quản lý.`, false);
         } catch (e) {
             console.error(e);
             setStatus(`Lỗi: ${e.message}`, true);
@@ -616,6 +948,17 @@
         const refBtn = document.getElementById("tbx-btn-refresh");
         if (loadBtn) loadBtn.addEventListener("click", () => loadFromAppSheet(false));
         if (refBtn) refBtn.addEventListener("click", () => loadFromAppSheet(true));
+        document.getElementById("tbx-btn-view-loaded-tables")?.addEventListener("click", openLoadedDataModal);
+        document.getElementById("tbx-loaded-close")?.addEventListener("click", closeLoadedDataModal);
+        document.getElementById("tbx-loaded-data-modal")?.addEventListener("click", (e) => {
+            if (e.target && e.target.id === "tbx-loaded-data-modal") closeLoadedDataModal();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape") return;
+            const modal = document.getElementById("tbx-loaded-data-modal");
+            if (!modal || modal.getAttribute("aria-hidden") !== "false") return;
+            closeLoadedDataModal();
+        });
 
         for (const id of ["tbx-filter-from-date", "tbx-filter-to-date"]) {
             const el = document.getElementById(id);
