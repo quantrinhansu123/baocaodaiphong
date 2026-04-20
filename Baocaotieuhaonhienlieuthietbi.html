@@ -328,6 +328,23 @@
             font-weight: bold;
         }
         
+        /** Ô «Số chuyến chạy / tháng» trống — gợi ý: Tên thiết bị (UI) khớp «Tên tài sản» (CT) để tính */
+        .so-chuyen-quy-trinh-td {
+            text-align: left !important;
+            vertical-align: top;
+        }
+        
+        .so-chuyen-quy-trinh {
+            font-size: 9px;
+            line-height: 1.3;
+            color: #374151;
+            font-weight: normal;
+        }
+        
+        .so-chuyen-quy-trinh strong {
+            color: #111827;
+        }
+        
         .signature-section {
             margin: 14px 0 8px;
             padding: 0 8px;
@@ -895,14 +912,14 @@
         /** Chi tiết ca — «Giờ làm việc HC» / «Giờ tăng ca» = tổng «Tổng giờ lv» theo «Loại công việc», gom theo Tên tài sản */
         const TABLE_NT_CT = "Nhật trình máy CT";
 
-        /** Nhập nhiên liệu — «Lượng dầu nhập» = tổng từ «Nhật trình NL» (Dầu Diezel), gom theo Tên tài sản */
+        /** «Lượng dầu nhập» — ưu tiên «Nhập xuất luân chuyển CT»: «Số lượng NL», «Tên nhiên liệu» = Dầu Diezel (diezel/DO), phiếu Nhập; không có thì «Nhật trình NL». */
         const TABLE_NT_NL = "Nhật trình NL";
 
         /** Danh mục tài sản — cột «Biển số xe» khớp theo «Tên tài sản» với «Tên thiết bị» báo cáo */
         const TABLE_DS_TAI_SAN = "Danh sách tài sản";
         /** Tiêu hao dầu — lấy từ «Nhập xuất luân chuyển CT», cột SL theo Tên tài sản */
         const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
-        /** Phiếu nhập/xuất cha — dùng để lọc «Loại phiếu = Xuất» cho dữ liệu CT */
+        /** Phiếu nhập/xuất cha — lọc «Loại phiếu = Nhập / Xuất» cho dòng CT */
         const TABLE_NXLC = "Nhập xuất luân chuyển";
 
         /** Cột ngày trên bảng Nhật trình máy (một số file dùng «Ngày» thay cho «Ngày làm việc») */
@@ -1364,7 +1381,7 @@
          * Diezel/Diesel/DO -> LuongDauTieuHao; các loại còn lại map tương ứng cột phụ.
          */
         function classifyNxlcTenToReportColumn(tenRaw) {
-            const s = cellDisplayString(tenRaw).trim();
+            const s = cellDisplayString(tenRaw).trim().normalize("NFKC");
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
@@ -1383,10 +1400,17 @@
                 compact.includes("daucau") ||
                 compact.includes("nhotcau")
             ) return "DauCau";
-            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (
+                compact.includes("daudiezel") ||
+                compact.includes("daudiesel") ||
+                /dau\s*diezel|dau\s*diesel/i.test(noAccent)
+            ) return "LuongDauTieuHao";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauTieuHao";
-            if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
+            if (/\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
+            if (compact.includes("gasoil") || compact.includes("hsd")) return "LuongDauTieuHao";
+            if (sLc.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if ((noAccent.includes("dau") || sLc.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
             return null;
         }
 
@@ -1432,6 +1456,17 @@
                 .replace(/\u0300-\u036f/g, "");
             if (!s) return false;
             if (s === "xuat" || s.includes("phieu xuat") || s.includes("xuat kho")) return true;
+            return false;
+        }
+
+        function loaiPhieuIsNhap(rawVal) {
+            const s = String(rawVal ?? "")
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "");
+            if (!s) return false;
+            if (s === "nhap" || s.includes("phieu nhap") || s.includes("nhap kho") || s.includes("nhap hang")) return true;
             return false;
         }
 
@@ -1502,12 +1537,27 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
+        function isLocalDateInFilterRange(d, from, to) {
+            if (!d || isNaN(d.getTime())) return false;
+            const dk = dateKeyYmd(d);
+            if (!dk) return false;
+            if (from) {
+                const fk = dateKeyYmd(from);
+                if (fk && dk < fk) return false;
+            }
+            if (to) {
+                const tk = dateKeyYmd(to);
+                if (tk && dk > tk) return false;
+            }
+            return true;
+        }
+
         /**
          * «Tên nhiên liệu» trên «Nhật trình NL» → cột báo cáo.
          * Thứ tự: cụm cụ thể (mỡ / nhớt / TL / cầu) trước, Diezel/DO sau (tránh nhầm cột).
          */
         function classifyNlTenToFuelColumn(tenRaw) {
-            const s = cellDisplayString(tenRaw).trim();
+            const s = cellDisplayString(tenRaw).trim().normalize("NFKC");
             if (!s) return null;
             const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
             const compact = noAccent.replace(/[^a-z0-9]/g, "");
@@ -1527,10 +1577,17 @@
                 compact.includes("daucau") ||
                 compact.includes("nhotcau")
             ) return "DauCau";
-            if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
-            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if (
+                compact.includes("daudiezel") ||
+                compact.includes("daudiesel") ||
+                /dau\s*diezel|dau\s*diesel/i.test(noAccent)
+            ) return "LuongDauNhap";
             if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
-            if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
+            if (/\bdo\b/i.test(noAccent)) return "LuongDauNhap";
+            if (compact.includes("gasoil") || compact.includes("hsd")) return "LuongDauNhap";
+            if (sLc.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
+            if (sLc.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
+            if ((noAccent.includes("dau") || sLc.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
             return null;
         }
 
@@ -2105,6 +2162,37 @@
             );
         }
 
+        /**
+         * Chuẩn hoá tên cột khi so khớp: NBSP → space, trim, gom nhiều khoảng trắng liên tiếp.
+         */
+        function normalizeCtColumnHeaderName(s) {
+            return String(s ?? "")
+                .replace(/\u00A0/g, " ")
+                .trim()
+                .replace(/\s+/g, " ");
+        }
+
+        /**
+         * Lấy giá trị ô đầu tiên khớp danh sách tên cột (bỏ lệch do dư khoảng trắng trên khóa AppSheet).
+         */
+        function pickCtCellByHeaderCandidates(row, headerCandidates) {
+            if (!row || typeof row !== "object") return undefined;
+            const byNormKey = new Map();
+            for (const rk of Object.keys(row)) {
+                const n = normalizeCtColumnHeaderName(rk);
+                if (!byNormKey.has(n)) byNormKey.set(n, rk);
+            }
+            for (const cand of headerCandidates) {
+                const rk = byNormKey.get(normalizeCtColumnHeaderName(cand));
+                if (rk == null) continue;
+                const v = row[rk];
+                if (v == null || v === "") continue;
+                const s = cellDisplayString(v).trim();
+                if (s) return v;
+            }
+            return undefined;
+        }
+
         /** Ô «Số chuyến» trên CT (alias + quét tên cột). */
         function getCtSoChuyenCell(r) {
             if (!r || typeof r !== "object") return "";
@@ -2113,25 +2201,25 @@
                 "So chuyen",
                 "Số chuyến chạy",
                 "So chuyen chay",
+                "Số chuyến trong ngày",
+                "So chuyen trong ngay",
                 "Số chuyến/tháng",
                 "So chuyen/thang",
                 "Số chuyến chạy/tháng",
                 "So chuyen chay/thang"
             ];
-            for (const k of keys) {
-                const v = r[k];
-                if (v == null || v === "") continue;
-                const s = cellDisplayString(v).trim();
-                if (s) return v;
-            }
+            const picked = pickCtCellByHeaderCandidates(r, keys);
+            if (picked !== undefined) return picked;
             for (const [k, v] of Object.entries(r)) {
-                const kn = String(k)
-                    .trim()
+                const kn = normalizeCtColumnHeaderName(k)
                     .normalize("NFD")
                     .replace(/\u0300-\u036f/g, "")
                     .toLowerCase();
                 if (!/(so\s*chuyen|chuyen\s*chay)/.test(kn)) continue;
-                if (/km|gio|ngay|stt|ref|id|related/i.test(kn)) continue;
+                /* Không loại «… trong ngày» — /ngay/ từng loại nhầm «Số chuyến trong ngày». */
+                if (/chuyen/i.test(kn)) {
+                    if (/km|gio|stt|ref|id|related/i.test(kn)) continue;
+                } else if (/km|gio|ngay|stt|ref|id|related/i.test(kn)) continue;
                 const s = cellDisplayString(v).trim();
                 if (s) return v;
             }
@@ -2151,15 +2239,10 @@
                 "Tổng số Km (km)",
                 "Tong so Km (km)"
             ];
-            for (const k of keys) {
-                const v = r[k];
-                if (v == null || v === "") continue;
-                const s = cellDisplayString(v).trim();
-                if (s) return v;
-            }
+            const picked = pickCtCellByHeaderCandidates(r, keys);
+            if (picked !== undefined) return picked;
             for (const [k, v] of Object.entries(r)) {
-                const kn = String(k)
-                    .trim()
+                const kn = normalizeCtColumnHeaderName(k)
                     .normalize("NFD")
                     .replace(/\u0300-\u036f/g, "")
                     .toLowerCase();
@@ -2201,14 +2284,12 @@
         }
 
         /**
-         * Cột «Số chuyến chạy / tháng»: lấy từ «Nhật trình máy CT», cột «Số chuyến»,
-         * chỉ cộng các dòng có «Ngày làm việc» cùng tháng/năm với «Từ ngày».
+         * Cột «Số chuyến chạy / tháng»: «Tên thiết bị» khớp «Tên tài sản» (CT); tổng «Số chuyến» trên các dòng CT
+         * đã lọc theo khoảng Từ–Đến (Ngày làm việc). Không lọc thêm theo tháng — tránh mất dữ liệu khi khoảng ngày cắt tháng.
          */
         function buildSoChuyenByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
             if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const fromD = parseDateInputYmd(filters ?.fromDate);
-            if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
@@ -2223,9 +2304,10 @@
             for (const r of ctRows) {
                 const d = parseCtNgayLamViec(r);
                 if (!d || isNaN(d.getTime())) continue;
-                if (d.getFullYear() !== fromD.getFullYear() || d.getMonth() !== fromD.getMonth()) continue;
 
-                const n = parseNumericForLiters(getCtSoChuyenCell(r));
+                const rawChuyen = getCtSoChuyenCell(r);
+                let n = parseHourCell(rawChuyen);
+                if (n == null || isNaN(n)) n = parseNumericForLiters(rawChuyen);
                 if (n == null || isNaN(n)) continue;
 
                 const ctAsset = pickCtTaiSanTen(r);
@@ -2243,7 +2325,8 @@
         function buildTongKmT1ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
             if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const fromD = parseDateInputYmd(filters ?.fromDate);
+            const fromD =
+                parseDateInputYmd(filters ?.fromDate) || parseDateInputYmd(filters ?.toDate);
             if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
@@ -2279,7 +2362,8 @@
         function buildTongKmT2ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
             if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const toD = parseDateInputYmd(filters ?.toDate);
+            const toD =
+                parseDateInputYmd(filters ?.toDate) || parseDateInputYmd(filters ?.fromDate);
             if (!toD) return byKey;
 
             const mainAssetKeys = new Set();
@@ -2910,9 +2994,7 @@
             for (const r of ctRows) {
                 if (from || to) {
                     const d = parseCtNgayLamViec(r);
-                    if (!d || isNaN(d.getTime())) continue;
-                    if (from && d < from) continue;
-                    if (to && d > to) continue;
+                    if (!isLocalDateInFilterRange(d, from, to)) continue;
                 }
 
                 const ctAsset = pickCtTaiSanTen(r);
@@ -3047,6 +3129,49 @@
             };
         }
 
+        function buildMainAssetKeyIndex(mainRows) {
+            const mainAssetKeys = new Set();
+            const mainAssetPairs = [];
+            for (const raw of mainRows || []) {
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                mainAssetKeys.add(key);
+                mainAssetPairs.push({
+                    key,
+                    name: asset
+                });
+            }
+            return {
+                mainAssetKeys,
+                mainAssetPairs
+            };
+        }
+
+        function resolveNlNameToMainAssetKey(candidateName, mainAssetKeys, mainAssetPairs) {
+            const t = String(candidateName ?? "").trim();
+            if (!t) return "";
+            const exact = assetKeyFromName(t);
+            if (exact && mainAssetKeys.has(exact)) return exact;
+            for (const p of mainAssetPairs) {
+                if (taiSanNamesLooselyEqual(t, p.name)) return p.key;
+            }
+            return "";
+        }
+
+        function collectNlTaiSanNameCandidates(r) {
+            const out = [];
+            const ts = cellString(getNlTaiSanCell(r)).trim();
+            if (ts) out.push(ts);
+            const xmtb = cellString(
+                r["Tên XMTB"] ?? r["Ten XMTB"] ?? r["TenXMTB"] ?? r["XMTB"] ?? ""
+            ).trim();
+            if (xmtb && !out.some((x) => x === xmtb || taiSanNamesLooselyEqual(x, xmtb))) out.push(xmtb);
+            return out;
+        }
+
         /**
          * Tổng từ «Nhật trình NL»: mỗi dòng theo «Tên nhiên liệu» → một trong 5 cột (Mỡ, Nhớt, TL, Cầu, Diezel), gom theo Tên tài sản.
          */
@@ -3056,15 +3181,10 @@
             const from = parseDateInputYmd(filters ?.fromDate);
             const to = parseDateInputYmd(filters ?.toDate);
 
-            const mainAssetKeys = new Set();
-            for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
-                if (!asset) continue;
-                const key = assetKeyFromName(asset);
-                if (!key) continue;
-                mainAssetKeys.add(key);
-            }
+            const {
+                mainAssetKeys,
+                mainAssetPairs
+            } = buildMainAssetKeyIndex(mainRows);
 
             function addToMap(targetMap, assetKey, q) {
                 targetMap.set(assetKey, (targetMap.get(assetKey) ?? 0) + q);
@@ -3073,9 +3193,7 @@
             for (const r of nlRows) {
                 if (from || to) {
                     const d = parseNlNgayCell(r);
-                    if (!d || isNaN(d.getTime())) continue;
-                    if (from && d < from) continue;
-                    if (to && d > to) continue;
+                    if (!isLocalDateInFilterRange(d, from, to)) continue;
                 }
                 const tenNl =
                     r["Tên nhiên liệu"] ??
@@ -3090,14 +3208,22 @@
                 if (q == null) continue;
 
                 const targetMap = sums[col];
-                const assetDirect = cellString(getNlTaiSanCell(r)).trim();
-                const k = assetKeyFromName(assetDirect);
-                if (!k || !mainAssetKeys.has(k)) continue;
+                let k = "";
+                for (const cand of collectNlTaiSanNameCandidates(r)) {
+                    k = resolveNlNameToMainAssetKey(cand, mainAssetKeys, mainAssetPairs);
+                    if (k) break;
+                }
+                if (!k) continue;
                 addToMap(targetMap, k, q);
             }
             return sums;
         }
 
+        /**
+         * Tồn đầu/cuối cho công thức tiêu hao: cùng ý báo cáo vật tư xe bồn —
+         * nếu trong tháng có dòng diezel/DO có tồn thì lấy theo nhóm đó (sớm nhất / muộn nhất),
+         * không thì lấy theo mọi loại NL.
+         */
         function buildNlTonBoundaryByTaiSan(mainRows, nlRows, filters) {
             const tonDauByTaiSan = new Map();
             const tonCuoiByTaiSan = new Map();
@@ -3113,8 +3239,20 @@
                 tonDauByTaiSan,
                 tonCuoiByTaiSan
             };
-            const tonDauDateByTaiSan = new Map();
-            const tonCuoiDateByTaiSan = new Map();
+
+            const tonDauDateDiesel = new Map();
+            const tonDauValDiesel = new Map();
+            const tonDauDateAny = new Map();
+            const tonDauValAny = new Map();
+            const tonCuoiDateDiesel = new Map();
+            const tonCuoiValDiesel = new Map();
+            const tonCuoiDateAny = new Map();
+            const tonCuoiValAny = new Map();
+
+            const {
+                mainAssetKeys,
+                mainAssetPairs
+            } = buildMainAssetKeyIndex(mainRows);
 
             const parents = [];
             for (const raw of mainRows) {
@@ -3132,9 +3270,8 @@
             }
 
             function detectAssetKeyOnNlRow(r) {
-                const assetDirect = cellString(getNlTaiSanCell(r)).trim();
-                if (assetDirect) {
-                    const k = assetKeyFromName(assetDirect);
+                for (const cand of collectNlTaiSanNameCandidates(r)) {
+                    const k = resolveNlNameToMainAssetKey(cand, mainAssetKeys, mainAssetPairs);
                     if (k) return k;
                 }
                 for (const rref of getNlParentRefCandidates(r)) {
@@ -3152,12 +3289,25 @@
                 return "";
             }
 
+            function nlLineIsDiesel(r) {
+                const tenNl =
+                    r["Tên nhiên liệu"] ??
+                    r["Ten nhien lieu"] ??
+                    r["Tên NL"] ??
+                    r["Loại nhiên liệu"] ??
+                    r["Loai nhien lieu"] ??
+                    "";
+                return classifyNlTenToFuelColumn(tenNl) === "LuongDauNhap";
+            }
+
             for (const r of nlRows) {
                 const assetKey = detectAssetKeyOnNlRow(r);
                 if (!assetKey) continue;
                 const ngay = parseNlNgayCell(r);
                 const dKey = dateKeyYmd(ngay);
                 if (!dKey) continue;
+
+                const isDiesel = nlLineIsDiesel(r);
 
                 if (
                     fromD &&
@@ -3167,11 +3317,17 @@
                 ) {
                     const tonTruoc = parseNlTonTruocCell(r);
                     if (tonTruoc != null) {
-                        const pickedDate = tonDauDateByTaiSan.get(assetKey);
-                        // «Tồn đầu kỳ»: ưu tiên ngày sớm nhất trong tháng của «Từ ngày».
-                        if (!pickedDate || ngay < pickedDate) {
-                            tonDauDateByTaiSan.set(assetKey, ngay);
-                            tonDauByTaiSan.set(assetKey, tonTruoc);
+                        const pickedAny = tonDauDateAny.get(assetKey);
+                        if (!pickedAny || ngay < pickedAny) {
+                            tonDauDateAny.set(assetKey, ngay);
+                            tonDauValAny.set(assetKey, tonTruoc);
+                        }
+                        if (isDiesel) {
+                            const pickedD = tonDauDateDiesel.get(assetKey);
+                            if (!pickedD || ngay < pickedD) {
+                                tonDauDateDiesel.set(assetKey, ngay);
+                                tonDauValDiesel.set(assetKey, tonTruoc);
+                            }
                         }
                     }
                 }
@@ -3183,22 +3339,42 @@
                 ) {
                     const tonSau = parseNlTonSauCell(r);
                     if (tonSau != null) {
-                        const pickedDate = tonCuoiDateByTaiSan.get(assetKey);
-                        // «Tồn cuối kỳ»: ưu tiên ngày muộn nhất trong tháng của «Đến ngày».
-                        if (!pickedDate || ngay > pickedDate) {
-                            tonCuoiDateByTaiSan.set(assetKey, ngay);
-                            tonCuoiByTaiSan.set(assetKey, tonSau);
+                        const pickedAny = tonCuoiDateAny.get(assetKey);
+                        if (!pickedAny || ngay > pickedAny) {
+                            tonCuoiDateAny.set(assetKey, ngay);
+                            tonCuoiValAny.set(assetKey, tonSau);
+                        }
+                        if (isDiesel) {
+                            const pickedD = tonCuoiDateDiesel.get(assetKey);
+                            if (!pickedD || ngay > pickedD) {
+                                tonCuoiDateDiesel.set(assetKey, ngay);
+                                tonCuoiValDiesel.set(assetKey, tonSau);
+                            }
                         }
                     }
                 }
             }
+
+            for (const k of new Set([...tonDauValDiesel.keys(), ...tonDauValAny.keys()])) {
+                tonDauByTaiSan.set(
+                    k,
+                    tonDauValDiesel.has(k) ? tonDauValDiesel.get(k) : tonDauValAny.get(k)
+                );
+            }
+            for (const k of new Set([...tonCuoiValDiesel.keys(), ...tonCuoiValAny.keys()])) {
+                tonCuoiByTaiSan.set(
+                    k,
+                    tonCuoiValDiesel.has(k) ? tonCuoiValDiesel.get(k) : tonCuoiValAny.get(k)
+                );
+            }
+
             return {
                 tonDauByTaiSan,
                 tonCuoiByTaiSan
             };
         }
 
-        const NXLC_FUEL_REPORT_COLUMNS = ["LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
+        const NXLC_FUEL_REPORT_COLUMNS = ["LuongDauTieuHao", "LuongDauNhap", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
         const NXLC_AUX_FUEL_COLUMNS = ["TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
 
         function mergeFuelMapsByKey(a, b) {
@@ -3214,16 +3390,16 @@
         function buildMergedAuxiliaryFuelMapsFromNlAndNxlc(nlSums, nxlcSums) {
             const empty = () => new Map();
             return {
-                // Theo yêu cầu: 4 cột phụ chỉ lấy nguồn NXLC CT (bỏ nguồn Nhật trình NL).
-                TongMo: mergeFuelMapsByKey(empty(), nxlcSums ?.TongMo ?? empty()),
-                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums ?.TongNhot ?? empty()),
-                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums ?.DauThuyLuc ?? empty()),
-                DauCau: mergeFuelMapsByKey(empty(), nxlcSums ?.DauCau ?? empty())
+                TongMo: mergeFuelMapsByKey(nlSums ?.TongMo ?? empty(), nxlcSums ?.TongMo ?? empty()),
+                TongNhot: mergeFuelMapsByKey(nlSums ?.TongNhot ?? empty(), nxlcSums ?.TongNhot ?? empty()),
+                DauThuyLuc: mergeFuelMapsByKey(nlSums ?.DauThuyLuc ?? empty(), nxlcSums ?.DauThuyLuc ?? empty()),
+                DauCau: mergeFuelMapsByKey(nlSums ?.DauCau ?? empty(), nxlcSums ?.DauCau ?? empty())
             };
         }
 
         function buildFuelColumnsByTaiSanFromNxlcCt(nxlcCtRows, nxlcRows, mainRows, filters) {
             const sums = {
+                LuongDauNhap: new Map(),
                 LuongDauTieuHao: new Map(),
                 TongMo: new Map(),
                 TongNhot: new Map(),
@@ -3263,10 +3439,15 @@
             }
 
             const xuatParentIds = [];
+            const nhapParentIds = [];
             if (nxlcRows ?.length) {
                 for (const p of nxlcRows) {
-                    if (!loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) continue;
-                    for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
+                    if (loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) {
+                        for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
+                    }
+                    if (loaiPhieuIsNhap(getLoaiPhieuOnRow(p))) {
+                        for (const pid of getNxlcParentMatchIds(p)) nhapParentIds.push(pid);
+                    }
                 }
             }
 
@@ -3282,22 +3463,48 @@
                 return false;
             }
 
+            function rowIsLoaiPhieuNhap(r) {
+                if (loaiPhieuIsNhap(getLoaiPhieuOnRow(r))) return true;
+                if (!nhapParentIds.length) return false;
+                for (const rref of getNxlcCtParentRefCandidates(r)) {
+                    if (!rref) continue;
+                    for (const pid of nhapParentIds) {
+                        if (parentIdsMatch(rref, pid)) return true;
+                    }
+                }
+                return false;
+            }
+
             for (const r of nxlcCtRows) {
                 const d = parseNxlcCtNgayCell(r);
                 if (from || to) {
-                    if (!d || isNaN(d.getTime())) continue;
-                    if (from && d < from) continue;
-                    if (to && d > to) continue;
+                    if (!isLocalDateInFilterRange(d, from, to)) continue;
                 }
                 const reportCol = classifyNxlcTenToReportColumn(getNxlcTenNhienLieuCell(r));
                 if (!reportCol) continue;
-                // Chỉ «Lượng dầu tiêu hao» buộc theo phiếu Xuất.
+                if (reportCol === "LuongDauTieuHao" && rowIsLoaiPhieuNhap(r)) {
+                    const xmtb = String(getNxlcTenXmtbCell(r) ?? "").trim();
+                    const ts = String(getNxlcTaiSanCell(r) ?? "").trim();
+                    const assetNhap = (xmtb || ts).trim();
+                    if (assetNhap) {
+                        const keyNhap = resolveMainAssetKeyByName(assetNhap);
+                        if (keyNhap && (!mainAssetKeys.size || mainAssetKeys.has(keyNhap))) {
+                            const qNhap = parseNxlcSlCell(r);
+                            if (qNhap != null) {
+                                sums.LuongDauNhap.set(keyNhap, (sums.LuongDauNhap.get(keyNhap) ?? 0) + qNhap);
+                            }
+                        }
+                    }
+                    continue;
+                }
+                // «Lượng dầu tiêu hao» buộc theo phiếu Xuất.
                 // 4 cột phụ (Mỡ/Nhớt/Thủy lực/Cầu) lấy theo tên nhiên liệu + ngày, không chặn theo Loại phiếu.
                 if (reportCol === "LuongDauTieuHao" && !rowIsLoaiPhieuXuat(r)) continue;
                 let asset = "";
                 if (NXLC_AUX_FUEL_COLUMNS.includes(reportCol)) {
-                    // 4 cột phụ chỉ lấy theo «Tên XMTB», không fallback «Tên tài sản».
-                    asset = cellString(getNxlcTenXmtbCell(r)).trim();
+                    const xmtb = String(getNxlcTenXmtbCell(r) ?? "").trim();
+                    const ts = String(getNxlcTaiSanCell(r) ?? "").trim();
+                    asset = (xmtb || ts).trim();
                 } else {
                     asset = cellString(getNxlcTaiSanCell(r)).trim();
                 }
@@ -3314,18 +3521,38 @@
 
         const NL_FUEL_COLUMN_KEYS = ["LuongDauNhap", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
 
-        /** Chỉ «Lượng dầu nhập» từ «Nhật trình NL» (Diezel/DO). */
-        function applyNlLuongDauNhapFromNl(mainRows, normalizedRows, nlSums) {
-            if (!nlSums) return normalizedRows;
-            const m = nlSums.LuongDauNhap;
-            if (!m ?.size) return normalizedRows;
+        function findNlLuongMapKeyForRow(tenThietBi, luongMap, mainAssetPairs) {
+            if (!luongMap ?.size) return "";
+            const k0 = assetKeyFromName(tenThietBi);
+            if (k0 && luongMap.has(k0)) return k0;
+            const t = String(tenThietBi ?? "").trim();
+            if (!t) return "";
+            for (const p of mainAssetPairs || []) {
+                if (!luongMap.has(p.key)) continue;
+                if (taiSanNamesLooselyEqual(t, p.name)) return p.key;
+            }
+            return "";
+        }
+
+        /** «Lượng dầu nhập»: ưu tiên «Nhập xuất luân chuyển CT» (phiếu Nhập, Dầu Diezel); không có thì «Nhật trình NL». */
+        function applyLuongDauNhapFromNlAndNxlc(mainRows, normalizedRows, nlSums, nxlcFuelSums) {
+            const mNx = nxlcFuelSums ?.LuongDauNhap;
+            const mNl = nlSums ?.LuongDauNhap;
+            if (!mNx ?.size && !mNl ?.size) return normalizedRows;
+            const {
+                mainAssetPairs
+            } = buildMainAssetKeyIndex(mainRows);
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
                 if (!raw) return out;
-                const key = assetKeyFromName(out.TenThietBi);
-                if (!key || !m.has(key)) return out;
-                out.LuongDauNhap = formatLitersDisplay(m.get(key));
+                const kNx = findNlLuongMapKeyForRow(out.TenThietBi, mNx, mainAssetPairs);
+                if (kNx) {
+                    out.LuongDauNhap = formatLitersDisplay(mNx.get(kNx));
+                    return out;
+                }
+                const kNl = findNlLuongMapKeyForRow(out.TenThietBi, mNl, mainAssetPairs);
+                if (kNl) out.LuongDauNhap = formatLitersDisplay(mNl.get(kNl));
                 return out;
             });
         }
@@ -3349,12 +3576,26 @@
             });
         }
 
-        function applyTonBoundaryColumnsFromNl(mainRows, normalizedRows, tonBoundary) {
-            if (!tonBoundary) return normalizedRows;
-            const tonDauMap = tonBoundary.tonDauByTaiSan;
-            const tonCuoiMap = tonBoundary.tonCuoiByTaiSan;
-            const hasAny = (tonDauMap ?.size ?? 0) > 0 || (tonCuoiMap ?.size ?? 0) > 0;
-            if (!hasAny) return normalizedRows;
+        /**
+         * «Tồn đầu / cuối kỳ (L)» = đọc tồn × «Định mức trong bình» khi có ĐM (DS hoặc ô trên dòng).
+         */
+        function applyTonBoundaryColumnsFromNl(mainRows, normalizedRows, tonBoundary, dinhMucMaps) {
+            const tonDauMap = tonBoundary ?.tonDauByTaiSan;
+            const tonCuoiMap = tonBoundary ?.tonCuoiByTaiSan;
+
+            function getDinhMucTrongBinhForRow(out, key) {
+                const fromDs = dinhMucMaps ?.trongBinhByTaiSan ?.get(key);
+                if (fromDs != null && !isNaN(fromDs) && fromDs > 0) return fromDs;
+                const parsed = parseNumericForLiters(out.DinhMucTrongBinh);
+                if (parsed != null && !isNaN(parsed) && parsed > 0) return parsed;
+                return null;
+            }
+
+            function nhanDinhMuc(baseVal, dm) {
+                if (baseVal == null || isNaN(baseVal)) return null;
+                if (dm == null || isNaN(dm) || dm <= 0) return baseVal;
+                return baseVal * dm;
+            }
 
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
@@ -3363,20 +3604,28 @@
                 const key = assetKeyFromName(out.TenThietBi);
                 if (!key) return out;
 
-                const dmTrongBinh = parseNumericForLiters(out.DinhMucTrongBinh);
-                const nhanDinhMuc = (baseVal) => {
-                    if (baseVal == null || isNaN(baseVal)) return baseVal;
-                    if (dmTrongBinh == null || isNaN(dmTrongBinh)) return baseVal;
-                    return baseVal * dmTrongBinh;
-                };
+                const dm = getDinhMucTrongBinhForRow(out, key);
 
                 if (tonDauMap ?.has(key)) {
-                    const tonDauDaNhan = nhanDinhMuc(tonDauMap.get(key));
-                    out.TonDauKy = formatLitersDisplay(tonDauDaNhan);
+                    const v = nhanDinhMuc(tonDauMap.get(key), dm);
+                    if (v != null) out.TonDauKy = formatLitersDisplay(v);
+                } else {
+                    const base = parseNumericForLiters(out.TonDauKy);
+                    if (base != null) {
+                        const v = nhanDinhMuc(base, dm);
+                        if (v != null) out.TonDauKy = formatLitersDisplay(v);
+                    }
                 }
+
                 if (tonCuoiMap ?.has(key)) {
-                    const tonCuoiDaNhan = nhanDinhMuc(tonCuoiMap.get(key));
-                    out.TonCuoiKy = formatLitersDisplay(tonCuoiDaNhan);
+                    const v = nhanDinhMuc(tonCuoiMap.get(key), dm);
+                    if (v != null) out.TonCuoiKy = formatLitersDisplay(v);
+                } else {
+                    const base = parseNumericForLiters(out.TonCuoiKy);
+                    if (base != null) {
+                        const v = nhanDinhMuc(base, dm);
+                        if (v != null) out.TonCuoiKy = formatLitersDisplay(v);
+                    }
                 }
                 return out;
             });
@@ -3387,12 +3636,15 @@
             if (!fuelByTaiSan) return normalizedRows;
             const m = fuelByTaiSan.LuongDauTieuHao;
             if (!m ?.size) return normalizedRows;
+            const {
+                mainAssetPairs
+            } = buildMainAssetKeyIndex(mainRows);
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
                 if (!raw) return out;
-                const key = assetKeyFromName(out.TenThietBi);
-                if (!key || !m.has(key)) return out;
+                const key = findNlLuongMapKeyForRow(out.TenThietBi, m, mainAssetPairs);
+                if (!key) return out;
                 out.LuongDauTieuHao = formatLitersDisplay(m.get(key));
                 return out;
             });
@@ -3718,6 +3970,41 @@
                 .replaceAll(">", "&gt;")
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#39;");
+        }
+
+        /** Quy trình «Số chuyến chạy / tháng» khi trống: Tên thiết bị (UI) khớp «Tên tài sản» (CT) để tính. */
+        function getSoChuyenChayThangEmptyPlainText(row) {
+            const ten = String(row ?.TenThietBi ?? "").trim() || "—";
+            const bien = String(row ?.BienSoXe ?? "").trim() || "—";
+            return (
+                "Chưa có số. Quy trình: " +
+                "(1) Tên thiết bị trên giao diện (" +
+                ten +
+                ") phải khớp cột «Tên tài sản» trên «Nhật trình máy CT» — đây là khóa dùng để tính. " +
+                "(2) Biển số xe (" +
+                bien +
+                ") chỉ hiển thị từ «Danh sách tài sản» (khớp Tên tài sản ↔ Tên thiết bị) để đối chiếu, không dùng làm khóa cộng số chuyến. " +
+                "(3) Cộng «Số chuyến» trên các dòng CT có «Ngày làm việc» nằm trong khoảng «Từ ngày»–«Đến ngày» (đã lọc)."
+            );
+        }
+
+        function getSoChuyenChayThangEmptyHintHtml(row) {
+            const ten = String(row ?.TenThietBi ?? "").trim();
+            const bien = String(row ?.BienSoXe ?? "").trim();
+            const tenDisp = ten ? escapeHtml(ten) : "—";
+            const bienDisp = bien ? escapeHtml(bien) : "—";
+            return (
+                '<div class="so-chuyen-quy-trinh">' +
+                "<strong>Chưa có số — quy trình tra:</strong> " +
+                "<span>(1)</span> <strong>Tên thiết bị</strong> trên báo cáo (" +
+                tenDisp +
+                ") khớp cột <strong>«Tên tài sản»</strong> trên «Nhật trình máy CT» — khóa để tính. " +
+                "<span>(2)</span> <strong>Biển số xe</strong> (" +
+                bienDisp +
+                ") từ «Danh sách tài sản» chỉ để đối chiếu, không làm khóa cộng. " +
+                "<span>(3)</span> Cộng «Số chuyến» khi «Ngày làm việc» nằm trong khoảng «Từ ngày»–«Đến ngày»." +
+                "</div>"
+            );
         }
 
         function setStatus(message, isError = false) {
@@ -4067,13 +4354,7 @@
             const to = parseDateInputYmd(filters ?.toDate);
             if (!from && !to) return ctRows || [];
             if (!ctRows ?.length) return [];
-            return ctRows.filter((ct) => {
-                const d = parseCtNgayLamViec(ct);
-                if (!d || isNaN(d.getTime())) return false;
-                if (from && d < from) return false;
-                if (to && d > to) return false;
-                return true;
-            });
+            return ctRows.filter((ct) => isLocalDateInFilterRange(parseCtNgayLamViec(ct), from, to));
         }
 
         /**
@@ -4087,13 +4368,7 @@
             if (!mainRows ?.length) return [];
 
             const fallbackByMainDate = (rows) =>
-                (rows || []).filter((raw) => {
-                    const d = parseRecordNgayLamViec(raw);
-                    if (!d || isNaN(d.getTime())) return false;
-                    if (from && d < from) return false;
-                    if (to && d > to) return false;
-                    return true;
-                });
+                (rows || []).filter((raw) => isLocalDateInFilterRange(parseRecordNgayLamViec(raw), from, to));
 
             if (!ctRows ?.length) return fallbackByMainDate(mainRows);
 
@@ -4144,7 +4419,9 @@
 
             if (ctRowsInRange === 0) return fallbackByMainDate(mainRows);
             if (!matchedMainIndexes.size) return fallbackByMainDate(mainRows);
-            return mainRows.filter((_, idx) => matchedMainIndexes.has(idx));
+            return mainRows.filter((raw, idx) =>
+                matchedMainIndexes.has(idx) || isLocalDateInFilterRange(parseRecordNgayLamViec(raw), from, to)
+            );
         }
 
         function updateDateRangeBanner(filters, rows) {
@@ -4545,7 +4822,15 @@
                         "";
                     const rawVal = column === "TT" ? sttAuto : (row[column] ?? "");
                     const displayVal = formatReportCellDisplay(column, rawVal);
-                    return `<td class="${cssClass}">${escapeHtml(displayVal)}</td>`;
+                    const emptySoChuyen =
+                        column === "SoChuyenChayThang" && String(displayVal ?? "").trim() === "";
+                    let inner = escapeHtml(displayVal);
+                    let tdClass = cssClass;
+                    if (emptySoChuyen) {
+                        inner = getSoChuyenChayThangEmptyHintHtml(row);
+                        tdClass = `${cssClass} so-chuyen-quy-trinh-td`.trim();
+                    }
+                    return `<td class="${tdClass}">${inner}</td>`;
                 }).join("");
 
                 return `<tr>${cells}</tr>`;
@@ -4684,8 +4969,8 @@
                 );
                 const showXeBonHdColumn = reportHasAnyXeBonRow(rows, tenNhomByTaiSan, nguonGocByTaiSan);
                 normalized = applyCongViecFromNtCtByTaiSan(rows, normalized, ctRowsByDate);
-                normalized = applyNlLuongDauNhapFromNl(rows, normalized, nlFuelSumsByTaiSan);
-                normalized = applyTonBoundaryColumnsFromNl(rows, normalized, tonBoundaryByTaiSan);
+                normalized = applyLuongDauNhapFromNlAndNxlc(rows, normalized, nlFuelSumsByTaiSan, fuelByTaiSanFromNxlc);
+                normalized = applyTonBoundaryColumnsFromNl(rows, normalized, tonBoundaryByTaiSan, dinhMucByTaiSanFromDs);
                 normalized = applyMergedAuxiliaryFuelColumnsFromNlNxlc(rows, normalized, mergedAuxFuelByTaiSan);
                 normalized = applyFuelColumnsFromNxlcCt(rows, normalized, fuelByTaiSanFromNxlc);
                 normalized = applyLuongDauTieuHaoFromTonFormula(rows, normalized);
@@ -4703,7 +4988,7 @@
                     ctPart = ` — không tải được «${TABLE_NT_CT}»: ${ctLoadError.message} (giờ HC theo phiếu nếu có)`;
                 } else if (ctRowsByDate.length) {
                     ctPart = `; giờ HC = tổng «Tổng giờ lv» (Loại = Trong giờ HC); giờ tăng ca = tổng «Tổng giờ lv» (Loại công việc khác Trong giờ HC, có nhập loại); số ngày làm việc = tổng «Số ngày lv thực tế» — gom theo Tên tài sản`;
-                    ctPart += "; cột Số chuyến chạy / tháng = tổng «Số chuyến» từ Nhật trình máy CT theo tháng của Từ ngày";
+                    ctPart += "; cột Số chuyến chạy / tháng = tổng «Số chuyến» từ Nhật trình máy CT (Tên thiết bị UI khớp «Tên tài sản» CT), trong khoảng ngày đã lọc (Ngày làm việc)";
                     ctPart += "; cột Công việc = «Công việc thực hiện» từ Nhật trình máy CT (gom theo Tên tài sản, phân tách bằng dấu phẩy)";
                     ctPart += "; cột Tổng giờ HĐ xe bồn = tổng TG rửa/nhập/trả từ Nhật trình máy CT (quy về phút, rồi chia 60)";
                     ctPart += "; cột Tổng km HĐ T{tháng Từ ngày} = tổng «Tổng số Km» từ Nhật trình máy CT theo Tên tài sản";
@@ -4761,7 +5046,7 @@
                 } else if (nxlcCtRows.length && fuelByTaiSanFromNxlc) {
                     const nFuelCols = NXLC_FUEL_REPORT_COLUMNS.filter((c) => fuelByTaiSanFromNxlc[c] ?.size > 0).length;
                     if (nFuelCols > 0) {
-                        ctPart += `; NL từ «${TABLE_NXLC_CT}»: ${nFuelCols} cột lấy tổng «SL» theo Tên nhiên liệu (Loại phiếu = Xuất)`;
+                        ctPart += `; «${TABLE_NXLC_CT}»: ${nFuelCols} cột — «Số lượng NL» + «Tên nhiên liệu»; dầu tiêu hao (diezel) = phiếu Xuất; dầu nhập (diezel) = phiếu Nhập; 4 cột phụ theo tên NL`;
                     }
                 }
                 if (nxlcLoadError) {
@@ -5191,9 +5476,16 @@
                         } else {
                             rawVal = row[column];
                         }
-                        const displayVal = formatReportCellDisplay(column, rawVal);
+                        const formattedCell = formatReportCellDisplay(column, rawVal);
+                        let displayVal = formattedCell;
+                        const emptySoChuyenExport =
+                            column === "SoChuyenChayThang" && String(formattedCell ?? "").trim() === "";
+                        if (emptySoChuyenExport) {
+                            displayVal = getSoChuyenChayThangEmptyPlainText(row);
+                        }
                         excelCell.value = displayVal;
-                        const cssClass = ["TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "CongViec", "CongTruong"].includes(column) ?
+                        const cssClass = (["TenThietBi", "BienSoXe", "TenLaiMay", "TenLoai", "CongViec", "CongTruong"].includes(column) ||
+                            emptySoChuyenExport) ?
                             "left" :
                             "center";
                         excelCell.alignment = {

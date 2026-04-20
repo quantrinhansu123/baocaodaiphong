@@ -1213,12 +1213,20 @@
         if (s.includes("dầu thủy lực") || noAccent.includes("dau thuy luc") || compact.includes("thuyluc")) return "DauThuyLuc";
         if (s.includes("dầu cầu") || noAccent.includes("dau cau") || compact.includes("daucau") || /nhot\s*cau|nhotcau/.test(noAccent))
             return "DauCau";
-        // «Mỡ» / «Nhớt» trên AppSheet → cùng cột Mỡ bò / Nhớt động cơ với báo cáo
+        // «Dầu Diezel» (AppSheet) — trước mỡ/nhớt
+        if (
+            compact.includes("daudiezel") ||
+            compact.includes("daudiesel") ||
+            /dau\s*diezel|dau\s*diesel/i.test(noAccent) ||
+            noAccent.includes("diezel") ||
+            noAccent.includes("diesel")
+        ) return "LuongDauNhap";
+        if (/\bdo\b/i.test(noAccent)) return "LuongDauNhap";
+        if (compact.includes("gasoil") || compact.includes("hsd")) return "LuongDauNhap";
         if (/^mỡ$/i.test(s) || compact === "mo") return "TongMo";
         if (/^nhớt$/i.test(s) || compact === "nhot") return "TongNhot";
         if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
         if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
-        if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauNhap";
         if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauNhap";
         return null;
     }
@@ -1418,15 +1426,23 @@
     }
 
     function classifyNxlcTenToReportColumn(tenRaw) {
-        const s = cellDisplayString(tenRaw).trim();
+        const s = normalizeTenNhienLieuLabel(tenRaw);
         if (!s) return null;
         const noAccent = s.normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
         const compact = noAccent.replace(/[^a-z0-9]/g, "");
         if (s.includes("dầu thủy lực") || noAccent.includes("dau thuy luc") || compact.includes("thuyluc")) return "DauThuyLuc";
         if (s.includes("dầu cầu") || noAccent.includes("dau cau") || compact.includes("daucau")) return "DauCau";
+        if (
+            compact.includes("daudiezel") ||
+            compact.includes("daudiesel") ||
+            /dau\s*diezel|dau\s*diesel/i.test(noAccent) ||
+            noAccent.includes("diezel") ||
+            noAccent.includes("diesel")
+        ) return "LuongDauTieuHao";
+        if (/\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
+        if (compact.includes("gasoil") || compact.includes("hsd")) return "LuongDauTieuHao";
         if (s.includes("mỡ") || noAccent.includes(" mo") || noAccent.startsWith("mo")) return "TongMo";
         if (s.includes("nhớt") || noAccent.includes("nhot")) return "TongNhot";
-        if (noAccent.includes("diezel") || noAccent.includes("diesel")) return "LuongDauTieuHao";
         if ((noAccent.includes("dau") || s.includes("dầu")) && /\bdo\b/i.test(noAccent)) return "LuongDauTieuHao";
         return null;
     }
@@ -1461,6 +1477,17 @@
             .replace(/\u0300-\u036f/g, "");
         if (!s) return false;
         if (s === "xuat" || s.includes("phieu xuat") || s.includes("xuat kho")) return true;
+        return false;
+    }
+
+    function loaiPhieuIsNhap(rawVal) {
+        const s = String(rawVal ?? "")
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/\u0300-\u036f/g, "");
+        if (!s) return false;
+        if (s === "nhap" || s.includes("phieu nhap") || s.includes("nhap kho") || s.includes("nhap hang")) return true;
         return false;
     }
 
@@ -1560,6 +1587,7 @@
         return sums;
     }
 
+    /** Tồn đầu/cuối: ưu tiên dòng diezel/DO (cùng ý báo cáo vật tư xe bồn), không thì mọi loại NL. */
     function buildNlTonBoundaryByTaiSan(mainRows, nlRows, filters) {
         const tonDauByTaiSan = new Map();
         const tonCuoiByTaiSan = new Map();
@@ -1567,8 +1595,17 @@
 
         const fromD = parseDateInputYmd(filters?.fromDate);
         const toD = parseDateInputYmd(filters?.toDate);
-        const tonDauDateByTaiSan = new Map();
-        const tonCuoiDateByTaiSan = new Map();
+        const fromKey = dateKeyYmd(fromD);
+        if (!fromKey && !toD) return { tonDauByTaiSan, tonCuoiByTaiSan };
+
+        const tonDauDateDiesel = new Map();
+        const tonDauValDiesel = new Map();
+        const tonDauDateAny = new Map();
+        const tonDauValAny = new Map();
+        const tonCuoiDateDiesel = new Map();
+        const tonCuoiValDiesel = new Map();
+        const tonCuoiDateAny = new Map();
+        const tonCuoiValAny = new Map();
 
         const parents = [];
         for (const raw of mainRows) {
@@ -1599,12 +1636,25 @@
             return "";
         }
 
+        function nlLineIsDiesel(r) {
+            const tenNl =
+                r["Tên nhiên liệu"] ??
+                r["Ten nhien lieu"] ??
+                r["Tên NL"] ??
+                r["Loại nhiên liệu"] ??
+                r["Loai nhien lieu"] ??
+                "";
+            return classifyNlTenToFuelColumn(tenNl) === "LuongDauNhap";
+        }
+
         for (const r of nlRows) {
             const assetKey = detectAssetKeyOnNlRow(r);
             if (!assetKey) continue;
             const ngay = parseNlNgayCell(r);
             const dKey = dateKeyYmd(ngay);
             if (!dKey) continue;
+
+            const isDiesel = nlLineIsDiesel(r);
 
             if (
                 fromD &&
@@ -1614,10 +1664,17 @@
             ) {
                 const tonTruoc = parseNlTonTruocCell(r);
                 if (tonTruoc != null) {
-                    const pickedDate = tonDauDateByTaiSan.get(assetKey);
-                    if (!pickedDate || ngay < pickedDate) {
-                        tonDauDateByTaiSan.set(assetKey, ngay);
-                        tonDauByTaiSan.set(assetKey, tonTruoc);
+                    const pickedAny = tonDauDateAny.get(assetKey);
+                    if (!pickedAny || ngay < pickedAny) {
+                        tonDauDateAny.set(assetKey, ngay);
+                        tonDauValAny.set(assetKey, tonTruoc);
+                    }
+                    if (isDiesel) {
+                        const pickedD = tonDauDateDiesel.get(assetKey);
+                        if (!pickedD || ngay < pickedD) {
+                            tonDauDateDiesel.set(assetKey, ngay);
+                            tonDauValDiesel.set(assetKey, tonTruoc);
+                        }
                     }
                 }
             }
@@ -1629,14 +1686,35 @@
             ) {
                 const tonSau = parseNlTonSauCell(r);
                 if (tonSau != null) {
-                    const pickedDate = tonCuoiDateByTaiSan.get(assetKey);
-                    if (!pickedDate || ngay > pickedDate) {
-                        tonCuoiDateByTaiSan.set(assetKey, ngay);
-                        tonCuoiByTaiSan.set(assetKey, tonSau);
+                    const pickedAny = tonCuoiDateAny.get(assetKey);
+                    if (!pickedAny || ngay > pickedAny) {
+                        tonCuoiDateAny.set(assetKey, ngay);
+                        tonCuoiValAny.set(assetKey, tonSau);
+                    }
+                    if (isDiesel) {
+                        const pickedD = tonCuoiDateDiesel.get(assetKey);
+                        if (!pickedD || ngay > pickedD) {
+                            tonCuoiDateDiesel.set(assetKey, ngay);
+                            tonCuoiValDiesel.set(assetKey, tonSau);
+                        }
                     }
                 }
             }
         }
+
+        for (const k of new Set([...tonDauValDiesel.keys(), ...tonDauValAny.keys()])) {
+            tonDauByTaiSan.set(
+                k,
+                tonDauValDiesel.has(k) ? tonDauValDiesel.get(k) : tonDauValAny.get(k)
+            );
+        }
+        for (const k of new Set([...tonCuoiValDiesel.keys(), ...tonCuoiValAny.keys()])) {
+            tonCuoiByTaiSan.set(
+                k,
+                tonCuoiValDiesel.has(k) ? tonCuoiValDiesel.get(k) : tonCuoiValAny.get(k)
+            );
+        }
+
         return { tonDauByTaiSan, tonCuoiByTaiSan };
     }
 
@@ -1662,6 +1740,7 @@
 
     function buildFuelColumnsByTaiSanFromNxlcCt(nxlcCtRows, nxlcRows, mainRows, filters) {
         const sums = {
+            LuongDauNhap: new Map(),
             LuongDauTieuHao: new Map(),
             TongMo: new Map(),
             TongNhot: new Map(),
@@ -1698,10 +1777,15 @@
         }
 
         const xuatParentIds = [];
+        const nhapParentIds = [];
         if (nxlcRows?.length) {
             for (const p of nxlcRows) {
-                if (!loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) continue;
-                for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
+                if (loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) {
+                    for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
+                }
+                if (loaiPhieuIsNhap(getLoaiPhieuOnRow(p))) {
+                    for (const pid of getNxlcParentMatchIds(p)) nhapParentIds.push(pid);
+                }
             }
         }
 
@@ -1717,6 +1801,18 @@
             return false;
         }
 
+        function rowIsLoaiPhieuNhap(r) {
+            if (loaiPhieuIsNhap(getLoaiPhieuOnRow(r))) return true;
+            if (!nhapParentIds.length) return false;
+            for (const rref of getNxlcCtParentRefCandidates(r)) {
+                if (!rref) continue;
+                for (const pid of nhapParentIds) {
+                    if (parentIdsMatch(rref, pid)) return true;
+                }
+            }
+            return false;
+        }
+
         for (const r of nxlcCtRows) {
             const d = parseNxlcCtNgayCell(r);
             if (from || to) {
@@ -1726,6 +1822,21 @@
             }
             const reportCol = classifyNxlcTenToReportColumn(getNxlcTenNhienLieuCell(r));
             if (!reportCol) continue;
+            if (reportCol === "LuongDauTieuHao" && rowIsLoaiPhieuNhap(r)) {
+                const xmtb = String(getNxlcTenXmtbCell(r) ?? "").trim();
+                const ts = String(getNxlcTaiSanCell(r) ?? "").trim();
+                const assetNhap = (xmtb || ts).trim();
+                if (assetNhap) {
+                    const keyNhap = resolveMainAssetKeyByName(assetNhap);
+                    if (keyNhap && (!mainAssetKeys.size || mainAssetKeys.has(keyNhap))) {
+                        const qNhap = parseNxlcSlCell(r);
+                        if (qNhap != null) {
+                            sums.LuongDauNhap.set(keyNhap, (sums.LuongDauNhap.get(keyNhap) ?? 0) + qNhap);
+                        }
+                    }
+                }
+                continue;
+            }
             if (reportCol === "LuongDauTieuHao" && !rowIsLoaiPhieuXuat(r)) continue;
             let asset = "";
             if (NXLC_AUX_FUEL_COLUMNS.includes(reportCol)) {
@@ -1744,17 +1855,39 @@
         return sums;
     }
 
-    function applyNlLuongDauNhapFromNl(mainRows, normalizedRows, nlSums) {
-        if (!nlSums) return normalizedRows;
-        const m = nlSums.LuongDauNhap;
-        if (!m?.size) return normalizedRows;
+    function applyLuongDauNhapFromNlAndNxlc(mainRows, normalizedRows, nlSums, nxlcFuelSums) {
+        const mNx = nxlcFuelSums?.LuongDauNhap;
+        const mNl = nlSums?.LuongDauNhap;
+        if (!mNx?.size && !mNl?.size) return normalizedRows;
+        const mainAssetPairs = [];
+        for (const raw of mainRows || []) {
+            if (raw?.groupRow || raw?.subGroupRow) continue;
+            const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+            const k = assetKeyFromName(asset);
+            if (k) mainAssetPairs.push({ key: k, name: asset });
+        }
+        function findLuongMapKey(tenThietBi, map) {
+            if (!map?.size) return "";
+            const k0 = assetKeyFromName(tenThietBi);
+            if (k0 && map.has(k0)) return k0;
+            const t = String(tenThietBi ?? "").trim();
+            for (const p of mainAssetPairs) {
+                if (!map.has(p.key)) continue;
+                if (taiSanNamesLooselyEqual(t, p.name)) return p.key;
+            }
+            return "";
+        }
         return normalizedRows.map((out, i) => {
             if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
             const raw = mainRows[i];
             if (!raw) return out;
-            const key = assetKeyFromName(out.TenThietBi);
-            if (!key || !m.has(key)) return out;
-            out.LuongDauNhap = formatLitersDisplay(m.get(key));
+            const kNx = findLuongMapKey(out.TenThietBi, mNx);
+            if (kNx) {
+                out.LuongDauNhap = formatLitersDisplay(mNx.get(kNx));
+                return out;
+            }
+            const kNl = findLuongMapKey(out.TenThietBi, mNl);
+            if (kNl) out.LuongDauNhap = formatLitersDisplay(mNl.get(kNl));
             return out;
         });
     }
@@ -1777,12 +1910,23 @@
         });
     }
 
-    function applyTonBoundaryColumnsFromNl(mainRows, normalizedRows, tonBoundary) {
-        if (!tonBoundary) return normalizedRows;
-        const tonDauMap = tonBoundary.tonDauByTaiSan;
-        const tonCuoiMap = tonBoundary.tonCuoiByTaiSan;
-        const hasAny = (tonDauMap?.size ?? 0) > 0 || (tonCuoiMap?.size ?? 0) > 0;
-        if (!hasAny) return normalizedRows;
+    function applyTonBoundaryColumnsFromNl(mainRows, normalizedRows, tonBoundary, dinhMucMaps) {
+        const tonDauMap = tonBoundary?.tonDauByTaiSan;
+        const tonCuoiMap = tonBoundary?.tonCuoiByTaiSan;
+
+        function getDinhMucTrongBinhForRow(out, key) {
+            const fromDs = dinhMucMaps?.trongBinhByTaiSan?.get(key);
+            if (fromDs != null && !isNaN(fromDs) && fromDs > 0) return fromDs;
+            const parsed = parseNumericForLiters(out.DinhMucTrongBinh);
+            if (parsed != null && !isNaN(parsed) && parsed > 0) return parsed;
+            return null;
+        }
+
+        function nhanDinhMuc(baseVal, dm) {
+            if (baseVal == null || isNaN(baseVal)) return null;
+            if (dm == null || isNaN(dm) || dm <= 0) return baseVal;
+            return baseVal * dm;
+        }
 
         return normalizedRows.map((out, i) => {
             if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
@@ -1791,20 +1935,28 @@
             const key = assetKeyFromName(out.TenThietBi);
             if (!key) return out;
 
-            const dmTrongBinh = parseNumericForLiters(out.DinhMucTrongBinh);
-            const nhanDinhMuc = (baseVal) => {
-                if (baseVal == null || isNaN(baseVal)) return baseVal;
-                if (dmTrongBinh == null || isNaN(dmTrongBinh)) return baseVal;
-                return baseVal * dmTrongBinh;
-            };
+            const dm = getDinhMucTrongBinhForRow(out, key);
 
             if (tonDauMap?.has(key)) {
-                const tonDauDaNhan = nhanDinhMuc(tonDauMap.get(key));
-                out.TonDauKy = formatLitersDisplay(tonDauDaNhan);
+                const v = nhanDinhMuc(tonDauMap.get(key), dm);
+                if (v != null) out.TonDauKy = formatLitersDisplay(v);
+            } else {
+                const base = parseNumericForLiters(out.TonDauKy);
+                if (base != null) {
+                    const v = nhanDinhMuc(base, dm);
+                    if (v != null) out.TonDauKy = formatLitersDisplay(v);
+                }
             }
+
             if (tonCuoiMap?.has(key)) {
-                const tonCuoiDaNhan = nhanDinhMuc(tonCuoiMap.get(key));
-                out.TonCuoiKy = formatLitersDisplay(tonCuoiDaNhan);
+                const v = nhanDinhMuc(tonCuoiMap.get(key), dm);
+                if (v != null) out.TonCuoiKy = formatLitersDisplay(v);
+            } else {
+                const base = parseNumericForLiters(out.TonCuoiKy);
+                if (base != null) {
+                    const v = nhanDinhMuc(base, dm);
+                    if (v != null) out.TonCuoiKy = formatLitersDisplay(v);
+                }
             }
             return out;
         });
