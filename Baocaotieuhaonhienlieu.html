@@ -193,15 +193,17 @@
         .report-tabs-container {
             display: flex;
             background-color: #f1f5f9;
-            padding: 4px 8px 0;
+            padding: 2px 8px 0;
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
         
         .report-tab-btn {
-            padding: 6px 16px;
+            height: 28px;
+            padding: 0 16px;
             font-size: 11px;
             font-weight: bold;
+            line-height: 28px;
             color: #475569;
             background: #e2e8f0;
             border: 1px solid #cbd5e1;
@@ -279,55 +281,13 @@
             white-space: normal;
         }
 
-        /* Thu gọn mạnh riêng tab «Báo cáo thiết bị máy». */
-        #report-table.tab-thiet-bi-compact {
+        /* 3 tab con trong «BC thiết bị»: ưu tiên dễ đọc, cỡ chữ đồng nhất. */
+        #report-table.tab-bc-thiet-bi-readable {
             zoom: 1;
             transform-origin: top left;
         }
 
-        #report-table.tab-thiet-bi-compact thead th {
-            font-size: 8px !important;
-            line-height: 0.7 !important;
-            padding: 0 !important;
-            letter-spacing: 0 !important;
-            white-space: normal !important;
-            word-break: normal !important;
-            overflow-wrap: break-word !important;
-            vertical-align: middle !important;
-        }
-
-        #report-table.tab-thiet-bi-compact .number-row th {
-            font-size: 7px !important;
-            line-height: 0.68 !important;
-            padding: 0 !important;
-        }
-
-        #report-table.tab-thiet-bi-compact tbody td {
-            font-size: 10px !important;
-            line-height: 1.1 !important;
-            padding: 2px 1px !important;
-        }
-
-        #report-table.tab-thiet-bi-compact thead>tr:not(.number-row) th {
-            min-height: 8px !important;
-        }
-
-        #report-table.tab-thiet-bi-compact .number-row th {
-            min-height: 5px !important;
-        }
-
-        /* Tab «Báo cáo xe bồn»: thu nhẹ tiêu đề để cân đối tổng thể. */
-        #report-table.tab-xe-bon-compact thead th {
-            font-size: 9.8px !important;
-            line-height: 1.02 !important;
-            padding: 2px 1px !important;
-        }
-
-        #report-table.tab-xe-bon-compact .number-row th {
-            font-size: 9.1px !important;
-            line-height: 1 !important;
-            padding: 1px 0 !important;
-        }
+        /* Giữ header theo layout chuẩn của tab xe bồn. */
         
         th,
         td {
@@ -345,12 +305,24 @@
             background-color: #4a8694;
             color: #ffffff;
             font-weight: 700;
-            line-height: 1.08;
-            font-size: 11.2px;
+            line-height: 1.1;
+            font-size: 10px;
             letter-spacing: 0.05px;
             text-shadow: none;
             vertical-align: middle;
-            padding: 3px 1px;
+            padding: 1px 2px;
+        }
+
+        #report-table thead > tr:nth-child(1) th[rowspan="2"] {
+            height: 42px !important;
+        }
+
+        #report-table thead > tr:nth-child(1) th[colspan] {
+            height: 20px !important;
+        }
+
+        #report-table thead > tr:nth-child(2) th {
+            height: 26px !important;
         }
 
         /* Tránh hàng tiêu đề bị co cao 0 khi có cột visibility:collapse (một số trình duyệt). */
@@ -364,9 +336,14 @@
             background-color: white;
             color: black;
             font-weight: bold;
-            font-size: 10px;
-            line-height: 1.02;
-            padding: 2px 0;
+            font-size: 8.8px;
+            line-height: 1.08;
+            padding: 1px 0;
+        }
+
+        #report-table thead > tr:not(.number-row) th {
+            padding-top: 1px;
+            padding-bottom: 1px;
         }
         /* Row highlighting */
         
@@ -716,30 +693,30 @@
                             <th rowspan="2" style="width: 11.5%;">Tên thiết bị</th>
                             <th rowspan="2" style="width: 3.5%;">Biển số xe</th>
                             <th rowspan="2" style="width: 5.5%;">Tên lái xe</th>
-                            <th id="th-so-ngay-hd" rowspan="2" style="width: 3%;">Số ngày<br>hoạt động (ngày)</th>
-                            <th class="report-col-so-chuyen" rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng (chuyến)</th>
-                            <th id="th-gio-hc" rowspan="2" style="width: 3%;">Giờ làm<br>việc HC (h)</th>
-                            <th id="th-gio-tc" rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng (h)</th>
-                            <th class="report-col-xe-bon-hd" rowspan="2" style="width: 3.5%;">Tổng giờ<br>HĐ xe bồn (h)</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động (h)</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng giờ hoạt động (h)</th>
-                            <th id="th-ton-dau-ky" rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
-                            <th id="th-dau-xuat-thang" rowspan="2" style="width: 4%;">Dầu xuất<br>trong tháng (L)</th>
-                            <th id="th-ton-cuoi-ky" rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
-                            <th id="th-luong-dau-th" rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
+                            <th id="th-so-ngay-hd" rowspan="2" style="width: 3%;">Số ngày<br>HĐ</th>
+                            <th class="report-col-so-chuyen" rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
+                            <th id="th-gio-hc" rowspan="2" style="width: 3%;">Giờ HC<br>(h)</th>
+                            <th id="th-gio-tc" rowspan="2" style="width: 3%;">Giờ TC<br>(h)</th>
+                            <th class="report-col-xe-bon-hd" rowspan="2" style="width: 3.5%;">Tổng giờ<br>HĐ xe bồn</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng km<br>(km)</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng km<br>(km)</th>
+                            <th id="th-ton-dau-ky" rowspan="2" style="width: 3.5%;">Tồn đầu<br>(L)</th>
+                            <th id="th-dau-xuat-thang" rowspan="2" style="width: 4%;">Dầu xuất<br>(L)</th>
+                            <th id="th-ton-cuoi-ky" rowspan="2" style="width: 3.5%;">Tồn cuối<br>(L)</th>
+                            <th id="th-luong-dau-th" rowspan="2" style="width: 4%;">Dầu TH<br>(L)</th>
                             <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế (L/h)</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế (L/h)</th>
-                            <th id="th-dm-trong-binh" rowspan="2" style="width: 3%;">Định mức<br>trong bình (L/h)</th>
-                            <th id="th-dm-tieu-hao" rowspan="2" style="width: 3%;">Định mức<br>tiêu hao (L/h)</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">TH thực tế<br>(L/h)</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">TH thực tế<br>(L/h)</th>
+                            <th id="th-dm-trong-binh" rowspan="2" style="width: 3%;">ĐM bình<br>(L/h)</th>
+                            <th id="th-dm-tieu-hao" rowspan="2" style="width: 3%;">ĐM TH<br>(L/h)</th>
                             <th id="th-cong-viec" rowspan="2" style="width: 9%;">Công việc</th>
                             <th id="th-cong-truong" rowspan="2" style="width: 6%;">Công trường</th>
                         </tr>
                         <tr>
-                            <th id="th-nlphu-mo" style="width: 3.5%;">Tổng<br>mỡ (kg)</th>
-                            <th id="th-nlphu-nhot" style="width: 3.5%;">Tổng<br>nhớt (L)</th>
-                            <th id="th-nlphu-thuyluc" style="width: 3.5%;">Dầu thủy<br>lực (L)</th>
-                            <th id="th-nlphu-daucau" style="width: 3.5%;">Dầu<br>cầu (L)</th>
+                            <th id="th-nlphu-mo" style="width: 3.5%;">Mỡ<br>(kg)</th>
+                            <th id="th-nlphu-nhot" style="width: 3.5%;">Nhớt<br>(L)</th>
+                            <th id="th-nlphu-thuyluc" style="width: 3.5%;">TL<br>(L)</th>
+                            <th id="th-nlphu-daucau" style="width: 3.5%;">Cầu<br>(L)</th>
                         </tr>
                         <tr class="number-row">
                             <th>(1)</th>
@@ -4657,6 +4634,9 @@
             setActiveReportTabButton(currentReportTab);
             applyGroupedTabVisibility();
             setReportSoChuyenColumnVisible(currentReportTab !== "trang-thiet-bi");
+            updateCompactHeadersForTab();
+            updateCompactHeaderWidthsForTab();
+            updateCompactTypographyForTab();
         }
 
         function switchReportTab(tabId) {
@@ -4991,103 +4971,110 @@
                 line2
             } = getKmMonthLabelsFromFiltersOrRows(filters);
             const thietBiTab = currentReportTab === "trang-thiet-bi";
+            const xeTab = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
             const compactThietBi = thietBiTab;
             const tieuHaoUnit = thietBiTab ? "L/h" : "L/km";
             th1.innerHTML =
                 line1 ?
                 (thietBiTab ?
-                    (compactThietBi ? `Giờ HĐ ${escapeHtml(line1)} (h)` : `Giờ HĐ<br>${escapeHtml(line1)} (h)`) :
-                    `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`) :
-                (thietBiTab ? "Giờ HĐ (h)" : "Tổng km (km)");
+                    (compactThietBi ? `Giờ HĐ<br>${escapeHtml(line1)} (h)` : `Giờ HĐ<br>${escapeHtml(line1)} (h)`) :
+                    (xeTab ? `Tổng km<br>${escapeHtml(line1)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`) ) :
+                (thietBiTab ? "Giờ HĐ (h)" : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
             th2.innerHTML =
                 line2 ?
                 (thietBiTab ?
-                    (compactThietBi ? `Giờ HĐ ${escapeHtml(line2)} (h)` : `Giờ HĐ<br>${escapeHtml(line2)} (h)`) :
-                    `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`) :
-                (thietBiTab ? "Giờ HĐ (h)" : "Tổng km (km)");
+                    (compactThietBi ? `Giờ HĐ<br>${escapeHtml(line2)} (h)` : `Giờ HĐ<br>${escapeHtml(line2)} (h)`) :
+                    (xeTab ? `Tổng km<br>${escapeHtml(line2)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`) ) :
+                (thietBiTab ? "Giờ HĐ (h)" : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
 
             if (thTieuHao1) {
                 thTieuHao1.innerHTML = line1 ?
-                    (compactThietBi ? `TH thực tế ${escapeHtml(line1)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line1)} (${tieuHaoUnit})`) :
-                    (compactThietBi ? `TH thực tế (${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
+                    (compactThietBi ? `TH thực tế<br>${escapeHtml(line1)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line1)} (${tieuHaoUnit})`) :
+                    (compactThietBi ? `TH thực tế<br>(${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
             }
             if (thTieuHao2) {
                 thTieuHao2.innerHTML = line2 ?
-                    (compactThietBi ? `TH thực tế ${escapeHtml(line2)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line2)} (${tieuHaoUnit})`) :
-                    (compactThietBi ? `TH thực tế (${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
+                    (compactThietBi ? `TH thực tế<br>${escapeHtml(line2)} (${tieuHaoUnit})` : `TH thực tế<br>${escapeHtml(line2)} (${tieuHaoUnit})`) :
+                    (compactThietBi ? `TH thực tế<br>(${tieuHaoUnit})` : `TH thực tế<br>(${tieuHaoUnit})`);
             }
         }
 
         function updateCompactHeadersForTab() {
-            const thietBiTab = currentReportTab === "trang-thiet-bi";
+            const useCompactHeaderLabels = currentReportTab === "xe-ben" || currentReportTab === "xe-bon" || currentReportTab === "trang-thiet-bi";
             const setHtml = (id, normalHtml, compactHtml) => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.innerHTML = thietBiTab ? compactHtml : normalHtml;
+                el.innerHTML = useCompactHeaderLabels ? compactHtml : normalHtml;
             };
 
-            setHtml("th-so-ngay-hd", "Số ngày<br>hoạt động (ngày)", "Số ngày HĐ (ngày)");
-            setHtml("th-gio-hc", "Giờ làm<br>việc HC (h)", "Giờ HC (h)");
-            setHtml("th-gio-tc", "Giờ tăng<br>ca / tháng (h)", "Giờ TC (h)");
-            setHtml("th-ton-dau-ky", "Tồn đầu<br>kỳ (L)", "Tồn đầu (L)");
-            setHtml("th-dau-xuat-thang", "Dầu xuất<br>trong tháng (L)", "Dầu xuất (L)");
-            setHtml("th-ton-cuoi-ky", "Tồn cuối<br>kỳ (L)", "Tồn cuối (L)");
-            setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Dầu TH (L)");
-            setHtml("th-dm-trong-binh", "Định mức<br>trong bình (L/h)", "ĐM bình (L/h)");
-            setHtml("th-dm-tieu-hao", "Định mức<br>tiêu hao (L/h)", "ĐM TH (L/h)");
-            setHtml("th-nlphu-mo", "Tổng<br>mỡ (kg)", "Mỡ (kg)");
-            setHtml("th-nlphu-nhot", "Tổng<br>nhớt (L)", "Nhớt (L)");
-            setHtml("th-nlphu-thuyluc", "Dầu thủy<br>lực (L)", "TL (L)");
-            setHtml("th-nlphu-daucau", "Dầu<br>cầu (L)", "Cầu (L)");
+            setHtml("th-so-ngay-hd", "Số ngày<br>hoạt động (ngày)", "Số ngày<br>HĐ");
+            setHtml("th-gio-hc", "Giờ làm<br>việc HC (h)", "Giờ HC<br>(h)");
+            setHtml("th-gio-tc", "Giờ tăng<br>ca / tháng (h)", "Giờ TC<br>(h)");
+            setHtml("th-ton-dau-ky", "Tồn đầu<br>kỳ (L)", "Tồn đầu<br>(L)");
+            setHtml("th-dau-xuat-thang", "Dầu xuất<br>trong tháng (L)", "Dầu xuất<br>(L)");
+            setHtml("th-ton-cuoi-ky", "Tồn cuối<br>kỳ (L)", "Tồn cuối<br>(L)");
+            setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Dầu TH<br>(L)");
+            setHtml("th-dm-trong-binh", "Định mức<br>trong bình (L/h)", "ĐM bình<br>(L/h)");
+            setHtml("th-dm-tieu-hao", "Định mức<br>tiêu hao (L/h)", "ĐM TH<br>(L/h)");
+            setHtml("th-nlphu-mo", "Tổng<br>mỡ (kg)", "Mỡ<br>(kg)");
+            setHtml("th-nlphu-nhot", "Tổng<br>nhớt (L)", "Nhớt<br>(L)");
+            setHtml("th-nlphu-thuyluc", "Dầu thủy<br>lực (L)", "TL<br>(L)");
+            setHtml("th-nlphu-daucau", "Dầu<br>cầu (L)", "Cầu<br>(L)");
         }
 
         function updateCompactHeaderWidthsForTab() {
             const thietBiTab = currentReportTab === "trang-thiet-bi";
+            const xeBenTab = currentReportTab === "xe-ben";
+            const xeBonTab = currentReportTab === "xe-bon";
             const setWidth = (id, normalWidth, compactWidth) => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.style.width = thietBiTab ? compactWidth : normalWidth;
+                el.style.width = normalWidth;
             };
-            setWidth("th-so-ngay-hd", "3%", "2.5%");
-            setWidth("th-gio-hc", "3%", "2.3%");
-            setWidth("th-gio-tc", "3%", "2.3%");
-            setWidth("th-km-t1", "3.5%", "2.8%");
-            setWidth("th-km-t2", "3.5%", "2.8%");
-            setWidth("th-ton-dau-ky", "3.5%", "3%");
-            setWidth("th-dau-xuat-thang", "4%", "3.2%");
-            setWidth("th-ton-cuoi-ky", "3.5%", "3%");
-            setWidth("th-luong-dau-th", "4%", "3.2%");
-            setWidth("th-nlphu-mo", "3.5%", "2.8%");
-            setWidth("th-nlphu-nhot", "3.5%", "2.8%");
-            setWidth("th-nlphu-thuyluc", "3.5%", "2.8%");
-            setWidth("th-nlphu-daucau", "3.5%", "2.8%");
-            setWidth("th-thtt-t1", "3.5%", "2.8%");
-            setWidth("th-thtt-t2", "3.5%", "2.8%");
-            setWidth("th-dm-trong-binh", "3%", "2.5%");
-            setWidth("th-dm-tieu-hao", "3%", "2.5%");
-            setWidth("th-cong-viec", "9%", "7.5%");
-            setWidth("th-cong-truong", "6%", "5%");
+            setWidth("th-so-ngay-hd", "3%", "3%");
+            setWidth("th-gio-hc", "3%", "3%");
+            setWidth("th-gio-tc", "3%", "3%");
+            setWidth("th-km-t1", "3.5%", "3.5%");
+            setWidth("th-km-t2", "3.5%", "3.5%");
+            setWidth("th-ton-dau-ky", "3.5%", "3.5%");
+            setWidth("th-dau-xuat-thang", "4%", "4%");
+            setWidth("th-ton-cuoi-ky", "3.5%", "3.5%");
+            setWidth("th-luong-dau-th", "4%", "4%");
+            setWidth("th-nlphu-mo", "3.5%", "3.5%");
+            setWidth("th-nlphu-nhot", "3.5%", "3.5%");
+            setWidth("th-nlphu-thuyluc", "3.5%", "3.5%");
+            setWidth("th-nlphu-daucau", "3.5%", "3.5%");
+            setWidth("th-thtt-t1", "3.5%", "3.5%");
+            setWidth("th-thtt-t2", "3.5%", "3.5%");
+            setWidth("th-dm-trong-binh", "3%", "3%");
+            setWidth("th-dm-tieu-hao", "3%", "3%");
+            setWidth("th-cong-viec", "9%", "9%");
+            setWidth("th-cong-truong", "6%", "6%");
 
             const table = document.getElementById("report-table");
-            if (table) table.style.minWidth = thietBiTab ? "1470px" : "1470px";
+            if (table) table.style.minWidth = (xeBenTab || xeBonTab || thietBiTab) ? "1820px" : "1470px";
         }
 
         function updateCompactTypographyForTab() {
             const table = document.getElementById("report-table");
             if (!table) return;
-            const useThietBiCompact = currentReportTab === "trang-thiet-bi";
-            const useXeBonTypography = currentReportTab === "xe-bon" || currentReportTab === "xe-ben";
-            table.classList.toggle("tab-thiet-bi-compact", useThietBiCompact);
-            table.classList.toggle("tab-xe-bon-compact", useXeBonTypography);
+            table.classList.remove("tab-bc-thiet-bi-readable");
         }
 
         /** Đồng bộ dòng chữ kỳ báo cáo + tiêu đề cột km theo bộ lọc / dữ liệu. */
         function syncReportPeriodUi(filters, rows) {
+            updateDateRangeBanner(filters, rows);
+            updateKmColumnHeaders(filters);
+            // Chạy sau updateKmColumnHeaders để tránh tiêu đề dài làm header phình lại sau khi load dữ liệu.
             updateCompactHeadersForTab();
             updateCompactHeaderWidthsForTab();
             updateCompactTypographyForTab();
-            updateDateRangeBanner(filters, rows);
-            updateKmColumnHeaders(filters);
+            // Ép lại một nhịp sau render để không bị phình header bởi cập nhật DOM trễ.
+            requestAnimationFrame(() => {
+                updateCompactHeadersForTab();
+                updateCompactHeaderWidthsForTab();
+                updateCompactTypographyForTab();
+            });
             updateSignatureDate(filters);
             updatePrintFilterSummary();
         }

@@ -94,7 +94,7 @@
             <iframe
                 id="panel-report"
                 class="tab-panel active"
-                src="./Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi"
+                src="./Baocaotieuhaonhienlieu.html?v=20260420-01&tab=trang-thiet-bi&group=thiet-bi"
                 title="View tổng hợp báo cáo">
             </iframe>
         </div>
@@ -104,13 +104,14 @@
         const buttons = Array.from(document.querySelectorAll(".tab-btn"));
         const panel = document.getElementById("panel-report");
         let currentTopTab = "bc-thiet-bi";
+        const CACHE_VER = "20260420-01";
 
         const TAB_SOURCES = {
-            "bc-thiet-bi": "./Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi",
-            "bc-nhien-lieu": "./BaocaoNL.html?group=nhien-lieu",
-            "bc-sua-chua": "./BaocaoTonghopCPSuachua.html?group=sua-chua",
-            "bc-kiem-ke": "./BaocaoKiemKeThietBi.html?group=kiem-ke",
-            "bc-ke-hoach": "./BaocaoSCnam2025.html?group=ke-hoach"
+            "bc-thiet-bi": `./Baocaotieuhaonhienlieu.html?v=${CACHE_VER}&tab=trang-thiet-bi&group=thiet-bi`,
+            "bc-nhien-lieu": `./BaocaoNL.html?v=${CACHE_VER}&group=nhien-lieu`,
+            "bc-sua-chua": `./BaocaoTonghopCPSuachua.html?v=${CACHE_VER}&group=sua-chua`,
+            "bc-kiem-ke": `./BaocaoKiemKeThietBi.html?v=${CACHE_VER}&group=kiem-ke`,
+            "bc-ke-hoach": `./BaocaoSCnam2025.html?v=${CACHE_VER}&group=ke-hoach`
         };
 
         const CHILD_TAB_GROUPS = {

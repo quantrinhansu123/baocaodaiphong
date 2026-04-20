@@ -294,12 +294,24 @@
             background-color: #4a8694;
             color: #ffffff;
             font-weight: 700;
-            line-height: 1.08;
-            font-size: 11.2px;
+            line-height: 1.12;
+            font-size: 10.2px;
             letter-spacing: 0.05px;
             text-shadow: none;
-            padding: 3px 1px;
+            padding: 1px 2px;
             vertical-align: middle;
+        }
+
+        .table-wrapper table thead > tr:nth-child(1) th[rowspan="2"] {
+            height: 42px !important;
+        }
+
+        .table-wrapper table thead > tr:nth-child(1) th[colspan] {
+            height: 20px !important;
+        }
+
+        .table-wrapper table thead > tr:nth-child(2) th {
+            height: 26px !important;
         }
 
         thead > tr:not(.number-row) th {
@@ -312,9 +324,14 @@
             background-color: white;
             color: black;
             font-weight: bold;
-            font-size: 10px;
-            line-height: 1.02;
-            padding: 2px 0;
+            font-size: 8.8px;
+            line-height: 1.08;
+            padding: 1px 0;
+        }
+
+        table thead > tr:not(.number-row) th {
+            padding-top: 1px;
+            padding-bottom: 1px;
         }
         /* Row highlighting */
         
@@ -642,7 +659,7 @@
 
             <!-- TABLE SECTION -->
             <div class="table-wrapper bg-white">
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                     <thead>
                         <tr style="background-color: #f2f2f2;">
                             <th rowspan="2" style="width: 2%;">STT</th>
@@ -4721,21 +4738,21 @@
                 line2
             } = getKmMonthLabelsFromFiltersOrRows(filters);
             th1.innerHTML = line1 ?
-                `Tổng giờ hoạt động<br>${escapeHtml(line1)} (h)` :
-                "Tổng giờ hoạt động";
+                `Giờ HĐ<br>${escapeHtml(line1)} (h)` :
+                "Giờ HĐ (h)";
             th2.innerHTML = line2 ?
-                `Tổng giờ hoạt động<br>${escapeHtml(line2)} (h)` :
-                "Tổng giờ hoạt động";
+                `Giờ HĐ<br>${escapeHtml(line2)} (h)` :
+                "Giờ HĐ (h)";
 
             if (thTieuHao1) {
                 thTieuHao1.innerHTML = line1 ?
-                    `Tiêu hao<br>thực tế ${escapeHtml(line1)}` :
-                    "Tiêu hao<br>thực tế";
+                    `TH thực tế<br>${escapeHtml(line1)}` :
+                    "TH thực tế";
             }
             if (thTieuHao2) {
                 thTieuHao2.innerHTML = line2 ?
-                    `Tiêu hao<br>thực tế ${escapeHtml(line2)}` :
-                    "Tiêu hao<br>thực tế";
+                    `TH thực tế<br>${escapeHtml(line2)}` :
+                    "TH thực tế";
             }
         }
 
