@@ -2224,11 +2224,17 @@
         }
 
         function applyCongTruongFromNtMainByTaiSan(mainRows, normalizedRows, congTruongByTaiSan) {
-            if (!congTruongByTaiSan ?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
                 if (!raw) return out;
+                // Ưu tiên công trường ngay trên dòng hiện tại để không làm mất khóa thứ 2 khi gộp (Tên thiết bị + Công trường).
+                const directSite = pickNtTenNoiQuanLy(raw);
+                if (directSite) {
+                    out.CongTruong = directSite;
+                    return out;
+                }
+                if (!congTruongByTaiSan ?.size) return out;
                 const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
                 if (!key || !congTruongByTaiSan.has(key)) return out;
                 out.CongTruong = congTruongByTaiSan.get(key);
@@ -2783,10 +2789,11 @@
             });
         }
 
-        function rowMergeKeyByAssetAndSite(row) {
+        function rowMergeKeyByAssetAndSiteAndDriver(row) {
             const tenTb = normalizeKeyPart(row ?.TenThietBi ?? "");
             const congTruong = normalizeKeyPart(row ?.CongTruong ?? "");
-            return `${tenTb}__${congTruong}`;
+            const tenLaiXe = normalizeKeyPart(row ?.TenLaiMay ?? "");
+            return `${tenTb}__${congTruong}__${tenLaiXe}`;
         }
 
         function rowFilledValueScore(row) {
@@ -2800,7 +2807,7 @@
         }
 
         /**
-         * Gộp trùng theo «Tên thiết bị + Công trường».
+         * Gộp trùng theo «Tên thiết bị + Công trường + Tên lái xe».
          * Giữ dòng có nhiều dữ liệu nhất, sau đó bù các ô trống từ các dòng cùng khóa.
          */
         function mergeRowsByTenThietBiAndCongTruong(rows) {
@@ -2808,7 +2815,7 @@
             const byKey = new Map();
             for (const row of rows) {
                 if (row ?.groupRow || row ?.subGroupRow || row ?.nhomTongRow) continue;
-                const key = rowMergeKeyByAssetAndSite(row);
+                const key = rowMergeKeyByAssetAndSiteAndDriver(row);
                 if (!byKey.has(key)) byKey.set(key, []);
                 byKey.get(key).push(row);
             }
@@ -2821,7 +2828,7 @@
                     out.push(row);
                     continue;
                 }
-                const key = rowMergeKeyByAssetAndSite(row);
+                const key = rowMergeKeyByAssetAndSiteAndDriver(row);
                 if (pushedKey.has(key)) continue;
                 pushedKey.add(key);
 
