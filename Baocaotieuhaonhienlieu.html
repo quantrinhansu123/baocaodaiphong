@@ -916,7 +916,7 @@
         /** Chi tiết ca — «Giờ làm việc HC» / «Giờ tăng ca» = tổng «Tổng giờ lv» theo «Loại công việc», gom theo Tên tài sản */
         const TABLE_NT_CT = "Nhật trình máy CT";
 
-        /** «Lượng dầu xuất trong tháng» (cột LuongDauNhap) — ưu tiên «Nhập xuất luân chuyển CT»: phiếu Xuất + «Số lượng NL», nhận diện diezel/DO cùng quy tắc 5 cột như «Lượng dầu tiêu hao»; không có thì «Nhật trình NL». */
+        /** «Lượng dầu xuất trong tháng» (cột LuongDauNhap) — chỉ từ «Nhập xuất luân chuyển CT»: phiếu Xuất + «Số lượng NL», diezel/DO theo cùng quy tắc 5 cột như «Lượng dầu tiêu hao». */
         const TABLE_NT_NL = "Nhật trình NL";
 
         /** Danh mục tài sản — cột «Biển số xe» khớp theo «Tên tài sản» với «Tên thiết bị» báo cáo */
@@ -1468,6 +1468,29 @@
             return String(getNxlcTaiSanCell(r) ?? "").trim();
         }
 
+        /**
+         * Khóa tài sản báo cáo từ một dòng «Nhập xuất luân chuyển CT» (gom diezel / Dầu xuất):
+         * thử lần lượt «Tên XMTB» rồi «Tên tài sản» — nhiều xe ben (vd. «Xe ben 01») chỉ khớp «Tên thiết bị» NT ở «Tên tài sản», còn XMTB trống hoặc khác.
+         */
+        function resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys) {
+            const labels = [];
+            const x = String(getNxlcTenXmtbCell(r) ?? "").trim();
+            const ts = String(getNxlcTaiSanCell(r) ?? "").trim();
+            if (x) labels.push(x);
+            if (ts) labels.push(ts);
+            const seen = new Set();
+            for (const lab of labels) {
+                const norm = lab.replace(/\s+/g, " ").trim();
+                if (!norm) continue;
+                const lk = norm.toLowerCase();
+                if (seen.has(lk)) continue;
+                seen.add(lk);
+                const key = resolveMainAssetKeyByName(norm);
+                if (key && (!mainAssetKeys.size || mainAssetKeys.has(key))) return key;
+            }
+            return "";
+        }
+
         function getNxlcCtParentRefCandidates(row) {
             if (!row || typeof row !== "object") return [];
             const orderedKeys = [
@@ -1563,12 +1586,12 @@
             return "";
         }
 
-        /** Dòng «Nhập xuất luân chuyển CT»: nhận phiếu Xuất khi «Loại phiếu» trống nhưng chỉ có ngày xuất (không có ngày nhập). */
+        /** Dòng «Nhập xuất luân chuyển CT»: Loại phiếu = Xuất; hoặc có «Ngày» và không có «Ngày nhập». */
         function nxlcCtRowIsPhieuXuat(r) {
             const lp = getLoaiPhieuOnRow(r);
             if (loaiPhieuIsXuat(lp)) return true;
             if (loaiPhieuIsNhap(lp)) return false;
-            const nx = cellString(r["Ngày xuất"] ?? r["Ngay xuat"] ?? "").trim();
+            const nx = cellString(r["Ngày"] ?? r["Ngay"] ?? "").trim();
             const nn = cellString(r["Ngày nhập"] ?? r["Ngay nhap"] ?? "").trim();
             return !!(nx && !nn);
         }
@@ -1604,7 +1627,8 @@
         }
 
         function parseNxlcCtNgayCell(row) {
-            const keys = ["Ngày", "Ngay", "Ngày nhập", "Ngay nhap", "Ngày xuất", "Ngay xuat", "Ngày làm việc", "Ngay lam viec"];
+            // NXLC CT chuẩn hiện tại: chỉ dùng cột «Ngày».
+            const keys = ["Ngày", "Ngay"];
             for (const k of keys) {
                 const t = cellString(row[k]).trim();
                 if (!t) continue;
@@ -1612,7 +1636,8 @@
                 if (d && !isNaN(d.getTime())) return d;
             }
             for (const [k, v] of Object.entries(row)) {
-                if (!/ng[aà]y|date/i.test(k)) continue;
+                const kn = String(k ?? "").trim().toLowerCase();
+                if (!(kn === "ngày" || kn === "ngay" || kn === "date")) continue;
                 const d = parseDateFlexible(cellString(v).trim());
                 if (d && !isNaN(d.getTime())) return d;
             }
@@ -3288,7 +3313,6 @@
 
         function emptyNlFuelSumsByTaiSan() {
             return {
-                LuongDauNhap: new Map(),
                 TongMo: new Map(),
                 TongNhot: new Map(),
                 DauThuyLuc: new Map(),
@@ -3342,7 +3366,7 @@
         }
 
         /**
-         * Tổng từ «Nhật trình NL»: mỗi dòng theo «Tên nhiên liệu» → một trong 5 cột (Mỡ, Nhớt, TL, Cầu, Diezel), gom theo Tên tài sản.
+         * Tổng từ «Nhật trình NL»: Mỡ / Nhớt / TL / Cầu (gom theo Tên tài sản). Diezel không gom ở đây — «Dầu xuất tháng» chỉ từ «Nhập xuất luân chuyển CT».
          */
         function buildNlFuelSumsByTaiSan(mainRows, nlRows, filters) {
             const sums = emptyNlFuelSumsByTaiSan();
@@ -3372,7 +3396,7 @@
                     r["Loai nhien lieu"] ??
                     "";
                 const col = classifyNlTenToFuelColumn(tenNl);
-                if (!col) continue;
+                if (!col || col === "LuongDauNhap") continue;
                 const q = parseNlQuantityCell(r);
                 if (q == null) continue;
 
@@ -3612,17 +3636,15 @@
                 return nxlcCtRowIsPhieuXuat(r);
             }
 
-            // «Lượng dầu tiêu hao (L)»: cùng logic tab «Bảng kê chi tiết nhập xuất NL» — tổng «Số lượng NL» trên CT theo 5 cột (diezel/DO), gom «Tên XMTB» / «Tên tài sản».
+            // «Lượng dầu tiêu hao (L)»: cùng logic tab «Bảng kê chi tiết nhập xuất NL» — tổng «Số lượng NL» trên CT theo 5 cột (diezel/DO), khớp tài sản: XMTB rồi Tên tài sản (xe ben).
             const luongDauTieuHaoNlTab = new Map();
             for (const r of nxlcCtRows) {
                 const d0 = parseNxlcCtNgayCell(r);
                 if (from || to) {
                     if (!isLocalDateInFilterRange(d0, from, to)) continue;
                 }
-                const dev = getNxlcDeviceLabelForRow(r);
-                if (!dev) continue;
-                const kDiezel = resolveMainAssetKeyByName(dev);
-                if (!kDiezel || (mainAssetKeys.size && !mainAssetKeys.has(kDiezel))) continue;
+                const kDiezel = resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys);
+                if (!kDiezel) continue;
                 const col5 = classifyNxlcTenNhienLieuToReportFiveColumns(getNxlcTenNhienLieuCell(r));
                 if (col5 !== "LuongDauTieuHao") continue;
                 const q0 = parseNxlcSlCell(r);
@@ -3639,14 +3661,11 @@
                 const tenNlCell = getNxlcTenNhienLieuCell(r);
                 const col5 = classifyNxlcTenNhienLieuToReportFiveColumns(tenNlCell);
                 if (col5 === "LuongDauTieuHao" && rowIsLoaiPhieuXuat(r)) {
-                    const assetXuat = getNxlcDeviceLabelForRow(r);
-                    if (assetXuat) {
-                        const keyXuat = resolveMainAssetKeyByName(assetXuat);
-                        if (keyXuat && (!mainAssetKeys.size || mainAssetKeys.has(keyXuat))) {
-                            const qXuat = parseNxlcSlCell(r);
-                            if (qXuat != null) {
-                                sums.LuongDauNhap.set(keyXuat, (sums.LuongDauNhap.get(keyXuat) ?? 0) + qXuat);
-                            }
+                    const keyXuat = resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys);
+                    if (keyXuat) {
+                        const qXuat = parseNxlcSlCell(r);
+                        if (qXuat != null) {
+                            sums.LuongDauNhap.set(keyXuat, (sums.LuongDauNhap.get(keyXuat) ?? 0) + qXuat);
                         }
                     }
                     continue;
@@ -3675,7 +3694,7 @@
             return sums;
         }
 
-        const NL_FUEL_COLUMN_KEYS = ["LuongDauNhap", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
+        const NL_FUEL_COLUMN_KEYS = ["TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
 
         /** Tìm khóa trong map NL đã gom (khớp chuẩn hoặc tên lỏng với «Tên thiết bị» trên phiếu). */
         function findNlLuongMapKeyForRow(tenThietBi, luongMap, mainAssetPairs) {
@@ -3691,11 +3710,9 @@
             return "";
         }
 
-        /** «Lượng dầu xuất trong tháng» (LuongDauNhap): ưu tiên «Nhập xuất luân chuyển CT» (phiếu Xuất, diezel/DO); không có thì «Nhật trình NL». */
-        function applyLuongDauNhapFromNlAndNxlc(mainRows, normalizedRows, nlSums, nxlcFuelSums) {
+        /** «Lượng dầu xuất trong tháng» (LuongDauNhap): chỉ từ «Nhập xuất luân chuyển CT» (phiếu Xuất, diezel/DO); không lấy từ cột phiếu NT. */
+        function applyLuongDauNhapFromNxlcCt(mainRows, normalizedRows, nxlcFuelSums) {
             const mNx = nxlcFuelSums ?.LuongDauNhap;
-            const mNl = nlSums ?.LuongDauNhap;
-            if (!mNx ?.size && !mNl ?.size) return normalizedRows;
             const {
                 mainAssetPairs
             } = buildMainAssetKeyIndex(mainRows);
@@ -3703,13 +3720,12 @@
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
                 if (!raw) return out;
-                const kNx = findNlLuongMapKeyForRow(out.TenThietBi, mNx, mainAssetPairs);
-                if (kNx) {
-                    out.LuongDauNhap = formatLitersDisplay(mNx.get(kNx));
+                if (!mNx ?.size) {
+                    out.LuongDauNhap = "";
                     return out;
                 }
-                const kNl = findNlLuongMapKeyForRow(out.TenThietBi, mNl, mainAssetPairs);
-                if (kNl) out.LuongDauNhap = formatLitersDisplay(mNl.get(kNl));
+                const kNx = findNlLuongMapKeyForRow(out.TenThietBi, mNx, mainAssetPairs);
+                out.LuongDauNhap = kNx ? formatLitersDisplay(mNx.get(kNx)) : "";
                 return out;
             });
         }
@@ -3810,7 +3826,7 @@
 
         /**
          * «Lượng dầu tiêu hao (L)» — ưu tiên tổng từ «Nhập xuất luân chuyển CT» (cùng logic tab Bảng kê NL).
-         * Chỉ khi không có tổng diezel NXLC cho tài sản: «Tồn đầu + LuongDauNhap − Tồn cuối» (LuongDauNhap: NXLC = dầu xuất; fallback NL = diezel theo NT).
+         * Chỉ khi không có tổng diezel NXLC cho tài sản: «Tồn đầu + LuongDauNhap − Tồn cuối» (LuongDauNhap = dầu xuất tháng chỉ từ «Nhập xuất luân chuyển CT»).
          */
         function applyLuongDauTieuHaoFromTonFormula(mainRows, normalizedRows, nxlcFuelSums) {
             if (!normalizedRows ?.length) return normalizedRows;
@@ -3882,6 +3898,17 @@
                 const text = String(s ?? "").trim();
                 if (!text) return s;
                 if (!keyLooksDate && !appSheetLooksLikeDateString(text)) return s;
+                // Dữ liệu AppSheet thực tế có thể trả MM/DD/YYYY; chuẩn hóa luôn về DD/MM/YYYY.
+                if (keyLooksDate) {
+                    const mUs = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:[\s,].*)?$/);
+                    if (mUs) {
+                        const mm = parseInt(mUs[1], 10);
+                        const dd = parseInt(mUs[2], 10);
+                        const yy = parseInt(mUs[3], 10);
+                        const dUs = buildStrictDate(yy, mm, dd);
+                        if (dUs && !isNaN(dUs.getTime())) return formatDateVn(dUs);
+                    }
+                }
                 const d = parseDateFlexible(text);
                 if (!d || isNaN(d.getTime())) return s;
                 return formatDateVn(d);
@@ -3906,6 +3933,26 @@
             };
             for (const [k, v] of Object.entries(row)) {
                 out[k] = normalizeAppSheetDateCell(v, k);
+            }
+            return out;
+        }
+
+        /**
+         * Bỏ dòng CT trùng **cùng AppSheet Row ID** (API lặp đúng một bản ghi).
+         * Chỉ dùng «Row ID» / RowId — không dùng ID phiếu / _RowNumber (thường trùng trên nhiều dòng chi tiết → từng xóa nhầm cả bảng).
+         */
+        function dedupeNxlcCtRowsByRowIdentity(rows) {
+            if (!rows ?.length) return rows;
+            const seen = new Set();
+            const out = [];
+            for (const r of rows) {
+                const id = cellString(r["Row ID"] ?? r.RowId ?? "").trim();
+                if (id) {
+                    const k = id.replace(/\s+/g, " ").toLowerCase();
+                    if (seen.has(k)) continue;
+                    seen.add(k);
+                }
+                out.push(r);
             }
             return out;
         }
@@ -3953,6 +4000,178 @@
             appSheetDataCache.ntRows = null;
             appSheetDataCache.aux = null;
         }
+
+        /**
+         * Debug NXLC CT (xe ben): gọi sau «Tải dữ liệu» — trong console: `debugNxlcCtXeBen()` hoặc `debugNxlcCtXeBen({ needle: 'ben 01', max: 10 })`.
+         * @returns {object[]} các dòng đã log (tối đa `max`)
+         */
+        function debugNxlcCtXeBen(options) {
+            const opts = options && typeof options === "object" ? options : {};
+            const max = typeof opts.max === "number" && opts.max > 0 ? opts.max : 5;
+            const needle = typeof opts.needle === "string" && opts.needle.trim() ? opts.needle.trim() : "xe ben";
+            const cache = appSheetDataCache.aux;
+            if (!cache ?.nxlcCtRows ?.length) {
+                console.warn("debugNxlcCtXeBen: chưa có cache aux hoặc nxlcCtRows rỗng — bấm «Tải dữ liệu» trước.");
+                return [];
+            }
+            const needleLc = needle.toLowerCase();
+            const rows = cache.nxlcCtRows.filter((r) => {
+                const xmtb = String(getNxlcTenXmtbCell(r) ?? "").trim();
+                return xmtb.toLowerCase().includes(needleLc);
+            }).slice(0, max);
+            if (!rows.length) {
+                console.warn(`debugNxlcCtXeBen: không có dòng nào Tên XMTB (getNxlcTenXmtbCell) chứa «${needle}».`);
+            }
+            rows.forEach((r, i) => {
+                const tenNl = getNxlcTenNhienLieuCell(r);
+                console.log(`--- Xe ben dòng ${i + 1} ---`);
+                console.log("Tên XMTB:", r["Tên XMTB"] ?? r["Ten XMTB"] ?? getNxlcTenXmtbCell(r));
+                console.log("Tên nhiên liệu:", r["Tên nhiên liệu"] ?? r["Ten nhien lieu"] ?? tenNl);
+                console.log("Loại phiếu:", r["Loại phiếu"] ?? r["Loai phieu"] ?? "(trống)");
+                console.log("Ngày:", r["Ngày"] ?? r["Ngay"] ?? "(trống)");
+                console.log("Ngày nhập:", r["Ngày nhập"] ?? r["Ngay nhap"] ?? "(trống)");
+                console.log("isXuat:", nxlcCtRowIsPhieuXuat(r));
+                console.log("col5 (5 cột NL):", classifyNxlcTenNhienLieuToReportFiveColumns(tenNl));
+                console.log("SL NL (ô):", r["Số lượng NL"] ?? r["SL"] ?? "(trống)");
+                console.log("parseNxlcSlCell:", parseNxlcSlCell(r));
+                console.log("All keys:", Object.keys(r).join(", "));
+            });
+            return rows;
+        }
+        window.debugNxlcCtXeBen = debugNxlcCtXeBen;
+
+        /**
+         * Dump toàn bộ NXLC CT: tổng dòng, in hết cặp key/value dòng 1, tìm dòng có chuỗi (mặc định «xe ben 01») trong JSON dòng.
+         * Console: `debugNxlcCtInspect()` hoặc `debugNxlcCtInspect({ needle: 'xe ben' })`
+         */
+        function debugNxlcCtInspect(options) {
+            const opts = options && typeof options === "object" ? options : {};
+            const needleRaw = typeof opts.needle === "string" && opts.needle.trim() ? opts.needle.trim() : "xe ben 01";
+            const needle = needleRaw.toLowerCase();
+            const cache = appSheetDataCache.aux;
+            const rows = cache ?.nxlcCtRows;
+            if (!Array.isArray(rows)) {
+                console.warn("debugNxlcCtInspect: chưa có cache aux — bấm «Tải dữ liệu» trước.");
+                return {
+                    total: 0,
+                    xeben: []
+                };
+            }
+            console.log("Tổng số dòng NXLC CT:", rows.length);
+
+            function fmtVal(v) {
+                if (v == null) return "";
+                if (typeof v === "object") {
+                    try {
+                        return JSON.stringify(v);
+                    } catch (e) {
+                        return String(v);
+                    }
+                }
+                return String(v);
+            }
+
+            if (rows.length > 0) {
+                console.log("=== TẤT CẢ KEYS dòng 1 ===");
+                Object.entries(rows[0]).forEach(([k, v]) => console.log(`"${k}": "${fmtVal(v)}"`));
+            }
+
+            const xeben = rows.filter((r) => JSON.stringify(r).toLowerCase().includes(needle));
+            console.log(`Số dòng chứa "${needleRaw}":`, xeben.length);
+            if (xeben.length > 0) {
+                console.log(`=== Dòng chứa "${needleRaw}" đầu tiên ===`);
+                Object.entries(xeben[0]).forEach(([k, v]) => console.log(`"${k}": "${fmtVal(v)}"`));
+            }
+            return {
+                total: rows.length,
+                xeben
+            };
+        }
+        window.debugNxlcCtInspect = debugNxlcCtInspect;
+
+        /** Debug theo bộ lọc ngày hiện tại: kiểm tra inRange/isXuat/col5 cho vài dòng xe ben đầu tiên. */
+        function debugNxlcCtDateRangeCheck(options) {
+            const opts = options && typeof options === "object" ? options : {};
+            const max = typeof opts.max === "number" && opts.max > 0 ? opts.max : 5;
+            const needle = typeof opts.needle === "string" && opts.needle.trim() ? opts.needle.trim() : "xe ben";
+            const cache = appSheetDataCache.aux;
+            const filters = getFilters();
+            console.log("Filters:", filters);
+            if (!cache ?.nxlcCtRows ?.length) {
+                console.warn("debugNxlcCtDateRangeCheck: chưa có nxlcCtRows trong cache — bấm «Tải dữ liệu» trước.");
+                return [];
+            }
+            const needleLc = needle.toLowerCase();
+            const rows = cache.nxlcCtRows.filter((r) =>
+                JSON.stringify(r).toLowerCase().includes(needleLc)
+            ).slice(0, max);
+            const from = parseDateInputYmd(filters.fromDate);
+            const to = parseDateInputYmd(filters.toDate);
+            rows.forEach((r, i) => {
+                const d = parseNxlcCtNgayCell(r);
+                console.log(
+                    `Dòng ${i + 1}: ngày=${d ? formatDateVn(d) : "null"}, inRange=${isLocalDateInFilterRange(d, from, to)}, isXuat=${nxlcCtRowIsPhieuXuat(r)}, col5=${classifyNxlcTenNhienLieuToReportFiveColumns(r["Tên nhiên liệu"] ?? r["Ten nhien lieu"] ?? "")}`
+                );
+            });
+            return rows;
+        }
+        window.debugNxlcCtDateRangeCheck = debugNxlcCtDateRangeCheck;
+
+        /**
+         * Debug định dạng ngày thô AppSheet (trước normalizeAppSheetDateCell).
+         * Console: await debugAppSheetRawDateFormat() hoặc await debugAppSheetRawDateFormat({ tableName: TABLE_NXLC_CT, maxRows: 5 })
+         */
+        async function debugAppSheetRawDateFormat(options) {
+            const opts = options && typeof options === "object" ? options : {};
+            const tableName = String(opts.tableName || TABLE_NXLC_CT).trim();
+            const maxRows = typeof opts.maxRows === "number" && opts.maxRows > 0 ? opts.maxRows : 5;
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: {
+                    Locale: "vi-VN",
+                    Timezone: "Asia/Ho_Chi_Minh"
+                },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            const rawText = await response.text();
+            if (!response.ok) {
+                console.error(`debugAppSheetRawDateFormat: ${tableName} HTTP ${response.status}`, rawText);
+                return [];
+            }
+            let result = null;
+            try {
+                result = rawText && rawText.trim() ? JSON.parse(rawText) : null;
+            } catch (err) {
+                console.error("debugAppSheetRawDateFormat: response không phải JSON", rawText);
+                return [];
+            }
+            const rows = Array.isArray(result) ? result : (Array.isArray(result ?.Rows) ? result.Rows : []);
+            console.log(`[${tableName}] Tổng dòng raw:`, rows.length);
+            const samples = rows.slice(0, maxRows);
+            samples.forEach((row, i) => {
+                console.log(`--- RAW ROW ${i + 1} ---`);
+                for (const [k, v] of Object.entries(row || {})) {
+                    const keyLooksDate = /ng[aà]y|date/i.test(String(k));
+                    const valText = typeof v === "string" ? v : JSON.stringify(v);
+                    const valLooksDate =
+                        typeof valText === "string" &&
+                        /^\d{4}[/-]\d{1,2}[/-]\d{1,2}(?:[T\s,].*)?$/i.test(valText.trim());
+                    if (!keyLooksDate && !valLooksDate) continue;
+                    console.log(`key="${k}" | type=${typeof v} | raw=`, v);
+                }
+            });
+            return samples;
+        }
+        window.debugAppSheetRawDateFormat = debugAppSheetRawDateFormat;
 
         async function fetchNtMainTableRows(condition) {
             const endpoint = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(APPSHEET_CONFIG.tableName)}/Action`;
@@ -4023,7 +4242,7 @@
                 nlLoadError: b.error,
                 dsTaiSanRows: c.rows,
                 dsTaiSanLoadError: c.error,
-                nxlcCtRows: d.rows,
+                nxlcCtRows: dedupeNxlcCtRowsByRowIdentity(d.rows),
                 nxlcCtLoadError: d.error
             };
         }
@@ -4400,14 +4619,14 @@
             m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})(?:\s.*)?$/);
             if (m) return buildStrictDate(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
 
-            // Hỗ trợ dd/mm/yyyy và dd-mm-yyyy, có thể kèm phần giờ.
+            // Hỗ trợ dd/mm/yyyy và dd-mm-yyyy, có thể kèm phần giờ (chuẩn VN: luôn hiểu dd/mm).
             m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,].*)?$/);
             if (m) {
                 const a = parseInt(m[1], 10);
                 const b = parseInt(m[2], 10);
                 const y = parseInt(m[3], 10);
-                // Ưu tiên dd/mm; nếu b > 12 thì hiểu là mm/dd.
-                if (a <= 12 && b > 12) return buildStrictDate(y, a, b);
+                // Chuỗi AppSheet có hậu tố AM/PM thường theo mm/dd/yyyy.
+                if (a <= 12 && b <= 12 && /\b(am|pm)\b/i.test(s)) return buildStrictDate(y, a, b);
                 return buildStrictDate(y, b, a);
             }
             m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[\s,].*)?$/);
@@ -4415,7 +4634,6 @@
                 const a = parseInt(m[1], 10);
                 const b = parseInt(m[2], 10);
                 const y = parseInt(m[3], 10);
-                if (a <= 12 && b > 12) return buildStrictDate(y, a, b);
                 return buildStrictDate(y, b, a);
             }
             m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
@@ -4427,15 +4645,19 @@
                 const a = parseInt(m[1], 10);
                 const b = parseInt(m[2], 10);
                 const y = parseInt(m[3], 10);
-                if (a <= 12 && b > 12) return buildStrictDate(y, a, b);
+                if (a <= 12 && b <= 12 && /\b(am|pm)\b/i.test(s)) return buildStrictDate(y, a, b);
                 return buildStrictDate(y, b, a);
             }
             m = s.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
             if (m) return buildStrictDate(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
 
-            const native = new Date(s);
-            if (!isNaN(native.getTime())) {
-                return new Date(native.getFullYear(), native.getMonth(), native.getDate());
+            // Tránh để JS tự đoán dạng số (mm/dd vs dd/mm) gây đảo ngày-tháng.
+            // Chỉ fallback native khi chuỗi có chữ (tháng tiếng Anh, timezone text...).
+            if (/[a-z]/i.test(s)) {
+                const native = new Date(s);
+                if (!isNaN(native.getTime())) {
+                    return new Date(native.getFullYear(), native.getMonth(), native.getDate());
+                }
             }
             return null;
         }
@@ -5147,7 +5369,7 @@
                 );
                 const showXeBonHdColumn = reportHasAnyXeBonRow(rows, tenNhomByTaiSan, nguonGocByTaiSan);
                 normalized = applyCongViecFromNtCtByTaiSan(rows, normalized, ctRowsByDate);
-                normalized = applyLuongDauNhapFromNlAndNxlc(rows, normalized, nlFuelSumsByTaiSan, fuelByTaiSanFromNxlc);
+                normalized = applyLuongDauNhapFromNxlcCt(rows, normalized, fuelByTaiSanFromNxlc);
                 normalized = applyTonBoundaryColumnsFromNl(rows, normalized, tonBoundaryByTaiSan, dinhMucByTaiSanFromDs);
                 normalized = applyMergedAuxiliaryFuelColumnsFromNlNxlc(rows, normalized, mergedAuxFuelByTaiSan);
                 normalized = applyFuelColumnsFromNxlcCt(rows, normalized, fuelByTaiSanFromNxlc);
@@ -5213,7 +5435,7 @@
                 } else if (nlRows.length && nlFuelSumsByTaiSan) {
                     const nTypes = NL_FUEL_COLUMN_KEYS.filter((c) => nlFuelSumsByTaiSan[c].size > 0).length;
                     if (nTypes > 0) {
-                        ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
+                        ctPart += `; NL: ${nTypes} loại có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu — diezel không gom NL; «Dầu xuất tháng» chỉ CT).`;
                     }
                     const nTonDau = tonBoundaryByTaiSan ?.tonDauByTaiSan ?.size ?? 0;
                     const nTonCuoi = tonBoundaryByTaiSan ?.tonCuoiByTaiSan ?.size ?? 0;

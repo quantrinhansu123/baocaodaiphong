@@ -106,7 +106,7 @@
 
     const NHOM_TONG_SUM_LITER_COLS = ["LuongDauTieuHao", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
     const NXLC_AUX_FUEL_COLUMNS = ["TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
-    const NL_FUEL_COLUMN_KEYS = ["LuongDauNhap", "TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
+    const NL_FUEL_COLUMN_KEYS = ["TongMo", "TongNhot", "DauThuyLuc", "DauCau"];
 
     const TEN_NHOM_PRIORITY_KEYS = [
         "Tên nhóm",
@@ -266,7 +266,7 @@
             const a = parseInt(m[1], 10);
             const b = parseInt(m[2], 10);
             const y = parseInt(m[3], 10);
-            if (a <= 12 && b > 12) return buildStrictDate(y, a, b);
+            if (a <= 12 && b <= 12 && /\b(am|pm)\b/i.test(s)) return buildStrictDate(y, a, b);
             return buildStrictDate(y, b, a);
         }
         m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[\s,].*)?$/);
@@ -274,12 +274,15 @@
             const a = parseInt(m[1], 10);
             const b = parseInt(m[2], 10);
             const y = parseInt(m[3], 10);
-            if (a <= 12 && b > 12) return buildStrictDate(y, a, b);
             return buildStrictDate(y, b, a);
         }
-        const native = new Date(s);
-        if (!isNaN(native.getTime())) {
-            return new Date(native.getFullYear(), native.getMonth(), native.getDate());
+        // Tránh JS tự đoán chuỗi số kiểu mm/dd.
+        // Chỉ fallback native khi chuỗi có chữ (tháng text/timezone text).
+        if (/[a-z]/i.test(s)) {
+            const native = new Date(s);
+            if (!isNaN(native.getTime())) {
+                return new Date(native.getFullYear(), native.getMonth(), native.getDate());
+            }
         }
         return null;
     }
@@ -356,6 +359,16 @@
             const text = String(s ?? "").trim();
             if (!text) return s;
             if (!keyLooksDate && !appSheetLooksLikeDateString(text)) return s;
+            if (keyLooksDate) {
+                const mUs = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:[\s,].*)?$/);
+                if (mUs) {
+                    const mm = parseInt(mUs[1], 10);
+                    const dd = parseInt(mUs[2], 10);
+                    const yy = parseInt(mUs[3], 10);
+                    const dUs = buildStrictDate(yy, mm, dd);
+                    if (dUs && !isNaN(dUs.getTime())) return formatDateVn(dUs);
+                }
+            }
             const d = parseDateFlexible(text);
             if (!d || isNaN(d.getTime())) return s;
             return formatDateVn(d);
@@ -376,6 +389,23 @@
         const out = { ...row };
         for (const [k, v] of Object.entries(out)) {
             out[k] = normalizeAppSheetDateCell(v, k);
+        }
+        return out;
+    }
+
+    /** Chỉ loại trùng theo «Row ID» AppSheet (không dùng ID phiếu / _RowNumber — trùng trên nhiều dòng chi tiết). */
+    function dedupeNxlcCtRowsByRowIdentity(rows) {
+        if (!rows?.length) return rows;
+        const seen = new Set();
+        const out = [];
+        for (const r of rows) {
+            const id = cellString(r["Row ID"] ?? r.RowId ?? "").trim();
+            if (id) {
+                const key = id.replace(/\s+/g, " ").toLowerCase();
+                if (seen.has(key)) continue;
+                seen.add(key);
+            }
+            out.push(r);
         }
         return out;
     }
@@ -424,7 +454,7 @@
             nlLoadError: u(rNl, "").error,
             dsTaiSanRows: u(rDs, "DS").rows,
             dsTaiSanLoadError: u(rDs, "").error,
-            nxlcCtRows: u(rNxlcCt, "NXLC CT").rows,
+            nxlcCtRows: dedupeNxlcCtRowsByRowIdentity(u(rNxlcCt, "NXLC CT").rows),
             nxlcCtLoadError: u(rNxlcCt, "").error
         };
     }
@@ -1358,6 +1388,26 @@
         return "";
     }
 
+    /** Khớp khóa báo cáo: thử «Tên XMTB» rồi «Tên tài sản» (xe ben: vd. «Xe ben 01» thường ở Tên tài sản). */
+    function resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys) {
+        const labels = [];
+        const x = String(getNxlcTenXmtbCell(r) ?? "").trim();
+        const ts = String(getNxlcTaiSanCell(r) ?? "").trim();
+        if (x) labels.push(x);
+        if (ts) labels.push(ts);
+        const seen = new Set();
+        for (const lab of labels) {
+            const norm = lab.replace(/\s+/g, " ").trim();
+            if (!norm) continue;
+            const lk = norm.toLowerCase();
+            if (seen.has(lk)) continue;
+            seen.add(lk);
+            const key = resolveMainAssetKeyByName(norm);
+            if (key && (!mainAssetKeys.size || mainAssetKeys.has(key))) return key;
+        }
+        return "";
+    }
+
     function parseNxlcSlCell(row) {
         const keys = [
             "Số lượng NL",
@@ -1533,7 +1583,7 @@
         const lp = getLoaiPhieuOnRow(r);
         if (loaiPhieuIsXuat(lp)) return true;
         if (loaiPhieuIsNhap(lp)) return false;
-        const nx = cellString(r["Ngày xuất"] ?? r["Ngay xuat"] ?? "").trim();
+        const nx = cellString(r["Ngày"] ?? r["Ngay"] ?? "").trim();
         const nn = cellString(r["Ngày nhập"] ?? r["Ngay nhap"] ?? "").trim();
         return !!(nx && !nn);
     }
@@ -1553,7 +1603,8 @@
     }
 
     function parseNxlcCtNgayCell(row) {
-        const keys = ["Ngày", "Ngay", "Ngày nhập", "Ngày xuất", "Ngày làm việc"];
+        // NXLC CT chuẩn hiện tại: chỉ dùng cột «Ngày».
+        const keys = ["Ngày", "Ngay"];
         for (const k of keys) {
             const t = cellString(row[k]).trim();
             if (!t) continue;
@@ -1561,7 +1612,8 @@
             if (d && !isNaN(d.getTime())) return d;
         }
         for (const [k, v] of Object.entries(row)) {
-            if (!/ng[aà]y|date/i.test(k)) continue;
+            const kn = String(k ?? "").trim().toLowerCase();
+            if (!(kn === "ngày" || kn === "ngay" || kn === "date")) continue;
             const d = parseDateFlexible(cellString(v).trim());
             if (d && !isNaN(d.getTime())) return d;
         }
@@ -1570,7 +1622,6 @@
 
     function emptyNlFuelSumsByTaiSan() {
         return {
-            LuongDauNhap: new Map(),
             TongMo: new Map(),
             TongNhot: new Map(),
             DauThuyLuc: new Map(),
@@ -1608,7 +1659,7 @@
             const tenNl =
                 r["Tên nhiên liệu"] ?? r["Ten nhien lieu"] ?? r["Loại nhiên liệu"] ?? r["Loai nhien lieu"] ?? "";
             const col = classifyNlTenToFuelColumn(tenNl);
-            if (!col) continue;
+            if (!col || col === "LuongDauNhap") continue;
             const q = parseNlQuantityCell(r);
             if (q == null) continue;
 
@@ -1822,10 +1873,8 @@
                 if (from && d0 < from) continue;
                 if (to && d0 > to) continue;
             }
-            const dev = getNxlcDeviceLabelForRow(r);
-            if (!dev) continue;
-            const kDiezel = resolveMainAssetKeyByName(dev);
-            if (!kDiezel || (mainAssetKeys.size && !mainAssetKeys.has(kDiezel))) continue;
+            const kDiezel = resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys);
+            if (!kDiezel) continue;
             const col5 = classifyNxlcTenNhienLieuToReportFiveColumns(getNxlcTenNhienLieuCell(r));
             if (col5 !== "LuongDauTieuHao") continue;
             const q0 = parseNxlcSlCell(r);
@@ -1844,14 +1893,11 @@
             const tenNlCell = getNxlcTenNhienLieuCell(r);
             const col5 = classifyNxlcTenNhienLieuToReportFiveColumns(tenNlCell);
             if (col5 === "LuongDauTieuHao" && rowIsLoaiPhieuXuat(r)) {
-                const assetXuat = getNxlcDeviceLabelForRow(r);
-                if (assetXuat) {
-                    const keyXuat = resolveMainAssetKeyByName(assetXuat);
-                    if (keyXuat && (!mainAssetKeys.size || mainAssetKeys.has(keyXuat))) {
-                        const qXuat = parseNxlcSlCell(r);
-                        if (qXuat != null) {
-                            sums.LuongDauNhap.set(keyXuat, (sums.LuongDauNhap.get(keyXuat) ?? 0) + qXuat);
-                        }
+                const keyXuat = resolveNxlcCtRowToMainAssetKey(r, resolveMainAssetKeyByName, mainAssetKeys);
+                if (keyXuat) {
+                    const qXuat = parseNxlcSlCell(r);
+                    if (qXuat != null) {
+                        sums.LuongDauNhap.set(keyXuat, (sums.LuongDauNhap.get(keyXuat) ?? 0) + qXuat);
                     }
                 }
                 continue;
@@ -1876,10 +1922,8 @@
         return sums;
     }
 
-    function applyLuongDauNhapFromNlAndNxlc(mainRows, normalizedRows, nlSums, nxlcFuelSums) {
+    function applyLuongDauNhapFromNxlcCt(mainRows, normalizedRows, nxlcFuelSums) {
         const mNx = nxlcFuelSums?.LuongDauNhap;
-        const mNl = nlSums?.LuongDauNhap;
-        if (!mNx?.size && !mNl?.size) return normalizedRows;
         const mainAssetPairs = [];
         for (const raw of mainRows || []) {
             if (raw?.groupRow || raw?.subGroupRow) continue;
@@ -1902,13 +1946,12 @@
             if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
             const raw = mainRows[i];
             if (!raw) return out;
-            const kNx = findLuongMapKey(out.TenThietBi, mNx);
-            if (kNx) {
-                out.LuongDauNhap = formatLitersDisplay(mNx.get(kNx));
+            if (!mNx?.size) {
+                out.LuongDauNhap = "";
                 return out;
             }
-            const kNl = findLuongMapKey(out.TenThietBi, mNl);
-            if (kNl) out.LuongDauNhap = formatLitersDisplay(mNl.get(kNl));
+            const kNx = findLuongMapKey(out.TenThietBi, mNx);
+            out.LuongDauNhap = kNx ? formatLitersDisplay(mNx.get(kNx)) : "";
             return out;
         });
     }
