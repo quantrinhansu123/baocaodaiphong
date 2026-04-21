@@ -206,11 +206,11 @@
         }
         
         .report-tab-btn {
-            height: 28px;
+            height: 32px;
             padding: 0 16px;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: bold;
-            line-height: 28px;
+            line-height: 32px;
             color: #475569;
             background: #e2e8f0;
             border: 1px solid #cbd5e1;
@@ -258,7 +258,7 @@
             min-width: 0;
             box-sizing: border-box;
             overflow-x: auto;
-            scrollbar-gutter: stable;
+            scrollbar-gutter: auto;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11px;
             padding-bottom: 8px;
@@ -376,9 +376,24 @@
             height: 22px !important;
         }
 
+        #th-stt {
+            white-space: nowrap !important;
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+
         /** Tab thiết bị máy: bảng kéo rộng (cuộn ngang trong .table-wrapper). */
         #report-table.machine-mode {
             min-width: 2320px;
+        }
+
+        /*
+         * Tab thiết bị máy ẩn một số cột bằng display:none.
+         * Nếu giữ colgroup cố định, trình duyệt có thể vẫn chừa bề ngang cột đã ẩn
+         * và tạo dải trống bên phải sau khi dữ liệu render.
+         */
+        #report-table.machine-mode colgroup {
+            display: none;
         }
 
         /**
@@ -734,7 +749,7 @@
 
             <!-- TABLE SECTION -->
             <div class="table-wrapper bg-white">
-                <table id="report-table">
+                <table id="report-table" class="machine-mode hide-col-xe-bon-hd">
                     <!-- Cột (9) xe bồn: ẩn bằng class .hide-col-xe-bon-hd trên #report-table (ô thứ 9), không dùng collapse trên <col> -->
                     <colgroup>
                         <col span="8" />
@@ -4666,7 +4681,7 @@
                 if (nlphuSpan) nlphuSpan.style.removeProperty("width");
                 /** Thu hẹp Tên TB / CV / CT — nhường bề ngang cho 4 cột NLP (mỡ, nhớt, THL, cầu). Tổng vẫn chuẩn hóa 100%. */
                 applyPctWeights({
-                    "th-stt": 1.25,
+                    "th-stt": 1.45,
                     "th-ten-thiet-bi": 4.6,
                     "th-bien-so-xe": 2.55,
                     "th-ten-lai-xe": 4.6,
@@ -4930,6 +4945,10 @@
                 }
                 out[col] = any ? formatNhomTongSum(col, s) : "";
             }
+            out.TongMo = "";
+            out.TongNhot = "";
+            out.DauThuyLuc = "";
+            out.DauCau = "";
             out.TieuHaoThucTeT1 = "";
             out.TieuHaoThucTeT12 = "";
             out.DinhMucTrongBinh = "";
@@ -5980,20 +5999,19 @@
         /** Tự kết nối AppSheet khi mở trang (giống các báo cáo khác trong dự án). */
         function bootLoadFromAppSheet() {
             applyTabFromUrl();
-            /** Cùng một khung bảng (25 cột + colgroup) ngay từ đầu — không để tbody trống rồi nhảy layout sau khi tải. */
-            renderRows(seedRows, {
-                showXeBonHdColumn: reportHasAnyXeBonRow(seedRows, new Map(), new Map())
+            /**
+             * Trạng thái ban đầu: giữ đúng layout tab hiện tại nhưng chưa đổ dữ liệu mẫu,
+             * tránh lệch khung do seed rows không cùng cấu trúc với tab máy.
+             */
+            renderRows([], {
+                showXeBonHdColumn: false
             });
             syncReportPeriodUi(getFilters(), []);
             loadFromAppSheet({
                 forceRefresh: false
             });
         }
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", bootLoadFromAppSheet);
-        } else {
-            bootLoadFromAppSheet();
-        }
+        bootLoadFromAppSheet();
 
         wireReportHeaderLogo();
         applyTabFromUrl();
