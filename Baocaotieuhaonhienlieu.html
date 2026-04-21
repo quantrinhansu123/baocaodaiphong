@@ -245,11 +245,31 @@
         /* Table specific styling */
         
         .table-wrapper {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
             overflow-x: auto;
+            scrollbar-gutter: stable;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 10px;
+            font-size: 11px;
             padding-bottom: 8px;
             /* space for scrollbar */
+        }
+
+        /** Tiêu đề báo cáo: hẹp, căn giữa — tách khỏi bảng rộng (tab thiết bị máy). */
+        .report-title-block {
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        #report-main-title {
+            line-height: 1.25;
+            font-size: 1rem;
         }
         /* Custom scrollbar for table wrapper */
         
@@ -274,8 +294,8 @@
         table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 1470px;
-            /* Đảm bảo bảng không bị co dúm lại trên màn hình nhỏ */
+            min-width: 1750px;
+            /* Đảm bảo bảng dãn ngang đủ rộng; màn hẹp vẫn cuộn trong .table-wrapper */
             table-layout: fixed;
             white-space: normal;
         }
@@ -291,25 +311,25 @@
         th,
         td {
             border: 1px solid #333;
-            padding: 3px 2px;
+            padding: 6px 5px;
             text-align: center;
             vertical-align: middle;
             word-wrap: break-word;
             overflow-wrap: anywhere;
-            font-size: 10.5px;
-            line-height: 1.12;
+            font-size: 12px;
+            line-height: 1.25;
         }
         
         thead th {
             background-color: #4a8694;
             color: #ffffff;
             font-weight: 700;
-            line-height: 1.2;
-            font-size: 9pt;
-            letter-spacing: 0.05px;
+            line-height: 1.18;
+            font-size: 10pt;
+            letter-spacing: 0.02px;
             text-shadow: none;
             vertical-align: middle;
-            padding: 1px 2px;
+            padding: 5px 4px;
         }
 
         .machine-mode thead th {
@@ -317,79 +337,97 @@
             color: #fff;
         }
 
+        /* Tab thiết bị máy: cho phép ngắt dòng trong ô (nowrap khiến «Tổng giờ hoạt động» một dài tràn sang cột kế). */
+        #report-table.machine-mode thead tr:not(.number-row) th {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-wrap: break-word;
+        }
+
         .th-dinh-muc-tieu-hao {
             color: #cc0000;
             font-weight: bold;
         }
 
+        /* Tab thiết bị máy: ẩn 2 cột (Số chuyến / HĐ xe bồn). Độ rộng các cột còn lại được chỉnh trong updateCompactHeaderWidthsForTab(). */
         .machine-mode thead tr:first-child th:nth-child(6),
         .machine-mode thead tr:first-child th:nth-child(9),
-        .machine-mode thead tr:first-child th:nth-child(10),
         .machine-mode thead tr.number-row th:nth-child(6),
         .machine-mode thead tr.number-row th:nth-child(9),
-        .machine-mode thead tr.number-row th:nth-child(10),
         .machine-mode tbody td:nth-child(6),
-        .machine-mode tbody td:nth-child(9),
-        .machine-mode tbody td:nth-child(10) {
+        .machine-mode tbody td:nth-child(9) {
             display: none;
         }
 
         #report-table thead > tr:nth-child(1) th[rowspan="2"] {
-            height: 42px !important;
+            height: 44px !important;
         }
 
         #report-table thead > tr:nth-child(1) th[colspan] {
-            height: 20px !important;
+            height: 22px !important;
+        }
+
+        /** Tab thiết bị máy: bảng kéo rộng (cuộn ngang trong .table-wrapper). */
+        #report-table.machine-mode {
+            min-width: 2320px;
+        }
+
+        /**
+         * Ẩn cột «Tổng giờ HĐ xe bồn» (cột 9) khi .hide-col-xe-bon-hd (JS setReportXeBonHdColumnVisible).
+         * Không dùng <col> visibility:collapse — tránh lệch header/body trên một số trình duyệt.
+         */
+        #report-table.hide-col-xe-bon-hd thead tr:first-child #th-xe-bon-hd,
+        #report-table.hide-col-xe-bon-hd thead tr.number-row th:nth-child(9),
+        #report-table.hide-col-xe-bon-hd tbody td:nth-child(9) {
+            display: none !important;
         }
 
         #report-table thead > tr:nth-child(2) th {
-            height: 26px !important;
+            height: 28px !important;
         }
 
-        /* Tránh hàng tiêu đề bị co cao 0 khi có cột visibility:collapse (một số trình duyệt). */
         thead > tr:not(.number-row) th {
             min-height: 0;
         }
-
-        thead > tr:not(.number-row) th.report-col-xe-bon-hd { font-size: inherit; }
         
         .number-row th {
             background-color: white;
             color: black;
             font-weight: bold;
-            font-size: 8.8px;
-            line-height: 1.08;
-            padding: 1px 0;
+            font-size: 10.5px;
+            line-height: 1.15;
+            padding: 4px 2px;
         }
 
         #report-table thead > tr:not(.number-row) th {
-            padding-top: 1px;
-            padding-bottom: 1px;
+            padding-top: 5px;
+            padding-bottom: 5px;
         }
         /* Row highlighting */
         
         .group-a-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 10.5px;
+            font-size: 12px;
         }
         
         .sub-group-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 10.5px;
+            font-size: 12px;
         }
         /** Dòng tổng theo nhóm «Tên nhóm» (Nhật trình máy CT) */
         
         .nhom-tong-row td {
             background-color: transparent;
             font-weight: bold;
-            font-size: 10.5px;
+            font-size: 12px;
         }
         
         .grand-total-row td {
             background-color: #e5e7eb;
             font-weight: bold;
+            font-size: 12px;
         }
         
         .signature-section {
@@ -429,12 +467,12 @@
         
         .text-left {
             text-align: left !important;
-            padding-left: 6px;
+            padding-left: 8px;
         }
         
         .text-right {
             text-align: right !important;
-            padding-right: 6px;
+            padding-right: 8px;
         }
         
         .font-bold-val {
@@ -446,20 +484,20 @@
                 padding: 4px;
             }
             .table-wrapper {
-                font-size: 9.5px;
+                font-size: 10.5px;
             }
             th,
             td {
-                padding: 2px 1.5px;
-                font-size: 9.8px;
+                padding: 4px 3px;
+                font-size: 11px;
             }
             thead th {
                 font-size: 9pt;
-                line-height: 1.04;
-                padding: 2px 1px;
+                line-height: 1.12;
+                padding: 4px 3px;
             }
             .number-row th {
-                font-size: 9pt;
+                font-size: 10px;
             }
             .filter-input,
             .filter-select {
@@ -497,6 +535,9 @@
                 zoom: 1 !important;
                 transform: none !important;
             }
+            .report-title-block {
+                max-width: 100% !important;
+            }
             .table-wrapper {
                 overflow: visible !important;
                 padding-bottom: 0 !important;
@@ -506,13 +547,13 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 table-layout: fixed !important;
-                font-size: 6.2pt !important;
+                font-size: 7pt !important;
             }
             .table-wrapper th,
             .table-wrapper td {
-                font-size: 6.9pt !important;
-                padding: 1px 1px !important;
-                line-height: 1.0 !important;
+                font-size: 7.5pt !important;
+                padding: 2px 2px !important;
+                line-height: 1.12 !important;
             }
             .table-wrapper thead th {
                 font-weight: 700 !important;
@@ -603,8 +644,10 @@
 
             <!-- TITLE BANNER -->
             <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
-                <h1 id="report-main-title" class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px] text-[#111827]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
-                <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
+                <div class="report-title-block">
+                    <h1 id="report-main-title" class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px] text-[#111827]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY TẠI CÔNG TRƯỜNG</h1>
+                    <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
+                </div>
             </div>
 
             <div class="report-print-filter-summary">
@@ -614,68 +657,59 @@
                 <span><b>NHÓM XE:</b> <span id="print-filter-group">Tất cả</span></span>
             </div>
 
-            <!-- FILTERS -->
+            <!-- FILTERS: một hàng — cuộn ngang khi màn hẹp -->
             <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-                <div class="flex flex-col gap-2 max-w-[1400px]">
-                    <!-- Row 1: Main Dropdowns -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2 font-bold text-[#2b7132] text-[10px]">
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">CÔNG TRƯỜNG:</span>
-                            <select id="filter-project" class="filter-select flex-1">
+                <div class="flex flex-nowrap items-center gap-x-2 sm:gap-x-3 gap-y-1 w-full min-w-0 overflow-x-auto overflow-y-hidden pb-0.5 font-bold text-[#2b7132] text-[10px]">
+                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
+                        <span class="w-[88px] shrink-0 whitespace-nowrap">CÔNG TRƯỜNG:</span>
+                        <select id="filter-project" class="filter-select flex-1 min-w-0">
                             <option value="">— Tất cả —</option>
                         </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">TÊN LÁI MÁY:</span>
-                            <select id="filter-driver" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">NGUỒN GỐC:</span>
-                            <select id="filter-origin" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">NHÓM XE:</span>
-                            <select id="filter-group" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
                     </div>
-
-                    <!-- Row 2: Dates & Action Buttons -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-gray-100">
-                        <div class="flex items-center gap-4 font-bold text-[#2b7132] text-[10px]">
-                            <div class="flex items-center gap-2">
-                                <span>TỪ NGÀY:</span>
-                                <div class="date-filter-field flex items-stretch w-[130px]">
-                                    <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
-                                    <button type="button" id="filter-from-date-cal" class="date-cal-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                                </div>
-                                <input type="date" id="filter-from-date-picker" class="sr-only">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>ĐẾN NGÀY:</span>
-                                <div class="date-filter-field flex items-stretch w-[130px]">
-                                    <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
-                                    <button type="button" id="filter-to-date-cal" class="date-cal-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                                </div>
-                                <input type="date" id="filter-to-date-picker" class="sr-only">
-                            </div>
+                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
+                        <span class="w-[88px] shrink-0 whitespace-nowrap">TÊN LÁI MÁY:</span>
+                        <select id="filter-driver" class="filter-select flex-1 min-w-0">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
+                        <span class="w-[88px] shrink-0 whitespace-nowrap">NGUỒN GỐC:</span>
+                        <select id="filter-origin" class="filter-select flex-1 min-w-0">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
+                        <span class="w-[88px] shrink-0 whitespace-nowrap">NHÓM XE:</span>
+                        <select id="filter-group" class="filter-select flex-1 min-w-0">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="hidden sm:block w-px h-6 shrink-0 bg-gray-200 self-center" aria-hidden="true"></div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="whitespace-nowrap">TỪ NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch w-[118px] sm:w-[130px]">
+                            <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <button type="button" id="filter-from-date-cal" class="date-cal-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
                         </div>
-
-                        <div class="flex flex-wrap items-center gap-1.5 no-print">
-                            <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
-                            <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
-                            <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                            <button id="export-pdf" class="action-btn">Xuất PDF</button>
+                        <input type="date" id="filter-from-date-picker" class="sr-only">
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="whitespace-nowrap">ĐẾN NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch w-[118px] sm:w-[130px]">
+                            <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <button type="button" id="filter-to-date-cal" class="date-cal-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
                         </div>
+                        <input type="date" id="filter-to-date-picker" class="sr-only">
+                    </div>
+                    <div class="flex flex-nowrap items-center gap-1.5 shrink-0 ml-auto pl-1 no-print">
+                        <button id="load-appsheet" class="action-btn whitespace-nowrap">Tải dữ liệu AppSheet</button>
+                        <button id="reset-filter" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xóa lọc</button>
+                        <button id="export-excel" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                        <button id="export-pdf" class="action-btn whitespace-nowrap">Xuất PDF</button>
                     </div>
                 </div>
                 <div id="appsheet-status" class="status-line text-[#2b7132] mt-1"></div>
@@ -684,38 +718,38 @@
             <!-- TABLE SECTION -->
             <div class="table-wrapper bg-white">
                 <table id="report-table">
-                    <!-- Cột (9) «Tổng giờ HĐ xe bồn» — ẩn khi không có thiết bị nhóm Xe bồn (visibility: collapse) -->
+                    <!-- Cột (9) xe bồn: ẩn bằng class .hide-col-xe-bon-hd trên #report-table (ô thứ 9), không dùng collapse trên <col> -->
                     <colgroup>
                         <col span="8" />
-                        <col class="report-col-xe-bon-hd" />
-                        <col span="17" />
+                        <col />
+                        <col span="2" />
+                        <col span="14" />
                     </colgroup>
                     <thead>
                         <!-- Tổng width: 100% -->
                         <tr>
-                            <th rowspan="2" style="width: 2%;">STT</th>
-                            <th rowspan="2" style="width: 11.5%;">Tên thiết bị</th>
-                            <th rowspan="2" style="width: 3.5%;">Biển số xe</th>
-                            <th rowspan="2" style="width: 5.5%;">Tên lái xe</th>
+                            <th id="th-stt" rowspan="2" style="width: 2%;">STT</th>
+                            <th id="th-ten-thiet-bi" rowspan="2" style="width: 10%;">Tên thiết bị</th>
+                            <th id="th-bien-so-xe" rowspan="2" style="width: 3.5%;">Biển số xe</th>
+                            <th id="th-ten-lai-xe" rowspan="2" style="width: 5.5%;">Tên lái xe</th>
                             <th id="th-so-ngay" rowspan="2" style="width: 3%;">Số ngày xe<br>hoạt động</th>
                             <th id="th-so-chuyen" rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
                             <th id="th-gio-hc" rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
                             <th id="th-gio-tc" rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
                             <th id="th-xe-bon-hd" rowspan="2" style="width: 3.5%;">Tổng giờ<br>HĐ xe bồn</th>
-                            <th id="th-an-khi-in" rowspan="2" style="width: 2.5%;">Ăn khi<br>in</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
-                            <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
-                            <th rowspan="2" style="width: 4%;">Dầu nhập<br>trong tháng (L)</th>
-                            <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
-                            <th rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
-                            <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>trong bình</th>
-                            <th rowspan="2" style="width: 3%;" class="th-dinh-muc-tieu-hao">Định mức tiêu hao<br>(l/km)</th>
-                            <th rowspan="2" style="width: 9%;">Công việc</th>
-                            <th rowspan="2" style="width: 6%;">Công trường</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 4.2%;">Tổng giờ<br>hoạt động<br>(h)</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 4.2%;">Tổng giờ<br>hoạt động<br>(h)</th>
+                            <th id="th-ton-dau-ky" rowspan="2" style="width: 3.5%;">Tồn đầu kỳ<br>(lít)</th>
+                            <th id="th-dau-xuat-thang" rowspan="2" style="width: 4%;">Lượng dầu nhập<br>trong tháng (lít)</th>
+                            <th id="th-ton-cuoi-ky" rowspan="2" style="width: 3.5%;">Tồn cuối kỳ<br>(lít)</th>
+                            <th id="th-luong-dau-th" rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
+                            <th id="th-nlphu-colspan" colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
+                            <th id="th-dm-trong-binh" rowspan="2" style="width: 3%;">ĐM bình<br>(L/h)</th>
+                            <th id="th-dm-tieu-hao" rowspan="2" style="width: 3%;" class="th-dinh-muc-tieu-hao">ĐM TH<br>(L/h)</th>
+                            <th id="th-cong-viec" rowspan="2" style="width: 7.5%;">Công việc</th>
+                            <th id="th-cong-truong" rowspan="2" style="width: 9%;">Công trường</th>
                         </tr>
                         <tr>
                             <th id="th-nlphu-mo" style="width: 3.5%;">Tổng mỡ<br>(kg)</th>
@@ -749,7 +783,6 @@
                             <th>(23)</th>
                             <th>(24)</th>
                             <th>(25)</th>
-                            <th>(26)</th>
                         </tr>
                     </thead>
                     <tbody id="report-body"></tbody>
@@ -986,7 +1019,6 @@
         const REPORT_COLUMNS = [
             "TT", "TenThietBi", "BienSoXe", "TenLaiMay", "SoNgayXeHoatDong", "SoChuyenChayThang",
             "GioLamHanhChinh", "GioLamTangCa", "TongGioHoatDongXeBon",
-            "AnKhiIn",
             "TongKmHoatDongT1", "TongKmHoatDongT2",
             "TonDauKy", "LuongDauNhap", "TonCuoiKy", "LuongDauTieuHao",
             "TongMo", "TongNhot", "DauThuyLuc", "DauCau",
@@ -1057,7 +1089,6 @@
                 "Tong gio hoat dong T12",
                 "TongGioHoatDong"
             ],
-            AnKhiIn: ["Ăn khi in", "An khi in", "AnKhiIn"],
             TongKmHoatDongT1: ["Tổng km hoạt động T1(km)", "Tong km hoat dong T1(km)", "TongKmHoatDongT1"],
             TongKmHoatDongT2: ["Tổng km hoạt động T2(km)", "Tong km hoat dong T2(km)", "TongKmHoatDongT2"],
             TongGioHoatDongT1: ["Tổng giờ hoạt động T1 (h)", "Tong gio hoat dong T1 (h)", "TongGioHoatDongT1"],
@@ -2390,6 +2421,104 @@
             return byKey;
         }
 
+        /**
+         * Tab thiết bị máy — cột «Tổng giờ hoạt động T{tháng Từ} (h)»: tổng «Tổng giờ lv» trên CT,
+         * các dòng có «Ngày làm việc» cùng tháng/năm với «Từ ngày» (mọi loại công việc), gom theo Tên tài sản.
+         */
+        function buildTongGioHoatDongSumT1ByTaiSanFromNtCt(mainRows, ctRows, filters) {
+            const byKey = new Map();
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            const fromD = parseDateInputYmd(filters ?.fromDate);
+            if (!fromD) return byKey;
+
+            const mainAssetKeys = new Set();
+            for (const raw of mainRows) {
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                mainAssetKeys.add(key);
+            }
+
+            for (const r of ctRows) {
+                const d = parseCtNgayLamViec(r);
+                if (!d || isNaN(d.getTime())) continue;
+                if (d.getFullYear() !== fromD.getFullYear() || d.getMonth() !== fromD.getMonth()) continue;
+
+                const n = parseHourCell(getCtTongGioLvCell(r));
+                if (n == null || isNaN(n)) continue;
+
+                const ctAsset = pickCtTaiSanTen(r);
+                const key = assetKeyFromName(ctAsset);
+                if (!key || !mainAssetKeys.has(key)) continue;
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
+            }
+            return byKey;
+        }
+
+        /**
+         * Tab thiết bị máy — cột «Tổng giờ hoạt động T{tháng Đến} (h)»: tổng «Tổng giờ lv» trên CT,
+         * các dòng có «Ngày làm việc» cùng tháng/năm với «Đến ngày», gom theo Tên tài sản.
+         */
+        function buildTongGioHoatDongSumT2ByTaiSanFromNtCt(mainRows, ctRows, filters) {
+            const byKey = new Map();
+            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            const toD = parseDateInputYmd(filters ?.toDate);
+            if (!toD) return byKey;
+
+            const mainAssetKeys = new Set();
+            for (const raw of mainRows) {
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                mainAssetKeys.add(key);
+            }
+
+            for (const r of ctRows) {
+                const d = parseCtNgayLamViec(r);
+                if (!d || isNaN(d.getTime())) continue;
+                if (d.getFullYear() !== toD.getFullYear() || d.getMonth() !== toD.getMonth()) continue;
+
+                const n = parseHourCell(getCtTongGioLvCell(r));
+                if (n == null || isNaN(n)) continue;
+
+                const ctAsset = pickCtTaiSanTen(r);
+                const key = assetKeyFromName(ctAsset);
+                if (!key || !mainAssetKeys.has(key)) continue;
+                byKey.set(key, (byKey.get(key) ?? 0) + n);
+            }
+            return byKey;
+        }
+
+        function applyTongGioHoatDongT1FromNtCt(mainRows, normalizedRows, sumGioByTaiSan) {
+            if (!sumGioByTaiSan || !sumGioByTaiSan.size) return normalizedRows;
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
+                if (!key || !sumGioByTaiSan.has(key)) return out;
+                out.TongKmHoatDongT1 = formatHourDisplay(sumGioByTaiSan.get(key));
+                return out;
+            });
+        }
+
+        function applyTongGioHoatDongT2FromNtCt(mainRows, normalizedRows, sumGioByTaiSan) {
+            if (!sumGioByTaiSan || !sumGioByTaiSan.size) return normalizedRows;
+            return normalizedRows.map((out, i) => {
+                if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
+                const raw = mainRows[i];
+                if (!raw) return out;
+                const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
+                if (!key || !sumGioByTaiSan.has(key)) return out;
+                out.TongKmHoatDongT2 = formatHourDisplay(sumGioByTaiSan.get(key));
+                return out;
+            });
+        }
+
         function pickCtTaiSanTen(row) {
             if (!row || typeof row !== "object") return "";
             return String(
@@ -3125,16 +3254,24 @@
             return false;
         }
 
+        /**
+         * Hiện/ẩn cột «Tổng giờ HĐ xe bồn» (ô cột 9) bằng class trên bảng — tránh visibility:collapse trên <col>.
+         * Tab thiết bị máy: renderRows luôn gọi với false; cột 9 (HĐ xe bồn) đồng thời bị ẩn bởi .machine-mode (display:none).
+         */
         function setReportXeBonHdColumnVisible(show) {
-            const col = document.querySelector("colgroup .report-col-xe-bon-hd");
-            if (!col) return;
-            if (show) {
-                col.style.visibility = "";
-                col.style.width = "";
-            } else {
-                col.style.visibility = "collapse";
-                col.style.width = "0";
-            }
+            const table = document.getElementById("report-table");
+            if (!table) return;
+            table.classList.toggle("hide-col-xe-bon-hd", !show);
+        }
+
+        /**
+         * Đồng bộ .machine-mode với tab: tab thiết bị máy ẩn cột «Số chuyến» và «HĐ xe bồn» (6, 9) qua CSS .machine-mode.
+         * (Trước đây gọi từ applyTabFromUrl nhưng thiếu định nghĩa → ReferenceError, chặn updateCompactHeaderWidthsForTab.)
+         */
+        function setReportSoChuyenColumnVisible(show) {
+            const table = document.getElementById("report-table");
+            if (!table) return;
+            table.classList.toggle("machine-mode", !show);
         }
 
         /**
@@ -3214,6 +3351,63 @@
             };
         }
 
+        /** Chỉ mục tài sản trên các dòng báo cáo (NT) để ghép dòng «Nhật trình NL». */
+        function buildMainAssetIndexForNlMerge(mainRows) {
+            const mainAssetKeys = new Set();
+            const mainAssetPairs = [];
+            const parents = [];
+            for (const raw of mainRows) {
+                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
+                if (!asset) continue;
+                const key = assetKeyFromName(asset);
+                if (!key) continue;
+                mainAssetKeys.add(key);
+                mainAssetPairs.push({
+                    key,
+                    name: asset
+                });
+                const ids = getNtParentMatchIds(raw);
+                if (ids ?.length) parents.push({
+                    ids,
+                    key
+                });
+            }
+            return {
+                mainAssetKeys,
+                mainAssetPairs,
+                parents
+            };
+        }
+
+        /**
+         * Gán dòng «Nhật trình NL» → khóa «Tên thiết bị» trên báo cáo:
+         * khớp chuẩn hóa → khớp lỏng (xe ben / AppSheet hay lệch tên) → Ref NL ↔ ID phiếu NT.
+         */
+        function resolveNlRowToReportAssetKey(nlRow, mainAssetKeys, mainAssetPairs, parents) {
+            const assetDirect = cellString(getNlTaiSanCell(nlRow)).trim();
+            if (assetDirect) {
+                const k = assetKeyFromName(assetDirect);
+                if (k && mainAssetKeys.has(k)) return k;
+                for (const p of mainAssetPairs) {
+                    if (taiSanNamesLooselyEqual(assetDirect, p.name)) return p.key;
+                }
+            }
+            for (const rref of getNlParentRefCandidates(nlRow)) {
+                if (!rref) continue;
+                for (const {
+                        ids,
+                        key
+                    } of parents) {
+                    if (!mainAssetKeys.has(key)) continue;
+                    for (const pid of ids) {
+                        if (parentIdsMatch(rref, pid)) return key;
+                    }
+                }
+            }
+            return "";
+        }
+
         /**
          * Tổng từ «Nhật trình NL»: mỗi dòng theo «Tên nhiên liệu» → một trong 5 cột (Mỡ, Nhớt, TL, Cầu, Diezel), gom theo Tên tài sản.
          */
@@ -3223,15 +3417,11 @@
             const from = parseDateInputYmd(filters ?.fromDate);
             const to = parseDateInputYmd(filters ?.toDate);
 
-            const mainAssetKeys = new Set();
-            for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
-                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
-                if (!asset) continue;
-                const key = assetKeyFromName(asset);
-                if (!key) continue;
-                mainAssetKeys.add(key);
-            }
+            const {
+                mainAssetKeys,
+                mainAssetPairs,
+                parents
+            } = buildMainAssetIndexForNlMerge(mainRows);
 
             function addToMap(targetMap, assetKey, q) {
                 targetMap.set(assetKey, (targetMap.get(assetKey) ?? 0) + q);
@@ -3257,9 +3447,8 @@
                 if (q == null) continue;
 
                 const targetMap = sums[col];
-                const assetDirect = cellString(getNlTaiSanCell(r)).trim();
-                const k = assetKeyFromName(assetDirect);
-                if (!k || !mainAssetKeys.has(k)) continue;
+                const k = resolveNlRowToReportAssetKey(r, mainAssetKeys, mainAssetPairs, parents);
+                if (!k) continue;
                 addToMap(targetMap, k, q);
             }
             return sums;
@@ -3283,44 +3472,14 @@
             const tonDauDateByTaiSan = new Map();
             const tonCuoiDateByTaiSan = new Map();
 
-            const parents = [];
-            for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
-                const ids = getNtParentMatchIds(raw);
-                if (!ids.length) continue;
-                const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
-                if (!asset) continue;
-                const key = assetKeyFromName(asset);
-                if (!key) continue;
-                parents.push({
-                    ids,
-                    key
-                });
-            }
-
-            function detectAssetKeyOnNlRow(r) {
-                const assetDirect = cellString(getNlTaiSanCell(r)).trim();
-                if (assetDirect) {
-                    const k = assetKeyFromName(assetDirect);
-                    if (k) return k;
-                }
-                for (const rref of getNlParentRefCandidates(r)) {
-                    if (!rref) continue;
-                    for (const {
-                            ids,
-                            key
-                        }
-                        of parents) {
-                        for (const pid of ids) {
-                            if (parentIdsMatch(rref, pid)) return key;
-                        }
-                    }
-                }
-                return "";
-            }
+            const {
+                mainAssetKeys,
+                mainAssetPairs,
+                parents
+            } = buildMainAssetIndexForNlMerge(mainRows);
 
             for (const r of nlRows) {
-                const assetKey = detectAssetKeyOnNlRow(r);
+                const assetKey = resolveNlRowToReportAssetKey(r, mainAssetKeys, mainAssetPairs, parents);
                 if (!assetKey) continue;
                 const ngay = parseNlNgayCell(r);
                 const dKey = dateKeyYmd(ngay);
@@ -3381,11 +3540,14 @@
         function buildMergedAuxiliaryFuelMapsFromNlAndNxlc(nlSums, nxlcSums) {
             const empty = () => new Map();
             return {
-                // Theo yêu cầu: 4 cột phụ chỉ lấy nguồn NXLC CT (bỏ nguồn Nhật trình NL).
-                TongMo: mergeFuelMapsByKey(empty(), nxlcSums ?.TongMo ?? empty()),
-                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums ?.TongNhot ?? empty()),
-                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums ?.DauThuyLuc ?? empty()),
-                DauCau: mergeFuelMapsByKey(empty(), nxlcSums ?.DauCau ?? empty())
+                /**
+                 * 4 cột phụ: «Nhật trình NL» (gom theo Tên tài sản) + «NXLC CT» (Tên XMTB / SL).
+                 * Máy thiết bị thường có đủ trên NL; chỉ NXLC dễ lệch khóa — gộp cả hai nguồn.
+                 */
+                TongMo: mergeFuelMapsByKey(nlSums ?.TongMo ?? empty(), nxlcSums ?.TongMo ?? empty()),
+                TongNhot: mergeFuelMapsByKey(nlSums ?.TongNhot ?? empty(), nxlcSums ?.TongNhot ?? empty()),
+                DauThuyLuc: mergeFuelMapsByKey(nlSums ?.DauThuyLuc ?? empty(), nxlcSums ?.DauThuyLuc ?? empty()),
+                DauCau: mergeFuelMapsByKey(nlSums ?.DauCau ?? empty(), nxlcSums ?.DauCau ?? empty())
             };
         }
 
@@ -3463,8 +3625,9 @@
                 if (reportCol === "LuongDauTieuHao" && !rowIsLoaiPhieuXuat(r)) continue;
                 let asset = "";
                 if (NXLC_AUX_FUEL_COLUMNS.includes(reportCol)) {
-                    // 4 cột phụ chỉ lấy theo «Tên XMTB», không fallback «Tên tài sản».
+                    // Ưu tiên «Tên XMTB»; thiết bị máy đôi khi chỉ nhập «Tên tài sản» → fallback.
                     asset = cellString(getNxlcTenXmtbCell(r)).trim();
+                    if (!asset) asset = cellString(getNxlcTaiSanCell(r)).trim();
                 } else {
                     asset = cellString(getNxlcTaiSanCell(r)).trim();
                 }
@@ -3589,8 +3752,8 @@
         }
 
         /**
-         * «Tiêu hao thực tế T{tháng}» = «Lượng dầu tiêu hao (L)» / «Tổng km HĐ T{tháng} (km)».
-         * T1 dùng TongKmHoatDongT1; T2 dùng TongKmHoatDongT2.
+         * «Tiêu hao thực tế T{tháng}» = «Lượng dầu tiêu hao (L)» / mẫu số cột T1/T2.
+         * Tab xe: mẫu số là km (Tổng km HĐ); tab thiết bị máy: mẫu số là giờ (Tổng giờ hoạt động) — cùng khóa TongKmHoatDongT1/T2.
          */
         function applyTieuHaoThucTeFromTongKm(mainRows, normalizedRows) {
             if (!normalizedRows ?.length) return normalizedRows;
@@ -3949,7 +4112,7 @@
         const REPORT_TITLE_BY_TAB = {
             "xe-ben": "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU XE BEN TẠI CÔNG TRƯỜNG",
             "xe-bon": "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU XE BỒN TẠI CÔNG TRƯỜNG",
-            "trang-thiet-bi": "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG"
+            "trang-thiet-bi": "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY TẠI CÔNG TRƯỜNG"
         };
         const REPORT_TAB_REDIRECTS = {
             "thue-thiet-bi": "BaocaoThueThietBi.html",
@@ -4363,10 +4526,10 @@
             };
         }
 
-        /** «Tổng giờ hoạt động Txx (h)» — layout xuống dòng như mẫu in/bảng. */
+        /** «Tổng giờ hoạt động Txx (h)» — luôn cùng mẫu 3 dòng (chưa có tháng dùng «—») để không nhảy layout. */
         function thietBiTongGioHoatDongHeaderHtml(monthToken) {
-            if (!monthToken) return "Tổng<br>giờ<br>hoạt động<br>(h)";
-            return `Tổng<br>giờ<br>hoạt động<br>${escapeHtml(monthToken)} (h)`;
+            const t = monthToken ? escapeHtml(monthToken) : "—";
+            return `Tổng giờ<br>hoạt động<br>${t} (h)`;
         }
 
         function updateKmColumnHeaders(filters) {
@@ -4379,7 +4542,6 @@
             const thGioHc = document.getElementById("th-gio-hc");
             const thGioTc = document.getElementById("th-gio-tc");
             const thXeBonHd = document.getElementById("th-xe-bon-hd");
-            const thAnKhiIn = document.getElementById("th-an-khi-in");
             if (!th1 || !th2) return;
             const {
                 line1,
@@ -4388,28 +4550,39 @@
             const thietBiTab = currentReportTab === "trang-thiet-bi";
             const xeTab = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
             const tieuHaoUnit = thietBiTab ? "L/h" : "L/km";
-            th1.innerHTML =
-                line1 ?
-                (thietBiTab ?
-                    thietBiTongGioHoatDongHeaderHtml(line1) :
-                    (xeTab ? `Tổng km<br>${escapeHtml(line1)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`) ) :
-                (thietBiTab ? thietBiTongGioHoatDongHeaderHtml("") : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
-            th2.innerHTML =
-                line2 ?
-                (thietBiTab ?
-                    thietBiTongGioHoatDongHeaderHtml(line2) :
-                    (xeTab ? `Tổng km<br>${escapeHtml(line2)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`) ) :
-                (thietBiTab ? thietBiTongGioHoatDongHeaderHtml("") : (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)"));
 
-            if (thTieuHao1) {
-                thTieuHao1.innerHTML = line1 ?
-                    `Tiêu hao<br>thực tế<br>${escapeHtml(line1)}<br>(${tieuHaoUnit})` :
-                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
-            }
-            if (thTieuHao2) {
-                thTieuHao2.innerHTML = line2 ?
-                    `Tiêu hao<br>thực tế<br>${escapeHtml(line2)}<br>(${tieuHaoUnit})` :
-                    `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
+            /** Tab «thiết bị máy»: cùng logic cập nhật theo Từ/Đến ngày như xe ben / xe bồn; đơn vị giờ + (CT). */
+            if (thietBiTab) {
+                th1.innerHTML = thietBiTongGioHoatDongHeaderHtml(line1 || "");
+                th2.innerHTML = thietBiTongGioHoatDongHeaderHtml(line2 || "");
+                if (thTieuHao1) {
+                    const m1 = line1 ? escapeHtml(line1) : "—";
+                    thTieuHao1.innerHTML = `Tiêu hao<br>thực tế<br>${m1}<br>(L/h)`;
+                }
+                if (thTieuHao2) {
+                    const m2 = line2 ? escapeHtml(line2) : "—";
+                    thTieuHao2.innerHTML = `Tiêu hao<br>thực tế<br>${m2}<br>(L/h)`;
+                }
+            } else {
+                th1.innerHTML =
+                    line1 ?
+                    (xeTab ? `Tổng km<br>${escapeHtml(line1)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line1)} (km)`) :
+                    (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)");
+                th2.innerHTML =
+                    line2 ?
+                    (xeTab ? `Tổng km<br>${escapeHtml(line2)} (km)` : `Tổng km<br>HĐ ${escapeHtml(line2)} (km)`) :
+                    (xeTab ? "Tổng km<br>(km)" : "Tổng km (km)");
+
+                if (thTieuHao1) {
+                    thTieuHao1.innerHTML = line1 ?
+                        `Tiêu hao<br>thực tế<br>${escapeHtml(line1)}<br>(${tieuHaoUnit})` :
+                        `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
+                }
+                if (thTieuHao2) {
+                    thTieuHao2.innerHTML = line2 ?
+                        `Tiêu hao<br>thực tế<br>${escapeHtml(line2)}<br>(${tieuHaoUnit})` :
+                        `Tiêu hao<br>thực tế<br>(${tieuHaoUnit})`;
+                }
             }
 
             if (thSoNgay) thSoNgay.innerHTML = "Số ngày xe<br>hoạt động";
@@ -4417,7 +4590,6 @@
             if (thGioHc) thGioHc.innerHTML = "Giờ làm<br>việc HC";
             if (thGioTc) thGioTc.innerHTML = "Giờ tăng<br>ca / tháng";
             if (thXeBonHd) thXeBonHd.innerHTML = "Tổng giờ<br>HĐ xe bồn";
-            if (thAnKhiIn) thAnKhiIn.innerHTML = "Ăn khi<br>in";
         }
 
         function updateCompactHeadersForTab() {
@@ -4431,56 +4603,108 @@
             setHtml("th-so-ngay-hd", "Số ngày<br>hoạt động (ngày)", "Số ngày<br>HĐ");
             setHtml("th-gio-hc", "Giờ làm<br>việc HC (h)", "Giờ HC<br>(h)");
             setHtml("th-gio-tc", "Giờ tăng<br>ca / tháng (h)", "Giờ TC<br>(h)");
-            setHtml("th-ton-dau-ky", "Tồn đầu<br>kỳ (L)", "Tồn đầu<br>(L)");
-            setHtml("th-dau-xuat-thang", "Dầu xuất<br>trong tháng (L)", "Dầu xuất<br>(L)");
-            setHtml("th-ton-cuoi-ky", "Tồn cuối<br>kỳ (L)", "Tồn cuối<br>(L)");
-            setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Dầu TH<br>(L)");
+            setHtml("th-ton-dau-ky", "Tồn đầu kỳ<br>(lít)", "Tồn đầu kỳ<br>(lít)");
+            setHtml("th-dau-xuat-thang", "Lượng dầu nhập<br>trong tháng (lít)", "Lượng dầu nhập<br>trong tháng (lít)");
+            setHtml("th-ton-cuoi-ky", "Tồn cuối kỳ<br>(lít)", "Tồn cuối kỳ<br>(lít)");
+            setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Lượng dầu<br>tiêu hao (L)");
+            /* Định mức: ĐM bình vẫn L/h; ĐM TH = L/km trên xe ben / xe bồn, L/h trên thiết bị máy. */
             setHtml("th-dm-trong-binh", "Định mức<br>trong bình (L/h)", "ĐM bình<br>(L/h)");
-            setHtml("th-dm-tieu-hao", "Định mức<br>tiêu hao (L/h)", "ĐM TH<br>(L/h)");
-            /** Nhiên liệu phụ: chỉ xe ben/bồn dùng nhãn ngắn; «Báo cáo thiết bị máy» và tab khác dùng đúng nhãn mẫu (ảnh). */
-            const setNlphuHeader = (id, fullHtml, compactHtml) => {
+            const dmThUnit = (currentReportTab === "xe-ben" || currentReportTab === "xe-bon") ? "L/km" : "L/h";
+            setHtml("th-dm-tieu-hao", `Định mức<br>tiêu hao (${dmThUnit})`, `ĐM TH<br>(${dmThUnit})`);
+            /**
+             * Nhiên liệu phụ: đơn vị trong ngoặc xuống dòng; cùng bộ nhãn đầy đủ cho cả ba tab báo cáo này.
+             */
+            const setNlphuHeader = (id, html) => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                const compactXeOnly = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
-                el.innerHTML = compactXeOnly ? compactHtml : fullHtml;
+                el.innerHTML = html;
             };
-            setNlphuHeader("th-nlphu-mo", "Tổng mỡ<br>(kg)", "Mỡ<br>(kg)");
-            setNlphuHeader("th-nlphu-nhot", "Tổng nhớt<br>(L)", "Nhớt<br>(L)");
-            setNlphuHeader("th-nlphu-thuyluc", "Dầu thủy lực<br>(L)", "TL<br>(L)");
-            setNlphuHeader("th-nlphu-daucau", "Dầu cầu<br>(L)", "Cầu<br>(L)");
+            setNlphuHeader("th-nlphu-mo", "Tổng mỡ<br>(kg)");
+            setNlphuHeader("th-nlphu-nhot", "Tổng nhớt<br>(L)");
+            setNlphuHeader("th-nlphu-thuyluc", "Dầu thủy lực<br>(L)");
+            setNlphuHeader("th-nlphu-daucau", "Dầu cầu<br>(L)");
         }
 
         function updateCompactHeaderWidthsForTab() {
             const thietBiTab = currentReportTab === "trang-thiet-bi";
             const xeBenTab = currentReportTab === "xe-ben";
             const xeBonTab = currentReportTab === "xe-bon";
-            const setWidth = (id, normalWidth, compactWidth) => {
+            const setWidth = (id, width) => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.style.width = normalWidth;
+                el.style.width = width;
             };
-            setWidth("th-so-ngay-hd", "3%", "3%");
-            setWidth("th-gio-hc", "3%", "3%");
-            setWidth("th-gio-tc", "3%", "3%");
-            setWidth("th-km-t1", "3.5%", "3.5%");
-            setWidth("th-km-t2", "3.5%", "3.5%");
-            setWidth("th-ton-dau-ky", "3.5%", "3.5%");
-            setWidth("th-dau-xuat-thang", "4%", "4%");
-            setWidth("th-ton-cuoi-ky", "3.5%", "3.5%");
-            setWidth("th-luong-dau-th", "4%", "4%");
-            setWidth("th-nlphu-mo", "3.5%", "3.5%");
-            setWidth("th-nlphu-nhot", "3.5%", "3.5%");
-            setWidth("th-nlphu-thuyluc", "3.5%", "3.5%");
-            setWidth("th-nlphu-daucau", "3.5%", "3.5%");
-            setWidth("th-thtt-t1", "3.5%", "3.5%");
-            setWidth("th-thtt-t2", "3.5%", "3.5%");
-            setWidth("th-dm-trong-binh", "3%", "3%");
-            setWidth("th-dm-tieu-hao", "3%", "3%");
-            setWidth("th-cong-viec", "9%", "9%");
-            setWidth("th-cong-truong", "6%", "6%");
+            /** Chuẩn hóa tổng trọng số = 100% — tránh cột phình khi tab máy ẩn 2 cột (display:none). */
+            const applyPctWeights = (weights) => {
+                const sum = Object.values(weights).reduce((a, b) => a + b, 0);
+                if (sum <= 0) return;
+                const f = 100 / sum;
+                for (const [id, w] of Object.entries(weights)) {
+                    setWidth(id, (w * f).toFixed(2) + "%");
+                }
+            };
+
+            if (thietBiTab) {
+                const nlphuSpan = document.getElementById("th-nlphu-colspan");
+                if (nlphuSpan) nlphuSpan.style.removeProperty("width");
+                /** Thu hẹp Tên TB / CV / CT — nhường bề ngang cho 4 cột NLP (mỡ, nhớt, THL, cầu). Tổng vẫn chuẩn hóa 100%. */
+                applyPctWeights({
+                    "th-stt": 1.25,
+                    "th-ten-thiet-bi": 4.6,
+                    "th-bien-so-xe": 2.55,
+                    "th-ten-lai-xe": 3.85,
+                    "th-so-ngay": 2.35,
+                    "th-gio-hc": 2.25,
+                    "th-gio-tc": 2.25,
+                    "th-km-t1": 3.15,
+                    "th-km-t2": 3.15,
+                    "th-ton-dau-ky": 2.65,
+                    "th-dau-xuat-thang": 2.85,
+                    "th-ton-cuoi-ky": 2.65,
+                    "th-luong-dau-th": 2.85,
+                    "th-nlphu-mo": 3.35,
+                    "th-nlphu-nhot": 3.35,
+                    "th-nlphu-thuyluc": 3.35,
+                    "th-nlphu-daucau": 3.35,
+                    "th-thtt-t1": 2.7,
+                    "th-thtt-t2": 2.7,
+                    "th-dm-trong-binh": 2.3,
+                    "th-dm-tieu-hao": 2.3,
+                    "th-cong-viec": 4.9,
+                    "th-cong-truong": 5.4,
+                });
+            } else {
+                setWidth("th-stt", "2%");
+                setWidth("th-ten-thiet-bi", "8%");
+                setWidth("th-bien-so-xe", "3.5%");
+                setWidth("th-ten-lai-xe", "5.5%");
+                setWidth("th-so-ngay", "3%");
+                setWidth("th-gio-hc", "3%");
+                setWidth("th-gio-tc", "3%");
+                setWidth("th-km-t1", "4.2%");
+                setWidth("th-km-t2", "4.2%");
+                setWidth("th-ton-dau-ky", "3.5%");
+                setWidth("th-dau-xuat-thang", "4%");
+                setWidth("th-ton-cuoi-ky", "3.5%");
+                setWidth("th-luong-dau-th", "4%");
+                setWidth("th-nlphu-colspan", "17%");
+                setWidth("th-nlphu-mo", "4.25%");
+                setWidth("th-nlphu-nhot", "4.25%");
+                setWidth("th-nlphu-thuyluc", "4.25%");
+                setWidth("th-nlphu-daucau", "4.25%");
+                setWidth("th-thtt-t1", "3.5%");
+                setWidth("th-thtt-t2", "3.5%");
+                setWidth("th-dm-trong-binh", "3%");
+                setWidth("th-dm-tieu-hao", "3%");
+                setWidth("th-cong-viec", "6%");
+                setWidth("th-cong-truong", "7.5%");
+            }
 
             const table = document.getElementById("report-table");
-            if (table) table.style.minWidth = (xeBenTab || xeBonTab || thietBiTab) ? "1820px" : "1470px";
+            if (table) {
+                if (thietBiTab) table.style.minWidth = "2320px";
+                else table.style.minWidth = (xeBenTab || xeBonTab) ? "2080px" : "1750px";
+            }
         }
 
         function updateCompactTypographyForTab() {
@@ -4493,16 +4717,10 @@
         function syncReportPeriodUi(filters, rows) {
             updateDateRangeBanner(filters, rows);
             updateKmColumnHeaders(filters);
-            // Chạy sau updateKmColumnHeaders để tránh tiêu đề dài làm header phình lại sau khi load dữ liệu.
+            // Chạy sau updateKmColumnHeaders (tiêu đề tab máy đã cố định số dòng để không nhảy khi tải data).
             updateCompactHeadersForTab();
             updateCompactHeaderWidthsForTab();
             updateCompactTypographyForTab();
-            // Ép lại một nhịp sau render để không bị phình header bởi cập nhật DOM trễ.
-            requestAnimationFrame(() => {
-                updateCompactHeadersForTab();
-                updateCompactHeaderWidthsForTab();
-                updateCompactTypographyForTab();
-            });
             updateSignatureDate(filters);
             updatePrintFilterSummary();
         }
@@ -4793,17 +5011,19 @@
             const tableEl = document.querySelector(".table-wrapper table");
             if (tableEl) tableEl.classList.toggle("machine-mode", currentReportTab === "trang-thiet-bi");
 
-            if (options.showXeBonHdColumn !== undefined) {
-                if (currentReportTab === "trang-thiet-bi") {
-                    setReportXeBonHdColumnVisible(false);
-                } else {
-                    setReportXeBonHdColumnVisible(options.showXeBonHdColumn);
-                }
-            }
+            /**
+             * Luôn áp trạng thái cột «Tổng giờ HĐ xe bồn» theo tab + dữ liệu — tránh giữ trạng thái cũ
+             * (layout như «bảng khác» sau khi tải AppSheet so với trước khi tải).
+             * Tab thiết bị máy: luôn ẩn cột này (giống logic cũ).
+             */
+            const showXeBonHd =
+                currentReportTab === "trang-thiet-bi" ? false : Boolean(options && options.showXeBonHdColumn);
+            setReportXeBonHdColumnVisible(showXeBonHd);
+
             if (!rows.length) {
                 reportBody.innerHTML = `
                     <tr>
-                        <td colspan="26" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
+                        <td colspan="25" class="text-left" style="padding: 10px;">Không có dữ liệu phù hợp.</td>
                     </tr>
                 `;
                 return;
@@ -4823,10 +5043,10 @@
                     return `<tr class="nhom-tong-row">${cells}</tr>`;
                 }
                 if (row.groupRow) {
-                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="23"></td></tr>`;
+                    return `<tr class="group-a-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="22"></td></tr>`;
                 }
                 if (row.subGroupRow) {
-                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="23"></td></tr>`;
+                    return `<tr class="sub-group-row"><td>${escapeHtml(row.TT)}</td><td class="text-left">${escapeHtml(row.TenThietBi)}</td><td></td><td colspan="22"></td></tr>`;
                 }
 
                 sttAuto += 1;
@@ -4960,18 +5180,27 @@
                 normalized = applyGioLamTangCaFromNtCt(rows, normalized, sumTangCaByTaiSan);
                 normalized = applySoNgayThucTeFromNtCt(rows, normalized, sumNgayLvByTaiSan);
                 normalized = applySoChuyenChayThangFromNtCt(rows, normalized, sumSoChuyenByTaiSan);
+                const sumGioHdT1ByTaiSan = buildTongGioHoatDongSumT1ByTaiSanFromNtCt(rows, ctRowsByDate, filters);
+                const sumGioHdT2ByTaiSan = buildTongGioHoatDongSumT2ByTaiSanFromNtCt(rows, ctRowsByDate, filters);
                 if (currentReportTab !== "trang-thiet-bi") {
                     normalized = applyTongKmHoatDongT1FromNtCt(rows, normalized, sumKmT1ByTaiSan);
                     normalized = applyTongKmHoatDongT2FromNtCt(rows, normalized, sumKmT2ByTaiSan);
                 } else {
+                    /** Giờ hoạt động theo tháng: gom «Tổng giờ lv» từ CT (như cột km trên tab xe); nếu không có thì lấy từ phiếu NT. */
+                    normalized = applyTongGioHoatDongT1FromNtCt(rows, normalized, sumGioHdT1ByTaiSan);
+                    normalized = applyTongGioHoatDongT2FromNtCt(rows, normalized, sumGioHdT2ByTaiSan);
                     normalized = normalized.map((out, i) => {
-                        if (out.groupRow || out.subGroupRow) return out;
+                        if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                         const raw = rows?.[i];
                         if (!raw) return out;
-                        const gioT1 = pickField(raw, "TongGioHoatDongT1");
-                        const gioT12 = pickField(raw, "TongGioHoatDongT12");
-                        if (cellString(gioT1).trim() !== "") out.TongKmHoatDongT1 = gioT1;
-                        if (cellString(gioT12).trim() !== "") out.TongKmHoatDongT2 = gioT12;
+                        if (!cellString(out.TongKmHoatDongT1 ?? "").trim()) {
+                            const gioT1 = pickField(raw, "TongGioHoatDongT1");
+                            if (cellString(gioT1).trim() !== "") out.TongKmHoatDongT1 = gioT1;
+                        }
+                        if (!cellString(out.TongKmHoatDongT2 ?? "").trim()) {
+                            const gioT12 = pickField(raw, "TongGioHoatDongT12");
+                            if (cellString(gioT12).trim() !== "") out.TongKmHoatDongT2 = gioT12;
+                        }
                         return out;
                     });
                 }
@@ -5115,7 +5344,7 @@
                 return;
             }
 
-            const EXCEL_LAST_COL = 26;
+            const EXCEL_LAST_COL = 25;
             const exportExcelBtn = document.getElementById("export-excel");
             if (exportExcelBtn) exportExcelBtn.disabled = true;
             try {
@@ -5124,7 +5353,7 @@
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet("BaoCao", {
                     properties: {
-                        defaultRowHeight: 18
+                        defaultRowHeight: 20
                     },
                     pageSetup: {
                         paperSize: 9,
@@ -5145,8 +5374,8 @@
                 worksheet.views = [{
                     showGridLines: true
                 }];
-                worksheet.getCell("Z1").value = "EXPORT_BUILD_NHL_V1";
-                worksheet.getCell("Z1").font = {
+                worksheet.getCell("Y1").value = "EXPORT_BUILD_NHL_V1";
+                worksheet.getCell("Y1").font = {
                     name: "Calibri",
                     size: 9,
                     bold: true,
@@ -5156,8 +5385,8 @@
                 };
 
                 const reportColPercents = [
-                    2, 11.5, 3.5, 5.5, 3, 3, 3, 3, 3.5, 2.5, 3.5, 3.5, 3.5, 4, 3.5, 4,
-                    3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3, 3, 9, 6
+                    2, 10, 3.5, 5.5, 3, 3, 3, 3, 3.5, 3.5, 3.5, 3.5, 4, 3.5, 4,
+                    3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3, 3, 7.5, 9
                 ];
                 reportColPercents.forEach((pct, idx) => {
                     worksheet.getColumn(idx + 1).width = Math.max(7, Math.round(pct * 2.35));
@@ -5299,7 +5528,7 @@
                     const trStyle = window.getComputedStyle(tr);
                     const pxHeight = Number.parseFloat(trStyle.height || "0");
                     if (Number.isFinite(pxHeight) && pxHeight > 0) {
-                        worksheet.getRow(excelRowIndex).height = Math.max(14, Math.round(pxHeight * 0.78));
+                        worksheet.getRow(excelRowIndex).height = Math.max(17, Math.round(pxHeight * 0.78));
                     }
                 });
 
@@ -5403,7 +5632,7 @@
                 const NLP_SUB_FALLBACK = ["Tổng mỡ (kg)", "Tổng nhớt (L)", "Dầu thủy lực (L)", "Dầu cầu (L)"];
                 const nlpSubExcelRow = startExcelRow + 1;
                 for (let i = 0; i < 4; i += 1) {
-                    const c = 17 + i;
+                    const c = 16 + i;
                     const cell = worksheet.getCell(nlpSubExcelRow, c);
                     const cur = cell.value;
                     const missing = cur === undefined || cur === null || String(cur).trim() === "";
@@ -5462,7 +5691,7 @@
                 let sttCounter = 0;
                 exportRowsNormalized.forEach((row, idx) => {
                     const excelRowIndex = dataStartRow + idx;
-                    let maxRowPt = 16;
+                    let maxRowPt = 18;
                     REPORT_COLUMNS.forEach((column, colIdx) => {
                         const excelCell = worksheet.getCell(excelRowIndex, colIdx + 1);
                         let rawVal;
@@ -5519,7 +5748,7 @@
                         const charsPerLine = Math.max(4, Math.round(wch * 0.52));
                         const wrapLines = longest > 0 ? Math.ceil(longest / charsPerLine) : 1;
                         const lines = Math.max(paras.length, wrapLines);
-                        const est = Math.min(180, Math.max(15, Math.round(6 + lines * 13)));
+                        const est = Math.min(180, Math.max(16, Math.round(6 + lines * 14)));
                         if (est > maxRowPt) maxRowPt = est;
                     });
                     worksheet.getRow(excelRowIndex).height = maxRowPt;
@@ -5571,7 +5800,7 @@
                 }
                 setStatus(
                     `Đã xuất Excel: ${fileName}${excelLogoAdded ? "" : " — Không nhúng được logo (ảnh local / headerLogoUrl)."}`);
-                alert(`Đã xuất Excel.\nFile: ${fileName}\nZ1 = EXPORT_BUILD_NHL_V1${excelLogoAdded ? "" : "\n(Cảnh báo: logo không nhúng được)"}`);
+                alert(`Đã xuất Excel.\nFile: ${fileName}\nY1 = EXPORT_BUILD_NHL_V1${excelLogoAdded ? "" : "\n(Cảnh báo: logo không nhúng được)"}`);
             } catch (error) {
                 if (error && error.name === "AbortError") {
                     setStatus("Đã hủy lưu file Excel.");
@@ -5734,6 +5963,11 @@
         /** Tự kết nối AppSheet khi mở trang (giống các báo cáo khác trong dự án). */
         function bootLoadFromAppSheet() {
             applyTabFromUrl();
+            /** Cùng một khung bảng (25 cột + colgroup) ngay từ đầu — không để tbody trống rồi nhảy layout sau khi tải. */
+            renderRows(seedRows, {
+                showXeBonHdColumn: reportHasAnyXeBonRow(seedRows, new Map(), new Map())
+            });
+            syncReportPeriodUi(getFilters(), []);
             loadFromAppSheet({
                 forceRefresh: false
             });
@@ -5745,6 +5979,7 @@
         }
 
         wireReportHeaderLogo();
+        applyTabFromUrl();
         syncReportPeriodUi(getFilters(), cachedRawRowsForBanner);
     </script>
 </body>

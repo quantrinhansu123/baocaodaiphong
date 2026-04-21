@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo cáo thuê thiết bị</title>
+    <title>Bảng chi tiết giờ làm việc — Thuê thiết bị</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
@@ -96,35 +96,51 @@
             letter-spacing: 0.2px;
         }
 
-        .title-band .sub-title {
-            margin-top: 3px;
-            font-size: 12px;
-            font-weight: 700;
-            font-style: italic;
-            color: #0047ab;
-        }
-
-        .title-band .meta-line {
-            display: none;
-        }
-
-        .meta-strip {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 8px;
-            padding: 6px 10px 4px;
+        .meta-block {
+            padding: 8px 12px 6px;
             font-size: 13px;
             font-weight: 700;
+            line-height: 1.5;
         }
 
-        .meta-strip div {
-            text-align: center;
-            white-space: nowrap;
+        .meta-block .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 6px 16px;
+            margin-bottom: 4px;
+        }
+
+        .meta-block label {
+            flex-shrink: 0;
+        }
+
+        .meta-block input[type="text"],
+        .meta-block input[type="date"] {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            border-bottom: 1px solid #94a3b8;
+            background: transparent;
+            min-width: 120px;
+            flex: 1;
+            max-width: 100%;
+        }
+
+        .meta-block input[type="date"] {
+            min-width: 140px;
+            max-width: 180px;
+        }
+
+        .meta-block .meta-wide input[type="text"] {
+            min-width: 200px;
         }
 
         .toolbar {
             display: flex;
             justify-content: flex-end;
+            flex-wrap: wrap;
             gap: 8px;
             padding: 0 10px 6px;
         }
@@ -157,24 +173,24 @@
             padding: 0 8px 8px;
         }
 
-        table {
+        table.report-table {
             width: 100%;
-            min-width: 1500px;
+            min-width: 1100px;
             border-collapse: collapse;
             table-layout: fixed;
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        th,
-        td {
+        .report-table th,
+        .report-table td {
             border: 1px solid #222;
-            padding: 4px 4px;
+            padding: 3px 2px;
             text-align: center;
             vertical-align: middle;
             word-wrap: break-word;
         }
 
-        thead th {
+        .report-table thead th {
             background: #4a8694;
             color: #fff;
             font-size: 9pt;
@@ -182,47 +198,91 @@
             line-height: 1.15;
         }
 
-        thead tr:nth-child(2) th {
+        .report-table thead tr:nth-child(2) th {
             background: #5b93a0;
         }
 
-        thead tr.number-row th {
+        .report-table thead tr.number-row th {
             background: #fff;
             color: #111;
         }
 
-        thead tr:nth-child(1) th {
-            font-size: 9pt;
-            padding: 3px 4px;
+        .report-table tbody td {
+            height: 26px;
+            font-size: 11px;
         }
 
-        thead tr:nth-child(2) th {
-            font-size: 9pt;
+        .report-table td.left,
+        .report-table th.left {
+            text-align: left;
+            padding-left: 6px;
+        }
+
+        .report-table td.time-cell {
+            padding: 1px;
+        }
+
+        .report-table input.time-field {
+            width: 100%;
+            min-width: 0;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 2px 0;
+        }
+
+        .report-table input.time-field:focus {
+            outline: 1px solid #2563eb;
+            background: #eff6ff;
+        }
+
+        .report-table input.note-field {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-size: 11px;
             padding: 2px 4px;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
-        thead tr:nth-child(3) th {
-            font-size: 9pt;
-            padding: 2px 4px;
+        .report-table input.ot-field {
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 11px;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
-        thead tr.number-row th {
-            font-size: 9pt;
+        .report-table tfoot td {
+            font-weight: 700;
+            background: #f1f5f9;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 12px 20px;
+            font-size: 13px;
             font-weight: 700;
         }
 
-        tbody td {
-            height: 26px;
+        .signatures .sig-block {
+            flex: 1;
+            text-align: center;
+            max-width: 48%;
+        }
+
+        .signatures .sig-line {
+            margin-top: 48px;
+            font-style: italic;
+            font-weight: 600;
             font-size: 12px;
-        }
-
-        .left {
-            text-align: left;
-            padding-left: 8px;
-        }
-
-        .blank-row td {
-            height: 28px;
+            color: #334155;
         }
 
         @media (max-width: 1100px) {
@@ -255,10 +315,18 @@
                 overflow: visible;
             }
 
-            thead th,
-            tbody td {
+            .report-table thead th,
+            .report-table tbody td,
+            .report-table tfoot td {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+            }
+
+            .report-table input.time-field,
+            .report-table input.note-field,
+            .report-table input.ot-field {
+                border: none !important;
+                background: transparent !important;
             }
         }
     </style>
@@ -290,60 +358,74 @@
         </div>
 
         <div class="title-band">
-            <h1>BÁO CÁO THUÊ THIẾT BỊ</h1>
-            <div class="sub-title">(Từ ... đến ...)</div>
+            <h1>BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
         </div>
 
-        <div class="meta-strip">
-            <div>Mũi thi công: số 2</div>
-            <div>CB Phụ trách: Hoàng Đình Mạnh</div>
-            <div>Chức vụ: Chỉ huy mũi</div>
+        <div class="meta-block">
+            <div class="meta-row">
+                <label for="meta-lessor">Đơn vị cho thuê :</label>
+                <input id="meta-lessor" type="text" value="Phạm Văn Vinh" autocomplete="organization">
+            </div>
+            <div class="meta-row">
+                <label for="meta-operator">Lái máy :</label>
+                <input id="meta-operator" type="text" value="Nguyễn Văn Điểm" autocomplete="name">
+            </div>
+            <div class="meta-row">
+                <span>Thực hiện : Từ</span>
+                <input id="meta-start" type="date" value="2026-02-26">
+                <span>đến</span>
+                <input id="meta-end" type="date" value="2026-03-25">
+            </div>
+            <div class="meta-row meta-wide">
+                <label for="meta-machine">Tên máy :</label>
+                <input id="meta-machine" type="text" value="Máy xúc SK200 - Đường gom đê Đông Anh" autocomplete="off">
+            </div>
         </div>
 
         <div class="toolbar print-hide">
+            <button type="button" id="btn-rebuild-rows" class="action-btn action-btn-secondary">Tạo lại dòng theo ngày</button>
             <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
             <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
         </div>
 
         <div class="table-wrap">
-            <table>
+            <table class="report-table" id="hours-table">
                 <colgroup>
-                    <col style="width: 4.5%;">
-                    <col style="width: 14.5%;">
-                    <col style="width: 10%;">
-                    <col style="width: 11%;">
-                    <col style="width: 9%;">
-                    <col style="width: 15%;">
-                    <col style="width: 4.5%;">
-                    <col style="width: 4.5%;">
-                    <col style="width: 5.5%;">
+                    <col style="width: 3.5%;">
+                    <col style="width: 7%;">
                     <col style="width: 6.5%;">
                     <col style="width: 6.5%;">
                     <col style="width: 6.5%;">
                     <col style="width: 6.5%;">
-                    <col style="width: 12.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 6.5%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 6%;">
+                    <col style="width: 14%;">
                 </colgroup>
                 <thead>
                     <tr>
-                        <th rowspan="2">TT</th>
-                        <th rowspan="2">CBKT</th>
-                        <th rowspan="2">CB Phụ trách</th>
-                        <th rowspan="2">Tên lái máy</th>
-                        <th rowspan="2">Loại máy</th>
-                        <th rowspan="2">Nội dung công việc</th>
-                        <th colspan="2">Lý trình</th>
-                        <th rowspan="2">ĐVT</th>
-                        <th colspan="2">Khối lượng</th>
-                        <th colspan="2">Thời gian</th>
-                        <th rowspan="2">Ghi chú</th>
+                        <th rowspan="3">TT</th>
+                        <th rowspan="3">Ngày</th>
+                        <th colspan="6">Thời gian làm việc</th>
+                        <th rowspan="3">Tổng giờ HC</th>
+                        <th rowspan="3">Tổng giờ tăng ca</th>
+                        <th rowspan="3">Số ngày LV</th>
+                        <th rowspan="3">Ghi chú</th>
                     </tr>
                     <tr>
-                        <th>Từ</th>
-                        <th>Đến</th>
-                        <th>Kế hoạch</th>
-                        <th>Thực tế</th>
-                        <th>Kế hoạch</th>
-                        <th>Thực tế</th>
+                        <th colspan="2">Sáng</th>
+                        <th colspan="2">Chiều</th>
+                        <th colspan="2">Tối</th>
+                    </tr>
+                    <tr>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
                     </tr>
                     <tr class="number-row">
                         <th>(1)</th>
@@ -358,29 +440,32 @@
                         <th>(10)</th>
                         <th>(11)</th>
                         <th>(12)</th>
-                        <th>(13)</th>
-                        <th>(14)</th>
                     </tr>
                 </thead>
-                <tbody id="work-table-body">
+                <tbody id="work-table-body"></tbody>
+                <tfoot>
                     <tr>
-                        <td>1</td>
-                        <td class="left">Tự nhảy theo mã NV</td>
-                        <td class="left">Tự nhảy theo mã</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="2" class="left">CỘNG</td>
+                        <td colspan="6"></td>
+                        <td id="footer-sum-hc">0:00</td>
+                        <td id="footer-sum-tc">0:00</td>
+                        <td id="footer-sum-days">0,0</td>
                         <td></td>
                     </tr>
-                </tbody>
+                </tfoot>
             </table>
+        </div>
+
+        <div class="signatures">
+            <div class="sig-block">
+                <div>XÁC NHẬN CHỈ HUY CÔNG TRƯỜNG</div>
+                <div class="sig-line">(Ký, ghi họ tên)</div>
+            </div>
+            <div class="sig-block">
+                <div>Ý Yên, Ngày ... tháng ... năm ......</div>
+                <div class="mt-2">NGƯỜI LẬP</div>
+                <div class="sig-line">(Ký, ghi họ tên)</div>
+            </div>
         </div>
     </div>
 
@@ -391,8 +476,217 @@
             return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
         }
 
+        function pad2(n) {
+            return String(n).padStart(2, "0");
+        }
+
+        function formatDateVN(d) {
+            return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+        }
+
+        function parseISODateLocal(iso) {
+            if (!iso) return null;
+            const [y, m, day] = iso.split("-").map(Number);
+            if (!y || !m || !day) return null;
+            return new Date(y, m - 1, day);
+        }
+
+        function durationMinutesFromTime(startVal, endVal) {
+            if (!startVal || !endVal) return 0;
+            const [sh, sm] = startVal.split(":").map(Number);
+            const [eh, em] = endVal.split(":").map(Number);
+            if (Number.isNaN(sh) || Number.isNaN(eh)) return 0;
+            let s = sh * 60 + (sm || 0);
+            let e = eh * 60 + (em || 0);
+            if (e < s) e += 24 * 60;
+            return e - s;
+        }
+
+        function formatHM(totalMinutes) {
+            const m = Math.max(0, Math.round(totalMinutes));
+            const h = Math.floor(m / 60);
+            const r = m % 60;
+            return `${h}:${pad2(r)}`;
+        }
+
+        function parseHMToMinutes(text) {
+            if (!text || typeof text !== "string") return 0;
+            const t = text.trim();
+            const m = t.match(/^(\d+)\s*:\s*(\d{1,2})$/);
+            if (!m) return 0;
+            return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+        }
+
+        function formatDaysVN(num) {
+            return num.toFixed(1).replace(".", ",");
+        }
+
+        function enumerateDaysInclusive(start, end) {
+            const out = [];
+            const cur = new Date(start.getTime());
+            while (cur <= end) {
+                out.push(new Date(cur.getTime()));
+                cur.setDate(cur.getDate() + 1);
+            }
+            return out;
+        }
+
+        function cellDisplayText(cell) {
+            const inp = cell.querySelector("input, select, textarea");
+            if (inp) return String(inp.value ?? "").trim();
+            return String(cell.innerText || "").replace(/\s+/g, " ").trim();
+        }
+
+        function buildRow(index, dateObj) {
+            const tr = document.createElement("tr");
+            tr.dataset.dateIso = `${dateObj.getFullYear()}-${pad2(dateObj.getMonth() + 1)}-${pad2(dateObj.getDate())}`;
+
+            const tdIndex = document.createElement("td");
+            tdIndex.textContent = String(index);
+
+            const tdDate = document.createElement("td");
+            tdDate.textContent = formatDateVN(dateObj);
+
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdDate);
+
+            const sessions = ["s", "c", "t"];
+            sessions.forEach((prefix) => {
+                const tdStart = document.createElement("td");
+                tdStart.className = "time-cell";
+                const inS = document.createElement("input");
+                inS.type = "time";
+                inS.className = "time-field";
+                inS.step = "60";
+                inS.dataset.role = `${prefix}-start`;
+                tdStart.appendChild(inS);
+
+                const tdEnd = document.createElement("td");
+                tdEnd.className = "time-cell";
+                const inE = document.createElement("input");
+                inE.type = "time";
+                inE.className = "time-field";
+                inE.step = "60";
+                inE.dataset.role = `${prefix}-end`;
+                tdEnd.appendChild(inE);
+
+                tr.appendChild(tdStart);
+                tr.appendChild(tdEnd);
+            });
+
+            const tdHc = document.createElement("td");
+            tdHc.className = "cell-hc";
+            tdHc.textContent = "0:00";
+
+            const tdTc = document.createElement("td");
+            tdTc.className = "time-cell";
+            const inOt = document.createElement("input");
+            inOt.type = "text";
+            inOt.className = "ot-field";
+            inOt.placeholder = "0:00";
+            inOt.value = "";
+            inOt.dataset.role = "ot";
+            tdTc.appendChild(inOt);
+
+            const tdDays = document.createElement("td");
+            tdDays.className = "cell-days";
+            tdDays.textContent = "0,0";
+
+            const tdNote = document.createElement("td");
+            const inNote = document.createElement("input");
+            inNote.type = "text";
+            inNote.className = "note-field";
+            inNote.autocomplete = "off";
+            tdNote.appendChild(inNote);
+
+            tr.appendChild(tdHc);
+            tr.appendChild(tdTc);
+            tr.appendChild(tdDays);
+            tr.appendChild(tdNote);
+
+            tr.querySelectorAll(".time-field").forEach((el) => {
+                el.addEventListener("input", () => recalculateRow(tr));
+                el.addEventListener("change", () => recalculateRow(tr));
+            });
+            inOt.addEventListener("input", () => recalculateFooter());
+            inOt.addEventListener("change", () => recalculateFooter());
+
+            return tr;
+        }
+
+        function recalculateRow(tr) {
+            const times = tr.querySelectorAll(".time-field");
+            let total = 0;
+            for (let i = 0; i < times.length; i += 2) {
+                const start = times[i]?.value;
+                const end = times[i + 1]?.value;
+                total += durationMinutesFromTime(start, end);
+            }
+
+            const hcCell = tr.querySelector(".cell-hc");
+            if (hcCell) hcCell.textContent = formatHM(total);
+
+            const daysCell = tr.querySelector(".cell-days");
+            if (daysCell) {
+                daysCell.textContent = total > 0 ? "1,0" : "0,0";
+            }
+
+            recalculateFooter();
+        }
+
+        function recalculateFooter() {
+            const body = document.getElementById("work-table-body");
+            if (!body) return;
+
+            let sumHc = 0;
+            let sumTc = 0;
+            let sumDays = 0;
+
+            body.querySelectorAll("tr").forEach((tr) => {
+                const hcText = tr.querySelector(".cell-hc")?.textContent || "0:00";
+                sumHc += parseHMToMinutes(hcText.trim());
+
+                const otInp = tr.querySelector('input[data-role="ot"]');
+                const otText = otInp?.value?.trim() || "0:00";
+                sumTc += parseHMToMinutes(otText || "0:00");
+
+                const dText = (tr.querySelector(".cell-days")?.textContent || "0,0").replace(",", ".");
+                const d = parseFloat(dText);
+                if (!Number.isNaN(d)) sumDays += d;
+            });
+
+            const elHc = document.getElementById("footer-sum-hc");
+            const elTc = document.getElementById("footer-sum-tc");
+            const elDays = document.getElementById("footer-sum-days");
+            if (elHc) elHc.textContent = formatHM(sumHc);
+            if (elTc) elTc.textContent = formatHM(sumTc);
+            if (elDays) elDays.textContent = formatDaysVN(sumDays);
+        }
+
+        function rebuildTableBody() {
+            const startIn = document.getElementById("meta-start");
+            const endIn = document.getElementById("meta-end");
+            const body = document.getElementById("work-table-body");
+            if (!startIn || !endIn || !body) return;
+
+            const start = parseISODateLocal(startIn.value);
+            const end = parseISODateLocal(endIn.value);
+            body.innerHTML = "";
+
+            if (!start || !end || end < start) {
+                recalculateFooter();
+                return;
+            }
+
+            const days = enumerateDaysInclusive(start, end);
+            days.forEach((d, i) => {
+                body.appendChild(buildRow(i + 1, d));
+            });
+            recalculateFooter();
+        }
+
         async function exportPageTableToExcel(tableSelector, filePrefix) {
-            const table = document.querySelector(tableSelector) || document.querySelector("table");
+            const table = document.querySelector(tableSelector) || document.querySelector("table.report-table");
             if (!table || !window.ExcelJS) {
                 alert("Không thể xuất Excel ở thời điểm này.");
                 return;
@@ -403,9 +697,22 @@
 
             try {
                 const workbook = new ExcelJS.Workbook();
-                const worksheet = workbook.addWorksheet("BaoCao");
+                const worksheet = workbook.addWorksheet("BangChiTietGio");
+
+                const lessor = document.getElementById("meta-lessor")?.value?.trim() || "";
+                const operator = document.getElementById("meta-operator")?.value?.trim() || "";
+                const machine = document.getElementById("meta-machine")?.value?.trim() || "";
+                const ds = document.getElementById("meta-start")?.value || "";
+                const de = document.getElementById("meta-end")?.value || "";
+
+                worksheet.addRow(["Đơn vị cho thuê:", lessor]);
+                worksheet.addRow(["Lái máy:", operator]);
+                worksheet.addRow(["Thực hiện từ:", ds, "đến", de]);
+                worksheet.addRow(["Tên máy:", machine]);
+                worksheet.addRow([]);
+
                 const rows = Array.from(table.rows).map((row) =>
-                    Array.from(row.cells).map((cell) => String(cell.innerText || "").replace(/\s+/g, " ").trim())
+                    Array.from(row.cells).map((cell) => cellDisplayText(cell))
                 );
                 rows.forEach((r) => worksheet.addRow(r));
 
@@ -435,12 +742,18 @@
 
         const exportExcelBtn = document.getElementById("export-excel");
         const exportPdfBtn = document.getElementById("export-pdf");
+        const rebuildBtn = document.getElementById("btn-rebuild-rows");
 
         if (exportExcelBtn) {
-            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel("table", "bao-cao-thue-thiet-bi"));
+            exportExcelBtn.addEventListener("click", () =>
+                exportPageTableToExcel("#hours-table", "bang-chi-tiet-gio-lam-viec-thue-thiet-bi")
+            );
         }
         if (exportPdfBtn) {
             exportPdfBtn.addEventListener("click", exportPageToPdf);
+        }
+        if (rebuildBtn) {
+            rebuildBtn.addEventListener("click", rebuildTableBody);
         }
 
         const TAB_REDIRECTS = {
@@ -451,9 +764,9 @@
         };
 
         function activateCurrentTab() {
-            document.querySelectorAll('.report-tab-btn').forEach((btn) => btn.classList.remove('active'));
-            const active = document.getElementById('tab-thue-thiet-bi');
-            if (active) active.classList.add('active');
+            document.querySelectorAll(".report-tab-btn").forEach((btn) => btn.classList.remove("active"));
+            const active = document.getElementById("tab-thue-thiet-bi");
+            if (active) active.classList.add("active");
         }
 
         function gotoTab(tabId) {
@@ -462,11 +775,12 @@
             window.location.href = target;
         }
 
-        document.querySelectorAll('.report-tab-btn').forEach((btn) => {
-            btn.addEventListener('click', () => gotoTab(btn.id));
+        document.querySelectorAll(".report-tab-btn").forEach((btn) => {
+            btn.addEventListener("click", () => gotoTab(btn.id));
         });
 
         activateCurrentTab();
+        rebuildTableBody();
     </script>
 </body>
 </html>
