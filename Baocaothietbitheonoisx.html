@@ -98,7 +98,8 @@
         .custom-table {
             border-collapse: collapse;
             width: 100%;
-            font-size: 11px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
         }
         
         .custom-table th {
@@ -106,7 +107,54 @@
             padding: 6px 4px;
             text-align: center;
             font-weight: bold;
-            font-size: 9pt;
+            font-size: 14px;
+        }
+
+        .custom-table th.tbx-th-ma-tb {
+            width: 4.75rem;
+            min-width: 4.75rem;
+            max-width: 5rem;
+            padding: 5px 3px;
+            font-size: 10.5px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .custom-table .data-row td.tbx-td-ma-tb {
+            width: 4.75rem;
+            min-width: 4.75rem;
+            max-width: 5rem;
+            box-sizing: border-box;
+            padding: 4px 3px;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .custom-table th.tbx-th-nhom-tb {
+            width: 5.5rem;
+            min-width: 5.5rem;
+            max-width: 6rem;
+            padding: 5px 3px;
+            font-size: 10.5px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .custom-table .data-row td.tbx-td-nhom-tb {
+            width: 5.5rem;
+            min-width: 5.5rem;
+            max-width: 6rem;
+            box-sizing: border-box;
+            padding: 4px 3px;
+            font-size: 12px;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .custom-table .group-row td {
@@ -142,33 +190,205 @@
             text-align: center;
             background-color: #4a8694;
         }
-        /* Filter inputs */
-        
+        /* Bộ lọc — cùng cấu trúc các trang báo cáo (vd. BaocaoTonkhoNhienlieu) */
         .filter-input {
-            background-color: #fff;
-            height: 32px;
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
             width: 100%;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+            color: #111827;
+        }
+        
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+        
+        select.filter-input {
+            cursor: pointer;
+            padding-right: 8px;
+        }
+        
+        input.filter-input[type="date"] {
+            color-scheme: light;
+            min-width: 140px;
         }
         
         .filter-select-noi {
             min-width: 0;
-            max-width: 100%;
-            padding: 4px 8px;
-            font-size: 12px;
-            color: #334155;
+        }
+        
+        .tonkho-filter-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: visible;
+            font-weight: bold;
+            color: #2b7132;
+            font-size: 11px;
+            line-height: 1.2;
+            padding-bottom: 2px;
+        }
+        
+        .tonkho-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+        
+        .tonkho-filter-item-label {
+            min-width: max-content;
+        }
+        
+        .tonkho-filter-item .filter-input {
+            width: 170px;
+            max-width: 170px;
+        }
+
+        .tbx-select-noi-compact {
+            width: 200px;
+            max-width: 200px;
+            min-width: 140px;
+        }
+
+        .tbx-filter-dd {
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            background: #f8fafc;
+            min-width: 0;
+            max-width: 260px;
+        }
+
+        .tbx-filter-dd > summary {
+            list-style: none;
             cursor: pointer;
+            min-height: 22px;
+            padding: 0 10px 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tbx-filter-dd > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .tbx-filter-dd > summary::after {
+            content: "▾";
+            flex-shrink: 0;
+            font-size: 10px;
+            color: #2b7132;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .tbx-filter-dd[open] > summary::after {
+            content: "▴";
+        }
+
+        .tbx-filter-dd-panel {
+            margin: 0 4px 6px;
+            padding: 6px 8px 8px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .tbx-filter-dd .filter-checkbox-panel {
+            max-height: 7rem;
+            margin-top: 4px;
+        }
+
+        .tbx-filter-dd-inline-label {
+            flex-shrink: 0;
+            font-size: 10px;
+            font-weight: 700;
+            color: #2b7132;
+            white-space: nowrap;
+            line-height: 1.1;
+            padding-bottom: 2px;
+        }
+
+        .tbx-filter-dd-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 2px;
+            flex: 0 0 auto;
+            min-width: 0;
+            max-width: 272px;
+        }
+        
+        .tonkho-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 0 0 auto;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+        
+        .tonkho-filter-actions .action-btn {
+            flex: 0 0 auto;
+            padding: 0 10px;
+        }
+        
+        .tonkho-filter-actions #tbx-appsheet-status {
+            flex: 0 1 380px;
+            min-width: 0;
+            max-width: min(420px, 32vw);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        .tbx-search-strip .filter-input {
+            max-width: none;
+            flex: 1 1 auto;
+            width: auto;
         }
         
         .filter-checkbox-panel {
             max-height: 9rem;
             overflow-y: auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            border: 1px solid #94a3b8;
+            border-radius: 8px;
             padding: 6px 8px;
             background: #fff;
-            font-size: 12px;
+            font-size: 11px;
             color: #334155;
         }
         
@@ -184,7 +404,7 @@
         .filter-checkbox-panel input[type="checkbox"] {
             margin-top: 2px;
             flex-shrink: 0;
-            accent-color: #387c2b;
+            accent-color: #2b7132;
         }
         
         .filter-checkbox-actions button {
@@ -201,25 +421,16 @@
             color: #1e40af;
         }
         
-        .date-input-wrap {
-            position: relative;
-            min-width: 200px;
-        }
-        
-        .date-input-wrap input[type="date"] {
-            padding-right: 28px;
-            color-scheme: light;
-        }
-        
-        .date-input-wrap .date-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            color: #387c2b;
+        .tbx-filter-extra-label {
+            width: 118px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: #2b7132;
+            font-size: 10px;
+            line-height: 1.2;
         }
 
+        
         .tbx-loaded-modal {
             display: none;
             position: fixed;
@@ -397,93 +608,79 @@
         </div>
         <p class="text-center text-xs font-bold italic text-blue-800 mb-4 hidden">(Từ ngày … đến ngày …)</p>
 
-        <!-- Bộ lọc: dropdown + kỳ ngày + nút (theo layout mới) -->
-        <div class="print-hide mb-3 text-xs" aria-label="Bộ lọc báo cáo">
-            <div class="flex flex-wrap justify-between items-start gap-6">
-                <div class="flex flex-col gap-2.5 min-w-[320px] flex-1 max-w-xl">
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0">NƠI THI CÔNG</span>
-                        <select id="tbx-filter-noi-thi-cong" class="filter-input filter-select-noi flex-1 border border-slate-300" title="Chọn nơi thi công">
-                            <option value="">--- Tất cả nơi thi công ---</option>
-                        </select>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0 pt-1">CÔNG TRÌNH</span>
-                        <div class="flex-1 min-w-0">
-                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5 mb-1">
+        <!-- Bộ lọc: một hàng — Nơi TC, ngày, nút, Công trình / Nhóm TB dạng sổ xuống gọn -->
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide overflow-x-auto overflow-y-visible" aria-label="Bộ lọc báo cáo">
+            <div class="tonkho-filter-row" style="min-width: 1020px;">
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">NƠI THI CÔNG</span>
+                    <select id="tbx-filter-noi-thi-cong" class="filter-input filter-select-noi tbx-select-noi-compact" title="Chọn nơi thi công">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TỪ NGÀY</span>
+                    <input id="tbx-filter-from-date" type="date" class="filter-input max-w-none" title="Từ ngày">
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">ĐẾN NGÀY</span>
+                    <input id="tbx-filter-to-date" type="date" class="filter-input max-w-none" title="Đến ngày">
+                </div>
+                <div class="tonkho-filter-actions">
+                    <button type="button" id="tbx-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" id="tbx-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <button type="button" id="tbx-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
+                    <button type="button" id="tbx-btn-export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button type="button" id="tbx-btn-export-pdf" class="action-btn">Xuất PDF</button>
+                    <span id="tbx-appsheet-status" class="text-gray-700 font-semibold text-[11px]" title=""></span>
+                </div>
+                <div class="tbx-filter-dd-stack">
+                    <span class="tbx-filter-dd-inline-label">CÔNG TRÌNH</span>
+                    <details id="tbx-dd-cong-trinh" class="tbx-filter-dd">
+                        <summary id="tbx-dd-ct-summary">Công trình: tất cả</summary>
+                        <div class="tbx-filter-dd-panel">
+                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5">
                                 <button type="button" id="tbx-ct-check-all" class="font-medium">Chọn tất cả</button>
                                 <button type="button" id="tbx-ct-check-none" class="font-medium">Bỏ chọn</button>
-                                <span class="text-slate-500 italic">(Không chọn = hiện tất cả)</span>
+                                <span class="text-slate-500 italic text-[10px]">(Trống = tất cả)</span>
                             </div>
                             <div id="tbx-filter-cong-trinh-list" class="filter-checkbox-panel" role="group" aria-label="Chọn một hoặc nhiều công trình"></div>
                         </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <span class="font-bold text-header-green whitespace-nowrap w-36 shrink-0 pt-1 leading-tight text-left">NHÓM<br>THIẾT BỊ</span>
-                        <div class="flex-1 min-w-0">
-                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5 mb-1">
+                    </details>
+                </div>
+                <div class="tbx-filter-dd-stack">
+                    <span class="tbx-filter-dd-inline-label">NHÓM THIẾT BỊ</span>
+                    <details id="tbx-dd-nhom-tb" class="tbx-filter-dd">
+                        <summary id="tbx-dd-nhom-summary">Nhóm TB: tất cả</summary>
+                        <div class="tbx-filter-dd-panel">
+                            <div class="filter-checkbox-actions flex flex-wrap gap-x-3 gap-y-0.5">
                                 <button type="button" id="tbx-nhom-check-all" class="font-medium">Chọn tất cả</button>
                                 <button type="button" id="tbx-nhom-check-none" class="font-medium">Bỏ chọn</button>
-                                <span class="text-slate-500 italic">(Không chọn = hiện tất cả)</span>
+                                <span class="text-slate-500 italic text-[10px]">(Trống = tất cả)</span>
                             </div>
                             <div id="tbx-filter-nhom-thiet-bi-list" class="filter-checkbox-panel" role="group" aria-label="Chọn một hoặc nhiều nhóm thiết bị"></div>
                         </div>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end gap-2 shrink-0">
-                    <div class="flex flex-col gap-2 w-full min-w-[260px]">
-                        <div class="flex items-center gap-3 justify-end">
-                            <span class="font-bold text-header-green w-20 text-right shrink-0">TỪ NGÀY</span>
-                            <div class="date-input-wrap w-52">
-                                <input id="tbx-filter-from-date" type="date" class="filter-input w-full pl-2 pr-7 text-[12px]" title="dd/mm/yyyy">
-                                <span class="date-icon" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 justify-end">
-                            <span class="font-bold text-header-green w-20 text-right shrink-0">ĐẾN NGÀY</span>
-                            <div class="date-input-wrap w-52">
-                                <input id="tbx-filter-to-date" type="date" class="filter-input w-full pl-2 pr-7 text-[12px]" title="dd/mm/yyyy">
-                                <span class="date-icon" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap justify-end gap-2 mt-1">
-                        <button type="button" id="tbx-btn-load" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Tải dữ liệu AppSheet</button>
-                        <button type="button" id="tbx-btn-refresh" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Làm mới toàn bộ</button>
-                        <button type="button" id="tbx-btn-view-loaded-tables" class="px-4 py-2 rounded-md bg-[#0047ab] text-white text-xs font-bold shadow-sm border border-[#003a8d]" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
-                        <button type="button" id="tbx-btn-export-excel" class="px-4 py-2 rounded-md bg-white text-[#387c2b] text-xs font-bold border-2 border-[#387c2b]">Xuất Excel</button>
-                        <button type="button" id="tbx-btn-export-pdf" class="px-4 py-2 rounded-md bg-[#387c2b] text-white text-xs font-bold shadow-sm border border-[#2d6322]">Xuất PDF</button>
-                    </div>
+                    </details>
                 </div>
             </div>
-            <p id="tbx-appsheet-status" class="text-header-green font-semibold text-[12px] mt-3 w-full"></p>
         </div>
 
-        <!-- Search Bar -->
-        <div class="flex items-center gap-2 mb-2 text-sm">
-            <span class="text-blue-700 font-bold flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </span>
-            <span class="font-bold text-header-green whitespace-nowrap">Tìm kiếm</span>
-            <input id="tbx-search" type="text" class="flex-1 border border-green-600 h-6 px-2 outline-none text-xs" placeholder="Lọc nhanh trên bảng đã tải">
+        <div class="tbx-search-strip px-2 pb-1 bg-white print-hide flex items-center gap-2">
+            <span class="text-blue-600 font-bold text-xs whitespace-nowrap">🔍 Tìm kiếm</span>
+            <input id="tbx-search" type="text" class="filter-input flex-1 min-w-0" placeholder="Lọc nhanh trên bảng đã tải">
         </div>
 
         <!-- Data Table -->
         <table class="custom-table mt-1">
             <thead>
                 <tr class="bg-table-header text-white">
-                    <th rowspan="2" class="w-12">MÃ<br>THIẾT<br>BỊ</th>
+                    <th rowspan="2" class="tbx-th-ma-tb">MÃ THIẾT BỊ</th>
                     <th rowspan="2" class="w-48">TÊN THIẾT BỊ</th>
                     <th rowspan="2" class="w-12">ĐVT</th>
                     <th colspan="2">TỒN ĐẦU KỲ</th>
                     <th colspan="2">NHẬP TRONG KỲ</th>
                     <th colspan="2">XUẤT TRONG KỲ</th>
                     <th colspan="2">TỒN CUỐI KỲ</th>
-                    <th rowspan="2" class="w-16">NHÓM<br>THIẾT BỊ</th>
+                    <th rowspan="2" class="tbx-th-nhom-tb">NHÓM THIẾT BỊ</th>
                     <th rowspan="2" class="w-20">GHI CHÚ</th>
                 </tr>
                 <tr class="bg-table-header text-white">

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo tổng hợp xuất nhiên liệu theo công trình</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="BaocaoTonghopXuatNhienLieuTheoCongTrinh-appsheet.js"></script>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            width: 145px;
+            text-align: center;
+        }
+
+        .logo-caption-box {
+            margin-top: 6px;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 1.05;
+            letter-spacing: 0.4px;
+            color: #0047ab;
+            text-shadow: 0 1px 0 #ffffff, 0 0 1px #00306e;
+            background: #ffffff;
+            display: inline-block;
+            min-width: 0;
+        }
+
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
+            width: 100%;
+            max-width: 200px;
+            padding: 0 10px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .date-filter-field {
+            height: 22px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .date-filter-field .filter-input {
+            max-width: none;
+            border-radius: 9999px 0 0 9999px;
+            border-right: none;
+        }
+
+        .date-cal-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 22px;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #94a3b8;
+            border-left: 1px solid #cbd5e1;
+            border-radius: 0 9999px 9999px 0;
+            background: #eef2f7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .date-cal-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .date-cal-btn:focus-visible {
+            outline: 2px solid rgba(43, 113, 50, 0.35);
+            outline-offset: 0;
+        }
+
+        .action-btn {
+            height: 26px;
+            border-radius: 9999px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #2b7132;
+            background: #2b7132;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .tonkho-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            font-weight: bold;
+            color: #2b7132;
+            font-size: 10px;
+            line-height: 1.2;
+            padding-bottom: 2px;
+        }
+
+        .tonkho-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .tonkho-filter-item-label {
+            min-width: max-content;
+        }
+
+        .tonkho-filter-item .filter-input {
+            width: 170px;
+            max-width: 170px;
+        }
+
+        .tonkho-filter-item.date-item .date-filter-field {
+            width: 170px;
+            flex: 0 0 auto;
+        }
+
+        .tonkho-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 0 0 auto;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+
+        .tonkho-filter-actions .action-btn {
+            flex: 0 0 auto;
+            padding: 0 10px;
+        }
+
+        #thxl-appsheet-status {
+            font-size: 11px;
+            margin-left: 8px;
+            color: #374151;
+            max-width: 260px;
+        }
+
+        .thxl-source-note {
+            text-align: center;
+            color: #475569;
+            font-size: 11px;
+            font-style: italic;
+            margin: 0 12px 8px;
+            line-height: 1.35;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            padding: 0 4px 10px;
+        }
+
+        table.report-table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1240px;
+            table-layout: fixed;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
+            font-size: 14px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        .report-table thead th {
+            background-color: #4a8694;
+            color: #fff;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        .report-table tbody td:nth-child(2) {
+            text-align: left;
+        }
+
+        .report-table tbody td.num {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .report-table tbody tr.thxl-total-row td {
+            background-color: #e5e7eb;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin: 14px 0 8px;
+            padding: 0 8px 12px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .signature-title {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            html,
+            body,
+            .page-container,
+            .report-table,
+            .report-table th,
+            .report-table td,
+            .report-table tbody tr.thxl-total-row td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-hide {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+            }
+            .table-wrapper {
+                overflow: visible;
+            }
+            table.report-table {
+                min-width: 0;
+            }
+            .report-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+            .report-table tbody tr.thxl-total-row td {
+                background-color: #e5e7eb !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+
+        <!-- HEADER — cùng format BaocaoTonkhoNhienlieu / BaocaoNL -->
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
+            </div>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TITLE BANNER -->
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỔNG HỢP XUẤT NHIÊN LIỆU THEO CÔNG TRÌNH</h1>
+            <p id="thxl-banner-cong-trinh-line" class="font-bold text-sm text-[#0047ab] mb-1 px-2">CT HỐ SÓI - SÔNG ĐUỐNG</p>
+            <p id="thxl-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+        </div>
+
+        <p class="thxl-source-note">Tồn đầu tháng: «Tồn kho ĐK». Nhập trong tháng, xuất theo công trình và ghi chú: «Nhập xuất luân chuyển CT».</p>
+
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="tonkho-filter-row">
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">NHÓM NHÀ CC</span>
+                    <select class="filter-input" title="Dự phòng — có thể nối dữ liệu sau">
+                        <option value="">-- Tất cả --</option>
+                        <option value="nhom-a">Nhóm A</option>
+                        <option value="nhom-b">Nhóm B</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TÊN NHÀ CUNG CẤP</span>
+                    <select id="thxl-filter-ncc" class="filter-input" title="Lọc theo «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">CÔNG TRÌNH</span>
+                    <select id="thxl-filter-cong-trinh" class="filter-input" title="Lọc theo «Tên nơi nhập» hoặc «Tên nơi xuất» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TÊN KHO</span>
+                    <select id="thxl-filter-ten-kho" class="filter-input" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">NHÓM NHIÊN LIỆU</span>
+                    <select id="thxl-filter-nhom-nl" class="filter-input" title="Theo «Danh sách tài sản» (nhóm / loại nhiên liệu)">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TÊN NHIÊN LIỆU</span>
+                    <input type="text" id="thxl-filter-ten-nl" class="filter-input" placeholder="Lọc chứa…" title="Lọc dòng theo tên nhiên liệu" autocomplete="off">
+                </div>
+                <div class="tonkho-filter-item date-item">
+                    <span class="tonkho-filter-item-label">TỪ NGÀY</span>
+                    <div class="date-filter-field flex items-stretch">
+                        <input id="thxl-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                        <button type="button" id="thxl-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </button>
+                    </div>
+                    <input type="date" id="thxl-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                </div>
+                <div class="tonkho-filter-item date-item">
+                    <span class="tonkho-filter-item-label">ĐẾN NGÀY</span>
+                    <div class="date-filter-field flex items-stretch">
+                        <input id="thxl-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                        <button type="button" id="thxl-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </button>
+                    </div>
+                    <input type="date" id="thxl-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                </div>
+                <div class="tonkho-filter-actions">
+                    <button type="button" id="thxl-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" id="thxl-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <span id="thxl-appsheet-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-2 pb-1 bg-white print-hide flex items-center gap-2">
+            <span class="text-blue-600 font-bold text-xs whitespace-nowrap">🔍 Tìm kiếm</span>
+            <input type="text" id="thxl-search" class="filter-input max-w-none flex-1" placeholder="">
+        </div>
+
+        <div class="table-wrapper bg-white">
+            <table class="report-table">
+                <thead id="thxl-thead"></thead>
+                <tbody id="thxl-tbody">
+                    <tr>
+                        <td colspan="24" style="padding:12px;">Đang tải dữ liệu…</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">TRƯỞNG PHÒNG VẬT TƯ</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP BIỂU</div>
+                    <div class="signature-note">(ký, họ tên)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

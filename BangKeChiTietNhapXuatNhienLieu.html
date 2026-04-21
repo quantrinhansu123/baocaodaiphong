@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng kê chi tiết nhập xuất nhiên liệu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background: #f3f4f6;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .page {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #d1d5db;
+        }
+
+        .filter-input {
+            background-color: #f8fafc;
+            border: 1px solid #94a3b8;
+            border-radius: 9999px;
+            height: 22px;
+            padding: 0 10px;
+            font-size: 12px;
+            outline: none;
+            min-width: 150px;
+            max-width: 180px;
+        }
+
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
+        }
+
+        .nlk-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            font-weight: bold;
+            color: #2b7132;
+            font-size: 10px;
+            line-height: 1.2;
+            padding: 8px 10px 4px;
+        }
+
+        .nlk-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .report-table {
+            width: 100%;
+            min-width: 1400px;
+            border-collapse: collapse;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #334155;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .report-table thead th {
+            background: #296f86;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .group-bar td {
+            background: #5fa13f;
+            color: #fff;
+            font-weight: 700;
+            text-align: left;
+            padding: 6px 8px;
+        }
+
+        .sum-row td {
+            background: #296f86;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .num {
+            text-align: right !important;
+            font-weight: 600;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                border: 0;
+            }
+            .print-hide {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="flex justify-between items-start px-4 pt-3 text-[14px] text-[#1f6b20] font-bold">
+            <div>CTY CỔ PHẦN XDHT ĐẠI PHONG</div>
+            <div class="text-right uppercase leading-tight">
+                <div>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div>Độc lập - Tự do - Hạnh phúc</div>
+            </div>
+        </div>
+
+        <div class="bg-[#1f6b20] text-white text-center py-2 px-2 font-extrabold uppercase tracking-wide text-[18px]">
+            BẢNG KÊ CHI TIẾT NHẬP XUẤT NHIÊN LIỆU
+        </div>
+        <p class="text-center font-bold text-[#1f6b20] text-[15px] mt-1">CT HỒ SÓI - SÔNG ĐUỐNG</p>
+        <p class="text-center italic font-bold text-[#1f6b20] text-[13px] mb-2">(Từ ngày … đến ngày …)</p>
+
+        <div class="bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="nlk-filter-row">
+                <div class="nlk-filter-item">
+                    <span>NHÓM NHÀ CC</span>
+                    <select class="filter-input" title="Lọc nhóm nhà cung cấp">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="nlk-filter-item">
+                    <span>TÊN NHÀ CUNG CẤP</span>
+                    <select class="filter-input" title="Lọc nhà cung cấp">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="nlk-filter-item">
+                    <span>CÔNG TRÌNH</span>
+                    <select class="filter-input" title="Lọc công trình">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="nlk-filter-item">
+                    <span>TÊN KHO</span>
+                    <select class="filter-input" title="Lọc kho">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="nlk-filter-item">
+                    <span>TỪ NGÀY</span>
+                    <input type="date" class="filter-input" title="Từ ngày">
+                </div>
+                <div class="nlk-filter-item">
+                    <span>ĐẾN NGÀY</span>
+                    <input type="date" class="filter-input" title="Đến ngày">
+                </div>
+            </div>
+            <p class="text-red-600 text-[11px] font-semibold px-3 pb-2">
+                — Trong các trường lọc dữ liệu có thể chọn 1 hoặc nhiều trường
+            </p>
+        </div>
+
+        <div class="px-3 pb-2 bg-white print-hide flex items-center gap-2">
+            <span class="text-blue-600 font-bold text-xs whitespace-nowrap">🔍 Tìm kiếm</span>
+            <input type="text" class="flex-1 border border-green-600 rounded px-2 py-1 text-sm outline-none min-h-[28px]" placeholder="Lọc nhanh trên bảng">
+        </div>
+
+        <div class="overflow-x-auto px-2 pb-4">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width:3%;">STT</th>
+                        <th rowspan="2" style="width:14%;">Tên thiết bị</th>
+                        <th rowspan="2" style="width:12%;">Tên thiết bị / Người vận hành</th>
+                        <th colspan="5">Nhiên liệu</th>
+                        <th rowspan="2" style="width:10%;">Ghi chú</th>
+                    </tr>
+                    <tr>
+                        <th style="width:8%;">Dầu diezel</th>
+                        <th style="width:8%;">Mỡ bò</th>
+                        <th style="width:9%;">Nhớt động cơ</th>
+                        <th style="width:9%;">Dầu thủy lực</th>
+                        <th style="width:8%;">Dầu cầu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group-bar">
+                        <td colspan="9">A. NHÓM XE MÁY THIẾT BỊ</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">Xe tải 2,5t 18C-024.59</td>
+                        <td class="text-left">Lê Hồng Luân</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td></td>
+                    </tr>
+                    <tr class="group-bar">
+                        <td colspan="9">B. NHÓM XE Ô TÔ</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">…</td>
+                        <td class="text-left">…</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td></td>
+                    </tr>
+                    <tr class="group-bar">
+                        <td colspan="9">Công trường</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">…</td>
+                        <td class="text-left">…</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td></td>
+                    </tr>
+                    <tr class="sum-row">
+                        <td colspan="3" class="text-left">Tổng xuất (A)</td>
+                        <td class="num">0</td>
+                        <td class="num">0</td>
+                        <td class="num">0</td>
+                        <td class="num">0</td>
+                        <td class="num">0</td>
+                        <td></td>
+                    </tr>
+                    <tr class="sum-row">
+                        <td colspan="3" class="text-left">Tồn đầu kỳ (B)</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td></td>
+                    </tr>
+                    <tr class="sum-row">
+                        <td colspan="3" class="text-left">Nhập trong tháng (C)</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td></td>
+                    </tr>
+                    <tr class="sum-row">
+                        <td colspan="3" class="text-left">Tồn cuối tháng (D = B + C − A)</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 px-6 pb-8 text-[14px] font-bold text-gray-900">
+            <div class="text-center">
+                <div>PHÒNG VẬT TƯ</div>
+                <div class="italic font-normal text-[13px] mt-1">(Ký, ghi họ tên)</div>
+            </div>
+            <div class="text-center">
+                <div>Ý Yên, Ngày …… tháng …… năm ……</div>
+                <div class="mt-2">NGƯỜI LẬP</div>
+                <div class="italic font-normal text-[13px] mt-1">(Ký, ghi họ tên)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

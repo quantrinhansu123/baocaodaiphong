@@ -408,80 +408,63 @@
             outline: none;
         }
         
-        .tonkho-filter-shell {
-            display: grid;
-            grid-template-columns: minmax(0, 1.3fr) minmax(440px, 1fr);
-            gap: 16px;
+        .tonkho-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
             font-weight: bold;
             color: #2b7132;
             font-size: 10px;
             line-height: 1.2;
+            padding-bottom: 2px;
         }
         
-        .tonkho-filter-left {
+        .tonkho-filter-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            flex: 0 0 auto;
+            white-space: nowrap;
         }
         
-        .tonkho-filter-left .filter-input {
-            max-width: none;
+        .tonkho-filter-item-label {
+            min-width: max-content;
         }
         
-        .tonkho-filter-right {
-            display: grid;
-            gap: 6px;
-            justify-items: end;
+        .tonkho-filter-item .filter-input {
+            width: 170px;
+            max-width: 170px;
         }
         
-        .tonkho-date-row {
-            width: 100%;
-            max-width: 420px;
-            display: grid;
-            grid-template-columns: 72px minmax(0, 1fr);
+        .tonkho-filter-item.date-item .date-filter-field {
+            width: 170px;
+            flex: 0 0 auto;
+        }
+        
+        .tonkho-filter-actions {
+            display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        
-        .tonkho-actions {
-            width: 100%;
-            max-width: 520px;
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 6px;
+            flex: 0 0 auto;
+            margin-left: 4px;
+            white-space: nowrap;
         }
         
-        .tonkho-actions .action-btn {
-            width: 100%;
-            padding: 0 6px;
+        .tonkho-filter-actions .action-btn {
+            flex: 0 0 auto;
+            padding: 0 10px;
         }
         
-        @media (max-width: 1180px) {
-            .tonkho-filter-shell {
-                grid-template-columns: 1fr;
-            }
-            .tonkho-filter-right {
-                justify-items: start;
-            }
-            .tkh-info-wrap {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 760px) {
-            .tonkho-date-row {
-                max-width: none;
-            }
-            .tonkho-actions {
-                max-width: none;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+        .tonkho-filter-actions #tkh-appsheet-status {
+            flex: 0 0 auto;
         }
         
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
+            font-size: 14px;
             padding: 0 4px 10px;
         }
         
@@ -496,6 +479,7 @@
         .inventory-report-table td {
             border: 1px solid #333;
             padding: 4px 3px;
+            font-size: 14px;
             text-align: center;
             vertical-align: middle;
             word-wrap: break-word;
@@ -505,7 +489,7 @@
             background-color: #4a8694;
             color: #fff;
             font-weight: bold;
-            font-size: 9pt;
+            font-size: 14px;
             line-height: 1.2;
             text-transform: uppercase;
         }
@@ -638,66 +622,60 @@
         </div>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-            <div class="flex flex-col gap-2 max-w-[1400px]">
-                <div class="flex flex-wrap justify-between gap-x-2 gap-y-1 font-bold text-[#2b7132] text-[10px] leading-tight">
-                    <div class="w-full lg:w-[46%] space-y-1">
-                        <div class="flex items-center gap-1">
-                            <span class="w-[118px] shrink-0">NHÓM NHÀ CC</span>
-                            <select class="filter-input max-w-none flex-1 min-w-0">
-                                <option value="">-- Tất cả --</option>
-                                <option value="nhom-a">Nhóm A</option>
-                                <option value="nhom-b">Nhóm B</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="w-[118px] shrink-0">TÊN NHÀ CUNG CẤP</span>
-                            <select id="tkh-filter-ncc" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo cột «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
-                                <option value="">-- Tất cả --</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="w-[118px] shrink-0">CÔNG TRÌNH</span>
-                            <select id="tkh-filter-cong-trinh" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo «Tên nơi nhập» trên «Nhập xuất luân chuyển CT»">
-                                <option value="">-- Tất cả --</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="w-[118px] shrink-0">TÊN KHO</span>
-                            <select id="tkh-filter-ten-kho" class="filter-input max-w-none flex-1 min-w-0" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
-                                <option value="">-- Tất cả --</option>
-                            </select>
-                        </div>
+            <div class="tonkho-filter-row">
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">NHÓM NHÀ CC</span>
+                    <select class="filter-input">
+                        <option value="">-- Tất cả --</option>
+                        <option value="nhom-a">Nhóm A</option>
+                        <option value="nhom-b">Nhóm B</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TÊN NHÀ CUNG CẤP</span>
+                    <select id="tkh-filter-ncc" class="filter-input" title="Lọc theo cột «Tên nhà cung cấp» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">CÔNG TRÌNH</span>
+                    <select id="tkh-filter-cong-trinh" class="filter-input" title="Lọc theo «Tên nơi nhập» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item">
+                    <span class="tonkho-filter-item-label">TÊN KHO</span>
+                    <select id="tkh-filter-ten-kho" class="filter-input" title="Lọc theo «Xe cấp dầu» trên «Nhập xuất luân chuyển CT»">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                </div>
+                <div class="tonkho-filter-item date-item">
+                    <span class="tonkho-filter-item-label">TỪ NGÀY</span>
+                    <div class="date-filter-field flex items-stretch">
+                        <input id="tkh-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                        <button type="button" id="tkh-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </button>
                     </div>
-                    <div class="w-full lg:w-[50%] space-y-1 flex flex-col items-end lg:pr-2">
-                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
-                            <span class="w-[72px] shrink-0">TỪ NGÀY</span>
-                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
-                                <input id="tkh-filter-from-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
-                                <button type="button" id="tkh-filter-from-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Từ ngày">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                            </div>
-                            <input type="date" id="tkh-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
-                        </div>
-                        <div class="flex items-center gap-1 w-full lg:w-[280px]">
-                            <span class="w-[72px] shrink-0">ĐẾN NGÀY</span>
-                            <div class="date-filter-field flex flex-1 min-w-0 items-stretch">
-                                <input id="tkh-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
-                                <button type="button" id="tkh-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                            </div>
-                            <input type="date" id="tkh-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
-                        </div>
-                        <div class="flex items-center gap-1.5 w-full lg:w-[460px] justify-end flex-wrap">
-                            <button type="button" id="tkh-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
-                            <button type="button" id="tkh-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
-                            <button type="button" id="tkh-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
-                            <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
-                            <span id="tkh-appsheet-status"></span>
-                        </div>
+                    <input type="date" id="tkh-filter-from-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                </div>
+                <div class="tonkho-filter-item date-item">
+                    <span class="tonkho-filter-item-label">ĐẾN NGÀY</span>
+                    <div class="date-filter-field flex items-stretch">
+                        <input id="tkh-filter-to-date" type="text" placeholder="dd/mm/yyyy" inputmode="numeric" class="filter-input flex-1 min-w-0" title="Có thể gõ ngày hoặc bấm biểu tượng lịch">
+                        <button type="button" id="tkh-filter-to-date-cal" class="date-cal-btn" title="Chọn ngày trên lịch" aria-label="Mở lịch chọn Đến ngày">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </button>
                     </div>
+                    <input type="date" id="tkh-filter-to-date-picker" class="sr-only" tabindex="-1" aria-hidden="true">
+                </div>
+                <div class="tonkho-filter-actions">
+                    <button type="button" id="tkh-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" id="tkh-btn-refresh" class="action-btn" style="background:#fff;color:#2b7132;">Làm mới toàn bộ</button>
+                    <button type="button" id="tkh-btn-view-loaded-tables" class="action-btn" style="background:#0047ab;border-color:#0047ab;" title="Xem dữ liệu đã tải từ AppSheet theo bộ lọc hiện tại">Xem</button>
+                    <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                    <span id="tkh-appsheet-status"></span>
                 </div>
             </div>
         </div>

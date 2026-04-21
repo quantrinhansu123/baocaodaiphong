@@ -641,6 +641,30 @@
         };
     }
 
+    function truncateSummaryText(s, maxLen) {
+        const t = String(s ?? "").trim();
+        if (!t) return "";
+        if (t.length <= maxLen) return t;
+        return `${t.slice(0, Math.max(0, maxLen - 1))}…`;
+    }
+
+    function syncTbxFilterDropdownSummaries() {
+        const sCt = document.getElementById("tbx-dd-ct-summary");
+        const sNhom = document.getElementById("tbx-dd-nhom-summary");
+        const ct = getCheckedFilterValues("tbx-filter-cong-trinh-list");
+        const nhom = getCheckedFilterValues("tbx-filter-nhom-thiet-bi-list");
+        if (sCt) {
+            if (ct.length === 0) sCt.textContent = "Công trình: tất cả";
+            else if (ct.length === 1) sCt.textContent = truncateSummaryText(ct[0], 34);
+            else sCt.textContent = `${ct.length} công trình đã chọn`;
+        }
+        if (sNhom) {
+            if (nhom.length === 0) sNhom.textContent = "Nhóm TB: tất cả";
+            else if (nhom.length === 1) sNhom.textContent = truncateSummaryText(nhom[0], 34);
+            else sNhom.textContent = `${nhom.length} nhóm đã chọn`;
+        }
+    }
+
     function populateFilterCheckboxes(rows) {
         const selNoi = document.getElementById("tbx-filter-noi-thi-cong");
         const listCt = document.getElementById("tbx-filter-cong-trinh-list");
@@ -668,7 +692,7 @@
         selNoi.innerHTML = "";
         const o0 = document.createElement("option");
         o0.value = "";
-        o0.textContent = "--- Tất cả nơi thi công ---";
+        o0.textContent = "Tất cả";
         selNoi.appendChild(o0);
         for (const v of [...setNoi].sort(sortVi)) {
             const o = document.createElement("option");
@@ -699,6 +723,7 @@
 
         fillPanel(listCt, setCt, "tbx-cong-trinh", prevCt);
         fillPanel(listNhom, setNhom, "tbx-nhom-thiet-bi", prevNhom);
+        syncTbxFilterDropdownSummaries();
     }
 
     function buildStrictDate(y, mm, dd) {
@@ -852,7 +877,7 @@
                 const nhom = pickDsNhomThietBi(r);
                 const gc = pickDsGhiChu(r);
                 html += `<tr class="data-row">
-                    <td class="text-center">${escapeHtml(ma)}</td>
+                    <td class="text-center tbx-td-ma-tb">${escapeHtml(ma)}</td>
                     <td class="pl-2 text-left">${escapeHtml(ten ? `- ${ten}` : "")}</td>
                     <td class="text-center">${escapeHtml(dvt)}</td>
                     <td class="text-center">${escapeHtml(displayCell(st.tonDauSl))}</td>
@@ -863,7 +888,7 @@
                     <td class="text-right pr-1">${escapeHtml(displayCell(st.xuatGt))}</td>
                     <td class="text-center">${escapeHtml(displayCell(st.tonCuoiSl))}</td>
                     <td class="text-right pr-1">${escapeHtml(displayCell(st.tonCuoiGt))}</td>
-                    <td class="text-center">${escapeHtml(nhom)}</td>
+                    <td class="text-center tbx-td-nhom-tb" title="${escapeHtml(nhom)}">${escapeHtml(nhom)}</td>
                     <td class="text-left pl-1">${escapeHtml(gc)}</td>
                 </tr>`;
             }
@@ -896,6 +921,7 @@
         const el = document.getElementById("tbx-appsheet-status");
         if (!el) return;
         el.textContent = msg;
+        el.setAttribute("title", msg || "");
         el.classList.toggle("text-red-600", !!isErr);
         el.classList.toggle("text-header-green", !isErr);
     }
@@ -970,6 +996,17 @@
         }
 
         document.getElementById("tbx-filter-noi-thi-cong")?.addEventListener("change", () => loadFromAppSheet(false));
+
+        const ddCt = document.getElementById("tbx-dd-cong-trinh");
+        const ddNhom = document.getElementById("tbx-dd-nhom-tb");
+        if (ddCt && ddNhom) {
+            ddCt.addEventListener("toggle", () => {
+                if (ddCt.open) ddNhom.open = false;
+            });
+            ddNhom.addEventListener("toggle", () => {
+                if (ddNhom.open) ddCt.open = false;
+            });
+        }
 
         const ctList = document.getElementById("tbx-filter-cong-trinh-list");
         if (ctList) ctList.addEventListener("change", () => loadFromAppSheet(false));

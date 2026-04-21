@@ -574,66 +574,56 @@
 
             <!-- FILTERS -->
             <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-                <div class="flex flex-col gap-2 max-w-[1400px]">
-                    <!-- Row 1: Main Dropdowns -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2 font-bold text-[#2b7132] text-[10px]">
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">CÔNG TRƯỜNG:</span>
-                            <select id="filter-project" class="filter-select flex-1">
+                <div class="flex flex-nowrap items-center gap-2 max-w-[1400px] overflow-x-auto whitespace-nowrap pb-1 font-bold text-[#2b7132] text-[10px]">
+                    <div class="flex items-center gap-2 shrink-0 w-[245px]">
+                        <span class="w-[90px] shrink-0">CÔNG TRƯỜNG:</span>
+                        <select id="filter-project" class="filter-select flex-1">
                             <option value="">— Tất cả —</option>
                         </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">TÊN LÁI MÁY:</span>
-                            <select id="filter-driver" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">NGUỒN GỐC:</span>
-                            <select id="filter-origin" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-[90px] shrink-0">NHÓM XE:</span>
-                            <select id="filter-group" class="filter-select flex-1">
-                            <option value="">— Tất cả —</option>
-                        </select>
-                        </div>
                     </div>
-
-                    <!-- Row 2: Dates & Action Buttons -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-gray-100">
-                        <div class="flex items-center gap-4 font-bold text-[#2b7132] text-[10px]">
-                            <div class="flex items-center gap-2">
-                                <span>TỪ NGÀY:</span>
-                                <div class="date-filter-field flex items-stretch w-[130px]">
-                                    <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
-                                    <button type="button" id="filter-from-date-cal" class="date-cal-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                                </div>
-                                <input type="date" id="filter-from-date-picker" class="sr-only">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>ĐẾN NGÀY:</span>
-                                <div class="date-filter-field flex items-stretch w-[130px]">
-                                    <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
-                                    <button type="button" id="filter-to-date-cal" class="date-cal-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                </button>
-                                </div>
-                                <input type="date" id="filter-to-date-picker" class="sr-only">
-                            </div>
+                    <div class="flex items-center gap-2 shrink-0 w-[245px]">
+                        <span class="w-[90px] shrink-0">TÊN LÁI MÁY:</span>
+                        <select id="filter-driver" class="filter-select flex-1">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 w-[225px]">
+                        <span class="w-[90px] shrink-0">NGUỒN GỐC:</span>
+                        <select id="filter-origin" class="filter-select flex-1">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 w-[205px]">
+                        <span class="w-[70px] shrink-0">NHÓM XE:</span>
+                        <select id="filter-group" class="filter-select flex-1">
+                            <option value="">— Tất cả —</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="shrink-0">TỪ NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch w-[130px]">
+                            <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <button type="button" id="filter-from-date-cal" class="date-cal-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
                         </div>
-
-                        <div class="flex flex-wrap items-center gap-1.5 no-print">
-                            <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
-                            <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
-                            <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                            <button id="export-pdf" class="action-btn">Xuất PDF</button>
+                        <input type="date" id="filter-from-date-picker" class="sr-only">
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="shrink-0">ĐẾN NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch w-[130px]">
+                            <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <button type="button" id="filter-to-date-cal" class="date-cal-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </button>
                         </div>
+                        <input type="date" id="filter-to-date-picker" class="sr-only">
+                    </div>
+                    <div class="flex items-center gap-1.5 no-print shrink-0 ml-1">
+                        <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
+                        <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
+                        <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                        <button id="export-pdf" class="action-btn">Xuất PDF</button>
                     </div>
                 </div>
                 <div id="appsheet-status" class="status-line text-[#2b7132] mt-1"></div>

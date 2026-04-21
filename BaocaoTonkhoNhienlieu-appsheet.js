@@ -1,10 +1,11 @@
 /**
  * Báo cáo tồn kho nhiên liệu — AppSheet.
  * «Mã nhiên liệu» / «Tên nhiên liệu» lấy từ «Danh sách tài sản»
- * (cột «Mã tài sản», «Tên tài sản») khi «Tên nhóm» = «Nhiên liệu».
+ * (cột «Mã tài sản», ưu tiên «Tên nhiên liệu», không có thì «Tên tài sản») khi «Tên nhóm» = «Nhiên liệu».
  * «Tồn đầu kỳ» (SL, và GT nếu có): bảng «Tồn kho ĐK» — cột «Sl tồn ĐK»,
  * khớp «Tên NL» với tên nhiên liệu và «Ngày nhập số dư ĐK» nằm trong khoảng «Từ ngày»..«Tới ngày».
  * «Nhập trong kỳ» / «Xuất trong kỳ» (SL): «Nhập xuất luân chuyển CT» — tổng «Số lượng NL»;
+ * Giá trị nhập/xuất kỳ: lấy từ cột «Thành tiền NL» trên «Nhập xuất luân chuyển CT».
  * Nhập / Xuất trong kỳ: chỉ theo cột «Loại phiếu» = Nhập hoặc Xuất (cùng bộ lọc ngày & NCC / nơi nhập / xe).
  * Các ô SL (tồn/nhập/xuất/tồn cuối) hiển thị kèm «(ĐVT)» từ cột ĐVT trên «Danh sách tài sản» của dòng đó.
  */
@@ -164,6 +165,19 @@
             "TenTaiSan",
             "TenThietBi"
         ]);
+    }
+
+    /** Ưu tiên cột «Tên nhiên liệu» trên AppSheet; fallback «Tên tài sản». */
+    function pickDsTenNhienLieu(row) {
+        const direct = pickFirstCell(row, [
+            "Tên nhiên liệu",
+            "Ten nhien lieu",
+            "TenNhienLieu",
+            "Tên NL",
+            "Ten NL"
+        ]);
+        if (direct) return direct;
+        return pickDsTenThietBi(row);
     }
 
     function pickDsDvt(row) {
@@ -467,7 +481,7 @@
         return { start, end };
     }
 
-    /** «Tên NL» trên «Tồn kho ĐK» — khớp với «Tên tài sản» (tên nhiên liệu) trên DS. */
+    /** «Tên NL» trên «Tồn kho ĐK» — khớp với «Tên nhiên liệu» (ưu tiên) trên «Danh sách tài sản». */
     function pickTkTenNl(row) {
         const direct = pickFirstCell(row, [
             "Tên NL",
@@ -636,17 +650,21 @@
     }
 
     /**
-     * Gom «Tồn kho ĐK» trong khoảng ngày đã chọn và khóa tên NL (chuẩn hóa).
-     * Trả về Map(normalizeKeyPart(Tên NL)) -> { sl, gt } (cộng dồn nếu trùng tên trong kỳ).
+     * Gom «Tồn kho ĐK» theo khóa tên NL (chuẩn hóa).
+     * - Luôn đọc từ cột «Tên NL» + «Sl tồn ĐK» (và GT tồn ĐK nếu có).
+     * - Nếu có khoảng ngày, chỉ lấy các dòng nằm trong khoảng đó.
+     * Trả về Map(normalizeKeyPart(Tên NL)) -> { sl, gt } (cộng dồn nếu trùng tên).
      */
     function buildTonKhoDkAggregateByTenNl(tonKhoRows, dateRange) {
         const map = new Map();
-        if (!dateRange || !tonKhoRows?.length) return map;
+        if (!tonKhoRows?.length) return map;
         for (const r of tonKhoRows) {
-            const rawNgay = pickTkNgayNhapSoDu(r);
-            const rowDate = rawNgay != null ? parseCellToDate(rawNgay) : null;
-            if (!rowDate || isNaN(rowDate.getTime())) continue;
-            if (rowDate < dateRange.start || rowDate > dateRange.end) continue;
+            if (dateRange) {
+                const rawNgay = pickTkNgayNhapSoDu(r);
+                const rowDate = rawNgay != null ? parseCellToDate(rawNgay) : null;
+                if (!rowDate || isNaN(rowDate.getTime())) continue;
+                if (rowDate < dateRange.start || rowDate > dateRange.end) continue;
+            }
             const tenNl = pickTkTenNl(r).trim();
             if (!tenNl) continue;
             const nk = normalizeKeyPart(tenNl);
@@ -750,7 +768,11 @@
         ];
         for (const k of keys) {
             if (row[k] == null || row[k] === "") continue;
-            const d = parseCellToDate(row[k]);
+            let d = parseCellToDate(row[k]);
+            if (!d || isNaN(d.getTime())) {
+                const s = cellDisplayString(row[k]).trim();
+                if (s) d = parseDateFlexible(s);
+            }
             if (d && !isNaN(d.getTime())) return d;
         }
         return null;
@@ -771,7 +793,13 @@
         return d >= start && d <= end;
     }
 
-    /** Có ít nhất một trong hai ô Từ / Đến ngày hợp lệ — mới gom nhập/xuất từ NXLC. */
+    /** Có chọn kỳ (Từ/Đến) thì lọc theo ngày NXLC; không chọn thì lấy toàn bộ phiếu (để cột Nhập/Xuất vẫn có số liệu). */
+    function nxlcRowPassesDateFilterIfAny(row) {
+        if (!hasTkhNxlcPeriodFilter()) return true;
+        return nxlcRowInSelectedPeriod(row);
+    }
+
+    /** Có ít nhất một ngày hợp lệ trên Từ/Đến — khi đó mới lọc phiếu NXLC theo kỳ (xem nxlcRowPassesDateFilterIfAny). */
     function hasTkhNxlcPeriodFilter() {
         const fromRaw = document.getElementById("tkh-filter-from-date")?.value?.trim() ?? "";
         const toRaw = document.getElementById("tkh-filter-to-date")?.value?.trim() ?? "";
@@ -855,6 +883,34 @@
         return null;
     }
 
+    function parseNxlcThanhTienNl(row) {
+        const n = pickNumericByAliases(
+            row,
+            [
+                "Thành tiền NL",
+                "Thanh tien NL",
+                "Thành tiền nhiên liệu",
+                "Thanh tien nhien lieu",
+                "Thành tiền",
+                "Thanh tien",
+                "Giá trị NL",
+                "Gia tri NL",
+                "Giá trị nhiên liệu",
+                "Gia tri nhien lieu"
+            ],
+            /th[aà]nh\s*ti[eề]n.*nl|thanh\s*tien.*nl|gia\s*tri.*nl|gia\s*tri.*nhien|thanh\s*tien.*nhien/i
+        );
+        if (n != null) return n;
+        for (const [k, v] of Object.entries(row || {})) {
+            const key = String(k);
+            if (!/th[aà]nh\s*ti[eề]n|thanh\s*tien|gia\s*tri/i.test(key)) continue;
+            if (!/nl|nhien\s*lieu|nhi[eê]n/i.test(key)) continue;
+            const q = parseNumeric(v);
+            if (q != null && !isNaN(q)) return q;
+        }
+        return null;
+    }
+
     /**
      * Tổng SL theo khóa normalizeKeyPart(Tên nhiên liệu): phiếu khớp rowPredicate + khoảng ngày + 3 filter.
      */
@@ -863,7 +919,7 @@
         if (!nxlcRows?.length || typeof rowPredicate !== "function") return map;
         for (const r of nxlcRows) {
             if (!rowPredicate(r)) continue;
-            if (!nxlcRowInSelectedPeriod(r)) continue;
+            if (!nxlcRowPassesDateFilterIfAny(r)) continue;
             const nccSel = document.getElementById("tkh-filter-ncc")?.value?.trim() ?? "";
             const ctSel = document.getElementById("tkh-filter-cong-trinh")?.value?.trim() ?? "";
             const khoSel = document.getElementById("tkh-filter-ten-kho")?.value?.trim() ?? "";
@@ -880,12 +936,119 @@
         return map;
     }
 
+    function buildNxlcGtAggregateFromNxlc(nxlcRows, rowPredicate) {
+        const map = new Map();
+        if (!nxlcRows?.length || typeof rowPredicate !== "function") return map;
+        for (const r of nxlcRows) {
+            if (!rowPredicate(r)) continue;
+            if (!nxlcRowPassesDateFilterIfAny(r)) continue;
+            const nccSel = document.getElementById("tkh-filter-ncc")?.value?.trim() ?? "";
+            const ctSel = document.getElementById("tkh-filter-cong-trinh")?.value?.trim() ?? "";
+            const khoSel = document.getElementById("tkh-filter-ten-kho")?.value?.trim() ?? "";
+            if (nccSel && pickNxlcTenNhaCungCap(r).trim() !== nccSel) continue;
+            if (ctSel && pickNxlcTenNoiNhap(r).trim() !== ctSel) continue;
+            if (khoSel && pickNxlcXeCapDau(r).trim() !== khoSel) continue;
+            const tenNl = getNxlcTenNhienLieuCell(r).trim();
+            if (!tenNl) continue;
+            const nk = normalizeKeyPart(tenNl);
+            const gt = parseNxlcThanhTienNl(r);
+            if (gt == null || isNaN(gt)) continue;
+            map.set(nk, (map.get(nk) || 0) + gt);
+        }
+        return map;
+    }
+
     function buildNhapSlAggregateFromNxlc(nxlcRows) {
         return buildNxlcSlAggregateFromNxlc(nxlcRows, nxlcRowIsPhieuNhap);
     }
 
     function buildXuatSlAggregateFromNxlc(nxlcRows) {
         return buildNxlcSlAggregateFromNxlc(nxlcRows, nxlcRowIsPhieuXuat);
+    }
+
+    function buildNhapGtAggregateFromNxlc(nxlcRows) {
+        return buildNxlcGtAggregateFromNxlc(nxlcRows, nxlcRowIsPhieuNhap);
+    }
+
+    function buildXuatGtAggregateFromNxlc(nxlcRows) {
+        return buildNxlcGtAggregateFromNxlc(nxlcRows, nxlcRowIsPhieuXuat);
+    }
+
+    /**
+     * Theo tên tài sản / tên nhiên liệu trên «Danh sách tài sản», xác định thứ tự khóa
+     * normalizeKeyPart(...) tương ứng với cột «Tên nhiên liệu» trên NXLC cần lấy:
+     * - Dầu cầu (DS) ← «Dầu cầu»
+     * - Mỡ / Mỡ bò (DS) ← ưu tiên «Mỡ», sau đó «Mỡ bò»
+     * - Nhớt / Nhớt động cơ (DS) ← ưu tiên «Nhớt», sau đó «Nhớt động cơ»
+     * - Dầu thủy lực (DS) ← «Dầu thủy lực»
+     * Các tên khác: khớp đúng tên DS trước, rồi fallback mềm.
+     */
+    function nxlcLookupKeysForDsTenNl(tenDs) {
+        const t = String(tenDs ?? "").trim();
+        if (!t) return [];
+        const nk = normalizeKeyPart(t);
+
+        if (/dầu\s*thủy\s*lực/i.test(t)) {
+            return [normalizeKeyPart("Dầu thủy lực")];
+        }
+        if (/dầu\s*cầu/i.test(t)) {
+            return [normalizeKeyPart("Dầu cầu")];
+        }
+        if (/dầu\s*diese|dầu\s*do\b|diezel|diesel/i.test(t)) {
+            const keys = [
+                normalizeKeyPart("Dầu Diesel"),
+                normalizeKeyPart("Dầu Diezel"),
+                normalizeKeyPart("Dầu DO"),
+                nk
+            ];
+            return [...new Set(keys)];
+        }
+        if (/\bmỡ\b|^mỡ|mỡ\s*bò|mỡ\s|mơ\s*bò/i.test(t) || nk === "mobo" || nk === "mo") {
+            return [normalizeKeyPart("Mỡ"), normalizeKeyPart("Mỡ bò")];
+        }
+        if (/nhớt|nhot/i.test(t)) {
+            return [normalizeKeyPart("Nhớt"), normalizeKeyPart("Nhớt động cơ")];
+        }
+
+        return [nk];
+    }
+
+    /**
+     * Lấy một giá trị aggregate theo tên NL trên DS: thử lần lượt các khóa NXLC đã map.
+     */
+    function getAggValueForDsFromNxlcMap(aggMap, tenDs) {
+        if (!aggMap) return null;
+        const keys = nxlcLookupKeysForDsTenNl(tenDs);
+        for (const k of keys) {
+            if (!k) continue;
+            if (aggMap.has(k)) {
+                const v = aggMap.get(k);
+                if (v != null && !isNaN(v)) return v;
+            }
+        }
+        return getAggValueByFuelName(aggMap, normalizeKeyPart(tenDs));
+    }
+
+    /**
+     * Fallback: khớp chuẩn hóa tuyệt đối, rồi khớp chứa 2 chiều (tên khác).
+     */
+    function getAggValueByFuelName(aggMap, normalizedFuelName) {
+        if (!aggMap || !normalizedFuelName) return null;
+        if (aggMap.has(normalizedFuelName)) return aggMap.get(normalizedFuelName);
+        let bestVal = null;
+        let bestScore = 0;
+        for (const [k, v] of aggMap.entries()) {
+            if (!k) continue;
+            const minLen = Math.min(k.length, normalizedFuelName.length);
+            if (minLen < 3) continue;
+            if (k.includes(normalizedFuelName) || normalizedFuelName.includes(k)) {
+                if (minLen > bestScore) {
+                    bestScore = minLen;
+                    bestVal = v;
+                }
+            }
+        }
+        return bestVal;
     }
 
     function fillSelectOptions(id, sortedValues) {
@@ -980,43 +1143,49 @@
         const selectedDateRange = getSelectedDateRangeFromDom();
         const tonDkAgg = buildTonKhoDkAggregateByTenNl(cacheTonKhoDkRows, selectedDateRange);
 
-        const useNxlcSlKy =
-            Array.isArray(cacheNxlcCtRows) && !lastNxlcFetchError && hasTkhNxlcPeriodFilter();
+        const useNxlcSlKy = Array.isArray(cacheNxlcCtRows) && !lastNxlcFetchError;
         const nhapSlAgg = useNxlcSlKy ? buildNhapSlAggregateFromNxlc(cacheNxlcCtRows) : null;
         const xuatSlAgg = useNxlcSlKy ? buildXuatSlAggregateFromNxlc(cacheNxlcCtRows) : null;
+        const nhapGtAgg = useNxlcSlKy ? buildNhapGtAggregateFromNxlc(cacheNxlcCtRows) : null;
+        const xuatGtAgg = useNxlcSlKy ? buildXuatGtAggregateFromNxlc(cacheNxlcCtRows) : null;
 
         let html = "";
         const sorted = [...(rows || [])].sort((a, b) => {
             const ma = pickDsMaThietBi(a).localeCompare(pickDsMaThietBi(b), "vi");
             if (ma !== 0) return ma;
-            return pickDsTenThietBi(a).localeCompare(pickDsTenThietBi(b), "vi");
+            return pickDsTenNhienLieu(a).localeCompare(pickDsTenNhienLieu(b), "vi");
         });
 
         for (const r of sorted) {
             const stBase = extractStockCells(r);
-            const tenNl = pickDsTenThietBi(r);
+            const tenNl = pickDsTenNhienLieu(r);
             const nk = normalizeKeyPart(tenNl);
-            let tonDauSl = stBase.tonDauSl;
+            let tonDauSl = null;
             let tonDauGt = stBase.tonDauGt;
-            if (selectedDateRange) {
-                const hit = tonDkAgg.get(nk);
-                if (hit) {
-                    tonDauSl = hit.sl;
-                    tonDauGt = hit.gt;
-                } else {
-                    tonDauSl = null;
-                    tonDauGt = null;
-                }
+            const hit = tonDkAgg.get(nk);
+            if (hit) {
+                tonDauSl = hit.sl;
+                if (hit.gt != null && !isNaN(hit.gt)) tonDauGt = hit.gt;
             }
             let nhapSl = stBase.nhapSl;
             let nhapGt = stBase.nhapGt;
             if (useNxlcSlKy && nhapSlAgg) {
-                nhapSl = nhapSlAgg.has(nk) ? nhapSlAgg.get(nk) : 0;
+                const v = getAggValueForDsFromNxlcMap(nhapSlAgg, tenNl);
+                nhapSl = v != null && !isNaN(v) ? v : 0;
+            }
+            if (useNxlcSlKy && nhapGtAgg) {
+                const v = getAggValueForDsFromNxlcMap(nhapGtAgg, tenNl);
+                nhapGt = v != null && !isNaN(v) ? v : 0;
             }
             let xuatSl = stBase.xuatSl;
             let xuatGt = stBase.xuatGt;
             if (useNxlcSlKy && xuatSlAgg) {
-                xuatSl = xuatSlAgg.has(nk) ? xuatSlAgg.get(nk) : 0;
+                const v = getAggValueForDsFromNxlcMap(xuatSlAgg, tenNl);
+                xuatSl = v != null && !isNaN(v) ? v : 0;
+            }
+            if (useNxlcSlKy && xuatGtAgg) {
+                const v = getAggValueForDsFromNxlcMap(xuatGtAgg, tenNl);
+                xuatGt = v != null && !isNaN(v) ? v : 0;
             }
             const tonCuoiSl = computeClosingValue(tonDauSl, nhapSl, xuatSl);
             const tonCuoiGt = computeClosingValue(tonDauGt, nhapGt, xuatGt);
