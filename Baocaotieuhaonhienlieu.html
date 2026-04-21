@@ -8,6 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
+        /* Table font normalization */
+        table,
+        table th,
+        table td {
+            font-family: "Times New Roman", Times, serif !important;
+            font-size: 14pt !important;
+        }
+
         body {
             font-family: 'Times New Roman', Times, serif;
             background-color: #f9fafb;
@@ -259,7 +267,7 @@
 
         /** Tiêu đề báo cáo: hẹp, căn giữa — tách khỏi bảng rộng (tab thiết bị máy). */
         .report-title-block {
-            max-width: 28rem;
+            max-width: none;
             margin-left: auto;
             margin-right: auto;
             padding-left: 0.5rem;
@@ -269,7 +277,8 @@
 
         #report-main-title {
             line-height: 1.25;
-            font-size: 1rem;
+            font-size: 14pt;
+            white-space: nowrap;
         }
         /* Custom scrollbar for table wrapper */
         
@@ -473,6 +482,14 @@
         .text-right {
             text-align: right !important;
             padding-right: 8px;
+        }
+
+        /* Keep driver names on one line while preserving row spacing. */
+        #report-table tbody td:nth-child(4) {
+            white-space: nowrap;
+            overflow-wrap: normal;
+            word-break: keep-all;
+            line-height: 1.25;
         }
         
         .font-bold-val {
@@ -731,7 +748,7 @@
                             <th id="th-stt" rowspan="2" style="width: 2%;">STT</th>
                             <th id="th-ten-thiet-bi" rowspan="2" style="width: 10%;">Tên thiết bị</th>
                             <th id="th-bien-so-xe" rowspan="2" style="width: 3.5%;">Biển số xe</th>
-                            <th id="th-ten-lai-xe" rowspan="2" style="width: 5.5%;">Tên lái xe</th>
+                            <th id="th-ten-lai-xe" rowspan="2" style="width: 6.8%;">Tên lái xe</th>
                             <th id="th-so-ngay" rowspan="2" style="width: 3%;">Số ngày xe<br>hoạt động</th>
                             <th id="th-so-chuyen" rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
                             <th id="th-gio-hc" rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
@@ -4652,7 +4669,7 @@
                     "th-stt": 1.25,
                     "th-ten-thiet-bi": 4.6,
                     "th-bien-so-xe": 2.55,
-                    "th-ten-lai-xe": 3.85,
+                    "th-ten-lai-xe": 4.6,
                     "th-so-ngay": 2.35,
                     "th-gio-hc": 2.25,
                     "th-gio-tc": 2.25,
@@ -4670,14 +4687,14 @@
                     "th-thtt-t2": 2.7,
                     "th-dm-trong-binh": 2.3,
                     "th-dm-tieu-hao": 2.3,
-                    "th-cong-viec": 4.9,
-                    "th-cong-truong": 5.4,
+                    "th-cong-viec": 4.4,
+                    "th-cong-truong": 5.0,
                 });
             } else {
                 setWidth("th-stt", "2%");
                 setWidth("th-ten-thiet-bi", "8%");
                 setWidth("th-bien-so-xe", "3.5%");
-                setWidth("th-ten-lai-xe", "5.5%");
+                setWidth("th-ten-lai-xe", "6.8%");
                 setWidth("th-so-ngay", "3%");
                 setWidth("th-gio-hc", "3%");
                 setWidth("th-gio-tc", "3%");
@@ -4696,8 +4713,8 @@
                 setWidth("th-thtt-t2", "3.5%");
                 setWidth("th-dm-trong-binh", "3%");
                 setWidth("th-dm-tieu-hao", "3%");
-                setWidth("th-cong-viec", "6%");
-                setWidth("th-cong-truong", "7.5%");
+                setWidth("th-cong-viec", "5.4%");
+                setWidth("th-cong-truong", "7%");
             }
 
             const table = document.getElementById("report-table");
