@@ -354,15 +354,16 @@
             <div class="repair-filter-bar">
                 <div class="repair-filter-dates">
                     <span class="repair-filter-label">TỪ NGÀY GIỜ</span>
-                    <input type="datetime-local" class="filter-input" aria-label="Từ ngày giờ">
+                    <input type="datetime-local" id="sc2-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
                     <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
-                    <input type="datetime-local" class="filter-input" aria-label="Đến ngày giờ">
+                    <input type="datetime-local" id="sc2-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
                 </div>
                 <div class="repair-filter-actions">
-                    <button type="button" class="action-btn">Tải dữ liệu AppSheet</button>
-                    <button type="button" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
+                    <button type="button" id="sc2-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
+                    <button type="button" id="sc2-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
                     <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
                     <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                    <span id="sc2-appsheet-status" class="text-slate-700 font-semibold ml-2"></span>
                 </div>
             </div>
         </div>
@@ -383,7 +384,7 @@
                         <th style="width: 20%;">DG chung</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="sc2-tbody">
                     <tr class="group-row">
                         <td>01. ĐỘI THẢM</td>
                         <td class="text-left">Lu Kawasaki 2 Thân</td>
@@ -580,6 +581,341 @@
 
         applyGroupedTabVisibility();
 
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+        const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
+        let cacheNxlcCtRows = null;
+
+        function normalizeSpaces(s) {
+            return String(s ?? "").trim().replace(/\s+/g, " ");
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function cellString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value);
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value);
+            return String(v);
+        }
+
+        function cellDisplayString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null) {
+                const display = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
+                if (display != null && String(display).trim() !== "") return String(display);
+            }
+            return cellString(v);
+        }
+
+        function pickFirstCell(row, keys) {
+            for (const k of keys) {
+                const v = row?.[k];
+                if (v == null) continue;
+                const s = normalizeSpaces(cellDisplayString(v));
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function pickByRegex(row, pattern) {
+            for (const [k, v] of Object.entries(row || {})) {
+                if (!pattern.test(normalizeSpaces(k))) continue;
+                const s = normalizeSpaces(cellDisplayString(v));
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function parseNumeric(raw) {
+            if (raw == null || raw === "") return null;
+            if (typeof raw === "number" && !isNaN(raw)) return raw;
+            const s0 = cellDisplayString(raw).trim();
+            const m = s0.match(/-?[\d.,]+/);
+            if (!m) return null;
+            let s = m[0];
+            const comma = s.indexOf(",");
+            const dot = s.indexOf(".");
+            if (comma !== -1 && dot !== -1) {
+                if (comma > dot) s = s.replace(/\./g, "").replace(",", ".");
+                else s = s.replace(/,/g, "");
+            } else if (comma !== -1) {
+                s = s.replace(",", ".");
+            } else if (dot !== -1 && s.indexOf(".", dot + 1) !== -1) {
+                s = s.replace(/\./g, "");
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? null : n;
+        }
+
+        function parseNgaySuaChuaValue(raw) {
+            if (raw == null) return null;
+            const ordered = typeof raw === "object" && raw !== null
+                ? [raw.Value, raw.value, raw.DisplayValue, raw.displayValue, raw.FormattedValue, raw.formattedValue, raw.Text, raw.text]
+                : [raw];
+            for (const item of ordered) {
+                const txt = normalizeSpaces(item);
+                if (!txt) continue;
+                let m = txt.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+                if (m) {
+                    const dIso = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+                    if (!isNaN(dIso.getTime())) return dIso;
+                }
+                m = txt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,].*)?$/);
+                if (m) {
+                    const a = Number(m[1]);
+                    const b = Number(m[2]);
+                    const y = Number(m[3]);
+                    const dSlash = a > 12 ? new Date(y, b - 1, a) : (b > 12 ? new Date(y, a - 1, b) : new Date(y, a - 1, b));
+                    if (!isNaN(dSlash.getTime())) return dSlash;
+                }
+                const dNative = new Date(txt);
+                if (!isNaN(dNative.getTime())) return dNative;
+            }
+            return null;
+        }
+
+        function formatDateDdMmYyyy(d) {
+            if (!d || isNaN(d.getTime())) return "";
+            return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+        }
+
+        function formatMoney(n) {
+            if (n == null || isNaN(n)) return "0";
+            return new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+        }
+
+        function pickTenThietBiSuaChua(row) {
+            const direct = pickFirstCell(row, ["Tên XMTB", "Ten XMTB", "Tên thiết bị sửa chữa", "Ten thiet bi sua chua"]);
+            if (direct) return direct;
+            return pickFirstCell(row, ["Tên tài sản", "Ten tai san", "Tên thiết bị", "Ten thiet bi"]);
+        }
+
+        function pickTenLaiMay(row) {
+            const direct = pickFirstCell(row, [
+                "Tên LM",
+                "Ten LM",
+                "Tên lái máy",
+                "Ten lai may",
+                "Lái máy",
+                "Lai may",
+                "Tên lái máy/XMTB",
+                "Ten lai may/XMTB",
+                "Tên người vận hành",
+                "Ten nguoi van hanh"
+            ]);
+            if (direct) return direct;
+            return pickByRegex(row, /(t[eê]n.*(l[aá]i|lm).*(m[aá]y|xmtb)|l[aá]i.*m[aá]y|t[eê]n.*v[aậ]n.*h[aà]nh)/i);
+        }
+
+        function pickNhomThongKe(row) {
+            const direct = pickFirstCell(row, ["Nhóm mã thống kê", "Nhom ma thong ke", "Tên nơi quản lý", "Ten noi quan ly"]);
+            if (direct) return direct;
+            const tenTb = pickTenThietBiSuaChua(row);
+            const m = tenTb.match(/^(\d{1,2}\.\s*[^-]+)/);
+            return m ? normalizeSpaces(m[1]) : "";
+        }
+
+        function pickTenLinhKienSuaChua(row) {
+            const direct = pickFirstCell(row, [
+                "Tên link kiện sửa chữa",
+                "Tên linh kiện sửa chữa",
+                "Ten link kien sua chua",
+                "Ten linh kien sua chua"
+            ]);
+            if (direct) return direct;
+            return pickByRegex(row, /t[eê]n.*(linh|link).*(ki[eệ]n).*(s[ửu]a).*(ch[uữ]a)/i);
+        }
+
+        function pickDvtSc(row) {
+            const direct = pickFirstCell(row, ["ĐVT SC", "DVT SC", "Đơn vị SC", "Don vi SC"]);
+            if (direct) return direct;
+            return pickByRegex(row, /[đd]vt.*sc|đ[oơ]n.*v[iị].*sc/i);
+        }
+
+        function pickSoLuongSc(row) {
+            const keys = ["Số lượng SC", "So luong SC", "SL SC", "So luong sua chua"];
+            for (const k of keys) {
+                const n = parseNumeric(row?.[k]);
+                if (n != null) return n;
+            }
+            return null;
+        }
+
+        function pickDonGiaSc(row) {
+            const keys = ["Đơn giá SC", "Don gia SC", "Đơn giá sửa chữa", "Don gia sua chua"];
+            for (const k of keys) {
+                const n = parseNumeric(row?.[k]);
+                if (n != null) return n;
+            }
+            return null;
+        }
+
+        function pickThanhTienSc(row) {
+            const keys = ["Thành tiền SC", "Thanh tien SC", "Tiền SC", "Tien SC"];
+            for (const k of keys) {
+                const n = parseNumeric(row?.[k]);
+                if (n != null) return n;
+            }
+            return null;
+        }
+
+        function pickDgChung(row) {
+            return pickFirstCell(row, ["DG chung", "Dg chung", "Diễn giải chung", "Dien giai chung", "Ghi chú", "Ghi chu"]);
+        }
+
+        function setStatus(msg, isErr) {
+            const el = document.getElementById("sc2-appsheet-status");
+            if (!el) return;
+            el.textContent = msg;
+            el.style.color = isErr ? "#b91c1c" : "#374151";
+        }
+
+        function getDateRangeFromFilters() {
+            const fromRaw = document.getElementById("sc2-filter-from-datetime")?.value?.trim() ?? "";
+            const toRaw = document.getElementById("sc2-filter-to-datetime")?.value?.trim() ?? "";
+            const from = fromRaw ? new Date(fromRaw) : null;
+            const to = toRaw ? new Date(toRaw) : null;
+            return {
+                hasFrom: !!(from && !isNaN(from.getTime())),
+                hasTo: !!(to && !isNaN(to.getTime())),
+                from: from && !isNaN(from.getTime()) ? from : null,
+                to: to && !isNaN(to.getTime()) ? to : null
+            };
+        }
+
+        function rowInDateRange(dateObj, dateRange) {
+            if (!dateRange?.hasFrom && !dateRange?.hasTo) return true;
+            if (!dateObj || isNaN(dateObj.getTime())) return false;
+            if (dateRange.hasFrom && dateObj < dateRange.from) return false;
+            if (dateRange.hasTo && dateObj > dateRange.to) return false;
+            return true;
+        }
+
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const err = await response.text();
+                throw new Error(`${tableName}: ${response.status} ${err}`);
+            }
+            const data = await response.json();
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.Rows)) return data.Rows;
+            return [];
+        }
+
+        function renderPaymentRows() {
+            const tbody = document.getElementById("sc2-tbody");
+            if (!tbody) return;
+            const dateRange = getDateRangeFromFilters();
+            if (dateRange.hasFrom && dateRange.hasTo && dateRange.from > dateRange.to) {
+                const tmp = dateRange.from;
+                dateRange.from = dateRange.to;
+                dateRange.to = tmp;
+            }
+
+            const rows = [];
+            for (const r of cacheNxlcCtRows || []) {
+                const tenLk = pickTenLinhKienSuaChua(r);
+                const tenTb = pickTenThietBiSuaChua(r);
+                const ngay = parseNgaySuaChuaValue(r["Ngày sửa chữa"] ?? r["Ngay sua chua"] ?? r["Ngày SC"] ?? r["Ngay SC"]);
+                if (!tenLk || !tenTb || !rowInDateRange(ngay, dateRange)) continue;
+                const sl = pickSoLuongSc(r);
+                const dg = pickDonGiaSc(r);
+                const ttRaw = pickThanhTienSc(r);
+                const tt = ttRaw != null ? ttRaw : ((sl != null && dg != null) ? sl * dg : null);
+                rows.push({
+                    nhom: pickNhomThongKe(r),
+                    tenTb,
+                    tenLm: pickTenLaiMay(r),
+                    ngay,
+                    tenLk,
+                    dvt: pickDvtSc(r),
+                    sl,
+                    dg,
+                    tt,
+                    dgChung: pickDgChung(r)
+                });
+            }
+
+            rows.sort((a, b) => (a.ngay?.getTime?.() || 0) - (b.ngay?.getTime?.() || 0) || a.tenTb.localeCompare(b.tenTb, "vi"));
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>';
+                return;
+            }
+
+            let total = 0;
+            const htmlRows = rows.map((r) => {
+                const tien = r.tt != null && isFinite(r.tt) ? r.tt : 0;
+                total += tien;
+                return `<tr>
+                    <td>${escapeHtml(r.nhom)}</td>
+                    <td class="text-left">${escapeHtml(r.tenTb)}</td>
+                    <td>${escapeHtml(r.tenLm)}</td>
+                    <td>${escapeHtml(formatDateDdMmYyyy(r.ngay))}</td>
+                    <td class="text-left">${escapeHtml(r.tenLk)}</td>
+                    <td>${escapeHtml(r.dvt)}</td>
+                    <td class="text-right">${escapeHtml(r.sl != null ? formatMoney(r.sl) : "")}</td>
+                    <td class="text-right">${escapeHtml(r.dg != null ? formatMoney(r.dg) : "")}</td>
+                    <td class="text-right">${escapeHtml(formatMoney(tien))}</td>
+                    <td class="text-left">${escapeHtml(r.dgChung)}</td>
+                </tr>`;
+            }).join("");
+
+            const totalRow = `<tr class="total-row">
+                <td>TỔNG CỘNG</td>
+                <td colspan="7"></td>
+                <td class="text-right">${escapeHtml(formatMoney(total))}</td>
+                <td class="text-left">Tổng toàn bảng</td>
+            </tr>`;
+
+            tbody.innerHTML = htmlRows + totalRow;
+        }
+
+        async function loadFromAppSheet(forceRefresh) {
+            const btnLoad = document.getElementById("sc2-btn-load");
+            const btnRefresh = document.getElementById("sc2-btn-refresh");
+            if (btnLoad) btnLoad.disabled = true;
+            if (btnRefresh) btnRefresh.disabled = true;
+            try {
+                if (forceRefresh) cacheNxlcCtRows = null;
+                setStatus("Đang tải AppSheet…", false);
+                if (!cacheNxlcCtRows) {
+                    cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
+                }
+                renderPaymentRows();
+                setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}».`, false);
+            } catch (error) {
+                console.error(error);
+                setStatus(`Lỗi: ${error?.message || error}`, true);
+            } finally {
+                if (btnLoad) btnLoad.disabled = false;
+                if (btnRefresh) btnRefresh.disabled = false;
+            }
+        }
+
         function getTimestampForFileName() {
             const now = new Date();
             const pad = (n) => String(n).padStart(2, "0");
@@ -656,6 +992,12 @@
         if (exportPdfBtn) {
             exportPdfBtn.addEventListener("click", exportPageToPdf);
         }
+
+        document.getElementById("sc2-btn-load")?.addEventListener("click", () => loadFromAppSheet(false));
+        document.getElementById("sc2-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
+        document.getElementById("sc2-filter-from-datetime")?.addEventListener("change", () => renderPaymentRows());
+        document.getElementById("sc2-filter-to-datetime")?.addEventListener("change", () => renderPaymentRows());
+        loadFromAppSheet(false);
     </script>
 </body>
 
