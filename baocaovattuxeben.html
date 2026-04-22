@@ -10,12 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     
     <style>
-        /* Table font normalization */
+        /* Keep typeface, avoid forcing large font on every cell */
         table,
         table th,
         table td {
-            font-family: "Times New Roman", Times, serif !important;
-            font-size: 14pt !important;
+            font-family: "Times New Roman", Times, serif;
         }
 
         :root {
@@ -93,7 +92,7 @@
             border-collapse: collapse;
             font-size: 14px;
             margin-bottom: 15px;
-            table-layout: fixed; /* Helps control precise widths */
+            table-layout: auto;
         }
 
         th, td {
@@ -102,15 +101,24 @@
             text-align: center;
             vertical-align: middle;
             box-sizing: border-box;
-            min-width: 0; /* fixed table: cho phép co ô, tránh tràn ngang */
+            min-width: 0;
             overflow-wrap: break-word;
             word-wrap: break-word;
+            font-size: 12px;
+            line-height: 1.15;
         }
 
         th {
             font-weight: bold;
             background-color: #fcfcfc;
             padding: 4px 2px; /* Giảm padding để chữ có thêm không gian */
+            font-size: 12px;
+        }
+
+        @media screen {
+            table col {
+                width: auto !important;
+            }
         }
         .th-time,
         td[id*="-bd"],
