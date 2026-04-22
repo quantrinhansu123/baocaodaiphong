@@ -743,19 +743,28 @@
                 return 0;
             }
 
-            // Determine years and months present
+            // Determine year-months present in data
             const yearMonthSet = new Set();
-            const yearsSet = new Set();
             rawItems.forEach(item => {
                 if (item.ngay) {
                     const y = item.ngay.getFullYear();
                     const m = item.ngay.getMonth() + 1;
-                    yearsSet.add(y);
                     yearMonthSet.add(`${y}-${String(m).padStart(2, "0")}`);
                 }
             });
-            const years = [...yearsSet].sort((a, b) => a - b);
             const yearMonths = [...yearMonthSet].sort();
+
+            // Build flat column list: DIỄN GIẢI | T01.2026 | T02.2026 | ... | Tổng cộng
+            const columns = [];
+            columns.push({ key: "label", header: "DIỄN GIẢI", width: "23%" });
+            yearMonths.forEach(ym => {
+                const [y, m] = ym.split("-");
+                columns.push({ key: ym, header: `T${m}.${y}`, width: "6%" });
+            });
+            columns.push({ key: "total", header: "Tổng cộng", width: "9%" });
+
+            // Build header
+            thead.innerHTML = `<tr>${columns.map(c => `<th style="width:${c.width};">${c.header}</th>`).join("")}</tr>`;
 
             // Group by equipment -> year-month
             const grouped = {};
@@ -764,12 +773,9 @@
                 const tb = item.tenTb;
                 if (!grouped[tb]) grouped[tb] = { byYM: {}, total: 0, nhom: item.nhom };
                 const ym = item.ngay ? `${item.ngay.getFullYear()}-${String(item.ngay.getMonth() + 1).padStart(2, "0")}` : null;
-                if (ym) {
-                    grouped[tb].byYM[ym] = (grouped[tb].byYM[ym] || 0) + item.tt;
-                }
+                if (ym) grouped[tb].byYM[ym] = (grouped[tb].byYM[ym] || 0) + item.tt;
                 grouped[tb].total += item.tt;
 
-                // Group totals by nhom
                 const nhom = item.nhom || "Khác";
                 if (!groupTotals[nhom]) groupTotals[nhom] = { byYM: {}, total: 0, items: new Set() };
                 if (ym) groupTotals[nhom].byYM[ym] = (groupTotals[nhom].byYM[ym] || 0) + item.tt;
@@ -777,47 +783,7 @@
                 groupTotals[nhom].items.add(tb);
             });
 
-            // Build yearly subtotal columns
-            const yearTotalsMap = {};
-            years.forEach(y => { yearTotalsMap[y] = {}; });
-
-            // Build header
-            let h1 = `<tr><th colspan="2">Số tiền SC</th>`;
-            let h2 = `<tr><th style="width:23%;">DIỄN GIẢI</th>`;
-
-            if (years.length > 1) {
-                // First year as "Cộng Năm XXXX"
-                const firstYear = years[0];
-                h2 += `<th style="width:9%;">Cộng Năm ${firstYear}</th>`;
-                
-                // Remaining years with monthly breakdown
-                for (let yi = 1; yi < years.length; yi++) {
-                    const y = years[yi];
-                    const monthsInYear = yearMonths.filter(ym => ym.startsWith(`${y}-`));
-                    h1 += `<th colspan="${monthsInYear.length}">Năm ${y}</th>`;
-                    monthsInYear.forEach(ym => {
-                        const m = parseInt(ym.split("-")[1], 10);
-                        h2 += `<th style="width:6%;">T${String(m).padStart(2, "0")}.${y}</th>`;
-                    });
-                }
-                h1 += `<th>Cộng Năm ${years[years.length - 1]}</th>`;
-                h2 += `<th style="width:9%;">Cộng Năm ${years[years.length - 1]}</th>`;
-            } else if (years.length === 1) {
-                const y = years[0];
-                const monthsInYear = yearMonths.filter(ym => ym.startsWith(`${y}-`));
-                h1 += `<th colspan="${monthsInYear.length}">Năm ${y}</th>`;
-                monthsInYear.forEach(ym => {
-                    const m = parseInt(ym.split("-")[1], 10);
-                    h2 += `<th style="width:6%;">T${String(m).padStart(2, "0")}.${y}</th>`;
-                });
-                h1 += `<th>Cộng Năm ${y}</th>`;
-                h2 += `<th style="width:9%;">Cộng Năm ${y}</th>`;
-            }
-            h1 += `<th>Tổng cộng</th></tr>`;
-            h2 += `<th style="width:9%;">Tổng cộng</th></tr>`;
-            thead.innerHTML = h1 + h2;
-
-            // Build body rows grouped by nhom
+            // Build body rows
             let html = "";
             let totalCount = 0;
             const nhomKeys = Object.keys(groupTotals).sort((a, b) => a.localeCompare(b, "vi"));
@@ -826,60 +792,35 @@
             nhomKeys.forEach(nhom => {
                 nhomIdx++;
                 const grp = groupTotals[nhom];
-                
-                // Nhom header row
+
+                // Group header row
                 html += `<tr class="group-row"><td class="text-left">${escapeHtml(nhomIdx.toString().padStart(2, "0") + ". " + nhom.toUpperCase())}</td>`;
-                if (years.length > 1) {
-                    const firstYear = years[0];
-                    const firstYearTotal = yearMonths.filter(ym => ym.startsWith(`${firstYear}-`)).reduce((s, ym) => s + (grp.byYM[ym] || 0), 0);
-                    html += `<td class="text-right">${formatMoney(firstYearTotal)}</td>`;
-                    for (let yi = 1; yi < years.length; yi++) {
-                        const y = years[yi];
-                        yearMonths.filter(ym => ym.startsWith(`${y}-`)).forEach(ym => {
-                            html += `<td class="text-right">${formatMoney(grp.byYM[ym] || 0)}</td>`;
-                        });
-                    }
-                    const lastYear = years[years.length - 1];
-                    const lastYearTotal = yearMonths.filter(ym => ym.startsWith(`${lastYear}-`)).reduce((s, ym) => s + (grp.byYM[ym] || 0), 0);
-                    html += `<td class="text-right">${formatMoney(lastYearTotal)}</td>`;
-                } else if (years.length === 1) {
-                    const y = years[0];
-                    yearMonths.filter(ym => ym.startsWith(`${y}-`)).forEach(ym => {
-                        html += `<td class="text-right">${formatMoney(grp.byYM[ym] || 0)}</td>`;
-                    });
-                    html += `<td class="text-right">${formatMoney(grp.total)}</td>`;
-                }
+                yearMonths.forEach(ym => {
+                    html += `<td class="text-right">${formatMoney(grp.byYM[ym] || 0)}</td>`;
+                });
                 html += `<td class="text-right">${formatMoney(grp.total)}</td></tr>`;
 
-                // Child rows (equipment within this nhom)
+                // Child rows (equipment)
                 const tbKeys = [...grp.items].sort((a, b) => a.localeCompare(b, "vi"));
                 tbKeys.forEach(tb => {
                     totalCount++;
                     const eq = grouped[tb];
                     html += `<tr class="child-row"><td class="text-left">${escapeHtml(tb)}</td>`;
-                    if (years.length > 1) {
-                        const firstYear = years[0];
-                        const firstYearTotal = yearMonths.filter(ym => ym.startsWith(`${firstYear}-`)).reduce((s, ym) => s + (eq.byYM[ym] || 0), 0);
-                        html += `<td class="text-right">${formatMoney(firstYearTotal)}</td>`;
-                        for (let yi = 1; yi < years.length; yi++) {
-                            const y = years[yi];
-                            yearMonths.filter(ym => ym.startsWith(`${y}-`)).forEach(ym => {
-                                html += `<td class="text-right">${formatMoney(eq.byYM[ym] || 0)}</td>`;
-                            });
-                        }
-                        const lastYear = years[years.length - 1];
-                        const lastYearTotal = yearMonths.filter(ym => ym.startsWith(`${lastYear}-`)).reduce((s, ym) => s + (eq.byYM[ym] || 0), 0);
-                        html += `<td class="text-right">${formatMoney(lastYearTotal)}</td>`;
-                    } else if (years.length === 1) {
-                        const y = years[0];
-                        yearMonths.filter(ym => ym.startsWith(`${y}-`)).forEach(ym => {
-                            html += `<td class="text-right">${formatMoney(eq.byYM[ym] || 0)}</td>`;
-                        });
-                        html += `<td class="text-right">${formatMoney(eq.total)}</td>`;
-                    }
+                    yearMonths.forEach(ym => {
+                        html += `<td class="text-right">${formatMoney(eq.byYM[ym] || 0)}</td>`;
+                    });
                     html += `<td class="text-right">${formatMoney(eq.total)}</td></tr>`;
                 });
             });
+
+            // Grand total row
+            const grandTotal = rawItems.reduce((s, i) => s + i.tt, 0);
+            html += `<tr class="group-row"><td class="text-left">TỔNG CỘNG</td>`;
+            yearMonths.forEach(ym => {
+                const ymTotal = rawItems.filter(i => i.ngay && `${i.ngay.getFullYear()}-${String(i.ngay.getMonth() + 1).padStart(2, "0")}` === ym).reduce((s, i) => s + i.tt, 0);
+                html += `<td class="text-right">${formatMoney(ymTotal)}</td>`;
+            });
+            html += `<td class="text-right">${formatMoney(grandTotal)}</td></tr>`;
 
             tbody.innerHTML = html;
             return totalCount;
