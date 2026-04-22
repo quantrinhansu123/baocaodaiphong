@@ -21,7 +21,7 @@
             background-color: #f9fafb;
             padding: 8px;
         }
-        
+
         .page-container {
             width: 100%;
             max-width: 100%;
@@ -29,13 +29,14 @@
             background-color: white;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
         /* Logo styling */
-        
+
         .logo-container {
             width: 145px;
             text-align: center;
         }
-        
+
         .logo-ellipse {
             width: 90px;
             height: 45px;
@@ -47,7 +48,7 @@
             position: relative;
             margin: 0 auto;
         }
-        
+
         .logo-ellipse::before {
             content: '';
             position: absolute;
@@ -56,7 +57,7 @@
             border-left: 2px solid black;
             border-right: 2px solid black;
         }
-        
+
         .logo-text {
             font-size: 10px;
             font-weight: bold;
@@ -65,7 +66,7 @@
             padding: 0 2px;
             letter-spacing: 1px;
         }
-        
+
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -81,8 +82,9 @@
             display: inline-block;
             min-width: 0;
         }
+
         /* Input mockups */
-        
+
         .mock-input {
             background-color: #e2e8f0;
             border: 1px solid #cbd5e1;
@@ -92,7 +94,7 @@
             width: 100%;
             max-width: 350px;
         }
-        
+
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
@@ -104,24 +106,25 @@
             font-size: 15px;
             outline: none;
         }
-        
+
         .filter-input:focus {
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
+
         /* Ô ngày: gõ dd/mm/yyyy + nút mở lịch (native date picker) */
-        
+
         .date-filter-field {
             height: 40px;
             max-width: none;
         }
-        
+
         .date-filter-field .filter-input {
             max-width: none;
             border-radius: 9999px 0 0 9999px;
             border-right: none;
         }
-        
+
         .date-cal-btn {
             flex-shrink: 0;
             width: 40px;
@@ -137,16 +140,16 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .date-cal-btn:hover {
             background: #e2e8f0;
         }
-        
+
         .date-cal-btn:focus-visible {
             outline: 2px solid rgba(43, 113, 50, 0.35);
             outline-offset: 0;
         }
-        
+
         .filter-select {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
@@ -166,12 +169,12 @@
             background-position: right 8px center;
             background-size: 10px;
         }
-        
+
         .filter-select:focus {
             border-color: #2b7132;
             box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.15);
         }
-        
+
         .action-btn {
             display: inline-flex;
             align-items: center;
@@ -189,13 +192,14 @@
             white-space: nowrap;
             transition: all 0.2s ease;
         }
-        
+
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
+
         /* Tabs styling */
-        
+
         .report-tabs-container {
             display: flex;
             background-color: #f1f5f9;
@@ -203,7 +207,7 @@
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         .report-tab-btn {
             padding: 6px 16px;
             font-size: 11px;
@@ -216,17 +220,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .report-tab-btn:hover {
             background: #d1d5db;
         }
-        
+
         .report-tab-btn.active {
             background: #0047ab;
             color: white;
             border-color: #0047ab;
         }
-        
+
         .status-line {
             min-height: 20px;
             font-size: 12px;
@@ -281,7 +285,7 @@
                 grid-column: span 3;
             }
         }
-        
+
         .appsheet-summary-modal {
             position: fixed;
             inset: 0;
@@ -290,17 +294,17 @@
             justify-content: center;
             z-index: 9999;
         }
-        
+
         .appsheet-summary-modal.open {
             display: flex;
         }
-        
+
         .appsheet-summary-backdrop {
             position: absolute;
             inset: 0;
             background: rgba(15, 23, 42, 0.45);
         }
-        
+
         .appsheet-summary-dialog {
             position: relative;
             width: min(920px, calc(100vw - 24px));
@@ -313,7 +317,7 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         .appsheet-summary-head {
             display: flex;
             align-items: center;
@@ -323,13 +327,13 @@
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
-        
+
         .appsheet-summary-title {
             margin: 0;
             font-size: 16px;
             color: #0f172a;
         }
-        
+
         .appsheet-summary-content {
             padding: 10px 12px 12px;
             overflow: auto;
@@ -338,13 +342,13 @@
         .appsheet-summary-overview {
             margin-bottom: 10px;
         }
-        
+
         .appsheet-summary-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-        
+
         .appsheet-summary-table th,
         .appsheet-summary-table td {
             border: 1px solid #dbe3ef;
@@ -352,7 +356,7 @@
             text-align: left;
             vertical-align: top;
         }
-        
+
         .appsheet-summary-table thead th {
             background: #eff6ff;
             font-weight: 700;
@@ -441,7 +445,7 @@
             top: 0;
             z-index: 1;
         }
-        
+
         .report-print-filter-summary {
             display: none;
             border-top: 1px solid #94a3b8;
@@ -451,12 +455,13 @@
             color: #1e293b;
             background: #fff;
         }
-        
+
         .report-print-filter-summary b {
             color: #0f172a;
         }
+
         /* Table specific styling */
-        
+
         .table-wrapper {
             overflow-x: auto;
             font-family: Arial, Helvetica, sans-serif;
@@ -464,26 +469,27 @@
             padding-bottom: 8px;
             /* space for scrollbar */
         }
+
         /* Custom scrollbar for table wrapper */
-        
+
         .table-wrapper::-webkit-scrollbar {
             height: 8px;
         }
-        
+
         .table-wrapper::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
-        
+
         .table-wrapper::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 4px;
         }
-        
+
         .table-wrapper::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
-        
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -492,7 +498,7 @@
             table-layout: fixed;
             white-space: normal;
         }
-        
+
         th,
         td {
             border: 1px solid #333;
@@ -504,7 +510,7 @@
             font-size: 10.5px;
             line-height: 1.12;
         }
-        
+
         thead th {
             background-color: #4a8694 !important;
             color: #fff !important;
@@ -517,24 +523,26 @@
             vertical-align: middle;
         }
 
-        .table-wrapper table thead > tr:nth-child(1) th[rowspan="2"] {
+        .table-wrapper table thead>tr:nth-child(1) th[rowspan="2"] {
             height: 42px !important;
         }
 
-        .table-wrapper table thead > tr:nth-child(1) th[colspan] {
+        .table-wrapper table thead>tr:nth-child(1) th[colspan] {
             height: 20px !important;
         }
 
-        .table-wrapper table thead > tr:nth-child(2) th {
+        .table-wrapper table thead>tr:nth-child(2) th {
             height: 26px !important;
         }
 
-        thead > tr:not(.number-row) th {
+        thead>tr:not(.number-row) th {
             min-height: 0;
         }
 
-        thead > tr:not(.number-row) th.report-col-xe-bon-hd { font-size: inherit; }
-        
+        thead>tr:not(.number-row) th.report-col-xe-bon-hd {
+            font-size: inherit;
+        }
+
         .number-row th {
             background-color: white;
             color: black;
@@ -544,50 +552,52 @@
             padding: 1px 0;
         }
 
-        table thead > tr:not(.number-row) th {
+        table thead>tr:not(.number-row) th {
             padding-top: 1px;
             padding-bottom: 1px;
         }
+
         /* Row highlighting */
-        
+
         .group-a-row td {
             background-color: transparent;
             font-weight: bold;
             font-size: 10.5px;
         }
-        
+
         .sub-group-row td {
             background-color: transparent;
             font-weight: bold;
             font-size: 10.5px;
         }
+
         /** Dòng tổng theo nhóm «Tên nhóm» (Nhật trình máy CT) */
-        
+
         .nhom-tong-row td {
             background-color: transparent;
             font-weight: bold;
             font-size: 10.5px;
         }
-        
+
         .grand-total-row td {
             background-color: #e5e7eb;
             font-weight: bold;
         }
-        
+
         .signature-section {
             margin: 14px 0 8px;
             padding: 0 8px;
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
-        
+
         .signature-date {
             text-align: right;
             font-style: italic;
             font-size: 14px;
             margin-bottom: 4px;
         }
-        
+
         .signature-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -595,73 +605,82 @@
             text-align: center;
             margin-top: 2px;
         }
-        
+
         .signature-title {
             font-weight: 700;
             font-size: 18px;
             line-height: 1.15;
             text-transform: uppercase;
         }
-        
+
         .signature-note {
             font-style: italic;
             font-size: 12px;
         }
+
         /* Utility */
-        
+
         .text-left {
             text-align: left !important;
             padding-left: 6px;
         }
-        
+
         .text-right {
             text-align: right !important;
             padding-right: 6px;
         }
-        
+
         .font-bold-val {
             font-weight: bold;
         }
-        
+
         @media (max-width: 1280px) {
             body {
                 padding: 4px;
             }
+
             .table-wrapper {
                 font-size: 9.5px;
             }
+
             th,
             td {
                 padding: 2px 1.5px;
                 font-size: 9.8px;
             }
+
             thead th {
                 font-size: 9pt;
                 line-height: 1.04;
                 padding: 2px 1px;
             }
+
             .number-row th {
                 font-size: 9pt;
             }
+
             .filter-input,
             .filter-select {
                 height: 22px;
                 font-size: 10px;
                 max-width: 180px;
             }
+
             .action-btn {
                 height: 24px;
                 padding: 0 8px;
                 font-size: 10px;
             }
         }
-        
+
         @media print {
+
             /* 297×210 = A4 ngang; tránh driver/Adobe in dọc rồi bóp nội dung. */
             @page {
                 size: 297mm 210mm;
                 margin: 6mm;
             }
+
             html,
             body {
                 background: #fff !important;
@@ -671,20 +690,24 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             .pdf-print-clip,
             .page-container {
                 box-shadow: none;
                 max-width: 100% !important;
             }
+
             .page-container {
                 /* In: không dùng zoom JS (dễ lệch/“xoay” với Save as PDF/Acrobat) — thu chữ + bỏ min-width bảng. */
                 zoom: 1 !important;
                 transform: none !important;
             }
+
             .table-wrapper {
                 overflow: visible !important;
                 padding-bottom: 0 !important;
             }
+
             .table-wrapper table {
                 min-width: 0 !important;
                 width: 100% !important;
@@ -692,18 +715,22 @@
                 table-layout: fixed !important;
                 font-size: 6.2pt !important;
             }
+
             .table-wrapper th,
             .table-wrapper td {
                 font-size: 6.2pt !important;
                 padding: 1px 1px !important;
                 line-height: 1.2 !important;
             }
+
             #appsheet-status {
                 display: none !important;
             }
+
             .print-hide {
                 display: none !important;
             }
+
             .report-print-filter-summary {
                 display: flex !important;
                 justify-content: space-between;
@@ -711,30 +738,37 @@
                 gap: 8px;
                 font-size: 8.2pt !important;
             }
+
             .no-print {
                 display: none !important;
             }
+
             .signature-section {
                 margin: 8px 0 0 !important;
                 padding: 0 4px !important;
             }
+
             .signature-date {
                 font-size: 10pt !important;
                 margin-bottom: 2px !important;
             }
+
             .signature-grid {
                 gap: 6px !important;
             }
+
             .signature-title {
                 font-size: 12.5pt !important;
                 line-height: 1.1 !important;
             }
+
             .signature-note {
                 font-size: 8.5pt !important;
             }
         }
+
         /* Chỉ trong khoảng beforeprint→afterprint: ẩn filter trống; cần áp trên layout màn hình để đo scale PDF đúng. */
-        
+
         .report-filter-row--pdf-skip {
             display: none !important;
         }
@@ -749,20 +783,30 @@
 
             <!-- REPORT TABS -->
             <div class="report-tabs-container print-hide">
-                <button id="tab-xe-ben" class="report-tab-btn" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
-                <button id="tab-xe-bon" class="report-tab-btn" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
-                <button id="tab-trang-thiet-bi" class="report-tab-btn active" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
-                <button id="tab-thiet-bi-noi-ql" class="report-tab-btn" onclick="switchReportTab('thiet-bi-noi-ql')">Báo cáo TB theo nơi quản lý</button>
-                <button id="tab-chi-tiet-nl" class="report-tab-btn" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
-                <button id="tab-ton-kho-nl" class="report-tab-btn" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
-                <button id="tab-tong-hop-sc" class="report-tab-btn" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
-                <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+                <button id="tab-xe-ben" class="report-tab-btn" onclick="switchReportTab('xe-ben')">Báo cáo xe
+                    ben</button>
+                <button id="tab-xe-bon" class="report-tab-btn" onclick="switchReportTab('xe-bon')">Báo cáo xe
+                    bồn</button>
+                <button id="tab-trang-thiet-bi" class="report-tab-btn active"
+                    onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+                <button id="tab-thiet-bi-noi-ql" class="report-tab-btn" onclick="switchReportTab('thiet-bi-noi-ql')">Báo
+                    cáo TB theo nơi quản lý</button>
+                <button id="tab-chi-tiet-nl" class="report-tab-btn" onclick="switchReportTab('chi-tiet-nl')">Bảng kê
+                    nhập xuất NL</button>
+                <button id="tab-ton-kho-nl" class="report-tab-btn" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn
+                    kho NL</button>
+                <button id="tab-tong-hop-sc" class="report-tab-btn" onclick="switchReportTab('tong-hop-sc')">Báo cáo
+                    tổng hợp CP sửa chữa</button>
+                <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn"
+                    onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
             </div>
 
             <!-- HEADER SECTION -->
             <div class="flex items-start p-2 bg-white">
                 <div class="logo-container mr-6">
-                    <img id="report-header-logo" src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
+                    <img id="report-header-logo"
+                        src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong"
+                        class="w-full max-w-[145px] mx-auto h-auto object-contain">
                     <div class="logo-caption-box whitespace-nowrap">PHÒNG VẬT TƯ</div>
                 </div>
                 <div class="flex-1 mt-2">
@@ -777,7 +821,9 @@
 
             <!-- TITLE BANNER -->
             <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
-                <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]" style="font-size: clamp(1.65rem, 2.1vw, 2.05rem); line-height: 1.2;">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
+                <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]"
+                    style="font-size: clamp(1.65rem, 2.1vw, 2.05rem); line-height: 1.2;">BẢNG TỔNG HỢP TIÊU HAO NHIÊN
+                    LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG</h1>
                 <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
             </div>
 
@@ -818,9 +864,16 @@
                     <div class="report-filter-item date-item">
                         <span>TỪ NGÀY:</span>
                         <div class="date-filter-field flex items-stretch flex-1 min-w-0">
-                            <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy"
+                                class="filter-input flex-1 min-w-0">
                             <button type="button" id="filter-from-date-cal" class="date-cal-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="#2b7132" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
                             </button>
                         </div>
                         <input type="date" id="filter-from-date-picker" class="sr-only">
@@ -828,9 +881,16 @@
                     <div class="report-filter-item date-item">
                         <span>ĐẾN NGÀY:</span>
                         <div class="date-filter-field flex items-stretch flex-1 min-w-0">
-                            <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
+                            <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy"
+                                class="filter-input flex-1 min-w-0">
                             <button type="button" id="filter-to-date-cal" class="date-cal-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="#2b7132" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
                             </button>
                         </div>
                         <input type="date" id="filter-to-date-picker" class="sr-only">
@@ -838,19 +898,23 @@
                 </div>
                 <div class="report-filter-actions no-print">
                     <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
-                    <button id="check-appsheet" class="action-btn" style="background:#fff;color:#2b7132;">Xem AppSheet</button>
+                    <button id="check-appsheet" class="action-btn" style="background:#fff;color:#2b7132;">Xem
+                        AppSheet</button>
                     <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>
-                    <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất
+                        Excel</button>
                     <button id="export-pdf" class="action-btn">Xuất PDF</button>
                 </div>
                 <div id="appsheet-status" class="status-line text-[#2b7132] mt-1"></div>
             </div>
             <div id="appsheet-summary-modal" class="appsheet-summary-modal no-print" aria-hidden="true">
                 <div id="appsheet-summary-backdrop" class="appsheet-summary-backdrop"></div>
-                <div class="appsheet-summary-dialog" role="dialog" aria-modal="true" aria-labelledby="appsheet-summary-title">
+                <div class="appsheet-summary-dialog" role="dialog" aria-modal="true"
+                    aria-labelledby="appsheet-summary-title">
                     <div class="appsheet-summary-head">
                         <h3 id="appsheet-summary-title" class="appsheet-summary-title">Thông tin tải AppSheet</h3>
-                        <button id="appsheet-summary-close" type="button" class="action-btn" style="padding:6px 10px;">Đóng</button>
+                        <button id="appsheet-summary-close" type="button" class="action-btn"
+                            style="padding:6px 10px;">Đóng</button>
                     </div>
                     <div class="appsheet-summary-content">
                         <div class="appsheet-summary-overview">
@@ -885,17 +949,17 @@
                             <th rowspan="2" style="width: 3%;">Số chuyến<br>chạy / tháng</th>
                             <th rowspan="2" style="width: 3%;">Giờ làm<br>việc HC</th>
                             <th rowspan="2" style="width: 3%;">Giờ tăng<br>ca / tháng</th>
-                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
-                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng<br>giờ<br>hoạt động<br>(h)</th>
+                            <th id="th-km-t1" rowspan="2" style="width: 3.5%;">Tổng<br>ca<br>hoạt động<br>(ca)</th>
+                            <th id="th-km-t2" rowspan="2" style="width: 3.5%;">Tổng<br>ca<br>hoạt động<br>(ca)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn đầu<br>kỳ (L)</th>
                             <th rowspan="2" style="width: 4%;">Dầu nhập<br>trong tháng (L)</th>
                             <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
                             <th rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
                             <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>trong bình</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>tiêu hao</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
+                            <th rowspan="2" style="width: 3%;">Định mức<br>trong bình<br>(L/cm)</th>
+                            <th rowspan="2" style="width: 3%;">Định mức<br>tiêu hao<br>(L/cm)</th>
                             <th rowspan="2" style="width: 9%;">Công việc</th>
                             <th rowspan="2" style="width: 6%;">Công trường</th>
                         </tr>
@@ -1073,7 +1137,7 @@
             if (imgEl) {
                 imgEl.removeAttribute("crossorigin");
                 try {
-                    await imgEl.decode().catch(() => {});
+                    await imgEl.decode().catch(() => { });
                 } catch (e) {
                     /* ignore */
                 }
@@ -1361,17 +1425,17 @@
                 ids.push(t);
             };
             if (!record || typeof record !== "object") return ids;
-            for (const k of[
-                    "ID",
-                    "Row ID",
-                    "RowId",
-                    "_RowNumber",
-                    "ID phát hiện",
-                    "Id phat hien",
-                    "ID phát hiện ",
-                    "KEY",
-                    "Key"
-                ]) {
+            for (const k of [
+                "ID",
+                "Row ID",
+                "RowId",
+                "_RowNumber",
+                "ID phát hiện",
+                "Id phat hien",
+                "ID phát hiện ",
+                "KEY",
+                "Key"
+            ]) {
                 add(record[k]);
             }
             return ids;
@@ -1676,7 +1740,7 @@
         function getLoaiPhieuOnRow(row) {
             const keys = ["Loại phiếu", "Loai phieu", "Loại", "Loai", "Phiếu", "Phieu"];
             for (const k of keys) {
-                const v = row ?.[k];
+                const v = row?.[k];
                 if (v == null || v === "") continue;
                 return v;
             }
@@ -1696,7 +1760,7 @@
                 ids.push(t);
             };
             if (!record || typeof record !== "object") return ids;
-            for (const k of["ID", "Row ID", "RowId", "_RowNumber", "KEY", "Key"]) add(record[k]);
+            for (const k of ["ID", "Row ID", "RowId", "_RowNumber", "KEY", "Key"]) add(record[k]);
             return ids;
         }
 
@@ -1824,19 +1888,19 @@
         }
 
         function rowIsNhomXeBen(r, tenNhomByTaiSan, key, tenLoaiByTaiSan) {
-            const nhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            const nhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
             if (nhomTenLooksLikeXeBen(nhom)) return true;
-            const loai = (key && tenLoaiByTaiSan ?.get) ? tenLoaiByTaiSan.get(key) : "";
+            const loai = (key && tenLoaiByTaiSan?.get) ? tenLoaiByTaiSan.get(key) : "";
             if (nhomTenLooksLikeXeBen(loai)) return true;
             return false;
         }
 
         function rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan) {
-            const nhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+            const nhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
             if (nhomTenLooksLikeXeBon(nhom)) return true;
-            const loai = (key && tenLoaiByTaiSan ?.get) ? tenLoaiByTaiSan.get(key) : "";
+            const loai = (key && tenLoaiByTaiSan?.get) ? tenLoaiByTaiSan.get(key) : "";
             if (nhomTenLooksLikeXeBon(loai)) return true;
-            const originDs = (key && nguonGocByTaiSan ?.get) ? nguonGocByTaiSan.get(key) : "";
+            const originDs = (key && nguonGocByTaiSan?.get) ? nguonGocByTaiSan.get(key) : "";
             const originMain = String(pickField(r, "NguonGoc") ?? "").trim();
             if (nhomTenLooksLikeXeBon(originDs) || nhomTenLooksLikeXeBon(originMain)) return true;
             if (typeof ntRowLooseXeBonHint === "function" && ntRowLooseXeBonHint(r)) return true;
@@ -1846,7 +1910,7 @@
         /** «Tên nhóm» trên «Nhật trình máy CT» — ưu tiên khớp «Xe bồn» hoặc «Xe ben». */
         function pickCtTenNhom(row) {
             const candidates = collectTenNhomCandidatesFromRow(row);
-            if (!candidates ?.length) return "";
+            if (!candidates?.length) return "";
             for (const c of candidates) {
                 if (nhomTenLooksLikeXeBon(c) || nhomTenLooksLikeXeBen(c)) return c;
             }
@@ -1963,7 +2027,7 @@
 
         function buildTenLoaiByTaiSanFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ?.length) return map;
+            if (!dsRows?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -1978,7 +2042,7 @@
         }
 
         function applyTenLoaiFromDanhSachTaiSan(normalizedRows, tenLoaiByTaiSan) {
-            if (!tenLoaiByTaiSan ?.size) return normalizedRows;
+            if (!tenLoaiByTaiSan?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const k = assetKeyFromName(out.TenThietBi);
@@ -1989,8 +2053,8 @@
         }
 
         function filterMainRowsByTenLoaiXeOto(mainRows, tenLoaiByTaiSan, dsRows) {
-            if (!mainRows ?.length) return [];
-            if (!tenLoaiByTaiSan ?.size) return [];
+            if (!mainRows?.length) return [];
+            if (!tenLoaiByTaiSan?.size) return [];
             const dsXeOtoNames = (dsRows || [])
                 .filter((r) => tenLoaiIsXeOto(pickDanhSachTenLoai(r)))
                 .map((r) => pickDanhSachTaiSanTen(r))
@@ -1999,7 +2063,7 @@
 
             const allowedMainKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const mainKey = assetKeyFromName(asset);
@@ -2018,7 +2082,7 @@
             }
 
             return mainRows.filter((raw) => {
-                if (raw ?.groupRow || raw ?.subGroupRow) return false;
+                if (raw?.groupRow || raw?.subGroupRow) return false;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
                 return !!key && allowedMainKeys.has(key);
@@ -2028,7 +2092,7 @@
         /** «Tên tài sản» trên «Danh sách tài sản» → «Nguồn gốc» (khớp khóa với Tên thiết bị báo cáo) */
         function buildNguonGocByTaiSanFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ?.length) return map;
+            if (!dsRows?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -2042,7 +2106,7 @@
         }
 
         function applyNguonGocFromDanhSachTaiSan(normalizedRows, nguonGocByTaiSan) {
-            if (!nguonGocByTaiSan ?.size) return normalizedRows;
+            if (!nguonGocByTaiSan?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const k = assetKeyFromName(out.TenThietBi);
@@ -2055,7 +2119,7 @@
         /** «Tên tài sản» trên «Danh sách tài sản» → «Biển số xe» (khớp khóa với cột Tên thiết bị báo cáo) */
         function buildBienSoXeMapFromDanhSachTaiSan(dsRows) {
             const map = new Map();
-            if (!dsRows ?.length) return map;
+            if (!dsRows?.length) return map;
             for (const r of dsRows) {
                 const name = pickDanhSachTaiSanTen(r);
                 if (!name) continue;
@@ -2069,7 +2133,7 @@
         }
 
         function applyBienSoXeFromDanhSachTaiSan(normalizedRows, bienSoByTaiSan) {
-            if (!bienSoByTaiSan ?.size) return normalizedRows;
+            if (!bienSoByTaiSan?.size) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const key = assetKeyFromName(out.TenThietBi);
@@ -2134,7 +2198,7 @@
             const tieuHaoByTaiSan = new Map();
             /** Chuỗi gốc cột định mức tiêu hao — hiển thị không làm tròn */
             const tieuHaoRawByTaiSan = new Map();
-            if (!dsRows ?.length) return {
+            if (!dsRows?.length) return {
                 trongBinhByTaiSan,
                 tieuHaoByTaiSan,
                 tieuHaoRawByTaiSan
@@ -2168,14 +2232,14 @@
             const m2 = dinhMucMaps.tieuHaoByTaiSan;
             const m2raw = dinhMucMaps.tieuHaoRawByTaiSan;
             const hasAny =
-                (m1 ?.size ?? 0) > 0 || (m2 ?.size ?? 0) > 0 || (m2raw ?.size ?? 0) > 0;
+                (m1?.size ?? 0) > 0 || (m2?.size ?? 0) > 0 || (m2raw?.size ?? 0) > 0;
             if (!hasAny) return normalizedRows;
             return normalizedRows.map((out) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
                 const key = assetKeyFromName(out.TenThietBi);
                 if (!key) return out;
-                if (m1 ?.has(key)) out.DinhMucTrongBinh = formatLitersDisplay(m1.get(key));
-                if (m2raw ?.has(key)) out.DinhMucTieuHao = m2raw.get(key);
+                if (m1?.has(key)) out.DinhMucTrongBinh = formatLitersDisplay(m1.get(key));
+                if (m2raw?.has(key)) out.DinhMucTieuHao = m2raw.get(key);
                 return out;
             });
         }
@@ -2193,7 +2257,7 @@
                 "Công trường"
             ];
             for (const k of keys) {
-                const t = cellString(raw ?.[k]).trim();
+                const t = cellString(raw?.[k]).trim();
                 if (t) return t;
             }
             for (const [k, v] of Object.entries(raw || {})) {
@@ -2206,9 +2270,9 @@
 
         function buildCongTruongByTaiSanFromNtMain(mainRows) {
             const byTaiSan = new Map();
-            if (!mainRows ?.length) return byTaiSan;
+            if (!mainRows?.length) return byTaiSan;
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2230,7 +2294,7 @@
                     out.CongTruong = directSite;
                     return out;
                 }
-                if (!congTruongByTaiSan ?.size) return out;
+                if (!congTruongByTaiSan?.size) return out;
                 const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
                 if (!key || !congTruongByTaiSan.has(key)) return out;
                 out.CongTruong = congTruongByTaiSan.get(key);
@@ -2244,11 +2308,11 @@
          */
         function buildGioHanhChinhSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            if (!ctRows?.length || !mainRows?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2276,11 +2340,11 @@
          */
         function buildGioTangCaSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            if (!ctRows?.length || !mainRows?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2423,11 +2487,11 @@
          */
         function buildSoNgayLvThucTeSumByTaiSan(mainRows, ctRows) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            if (!ctRows?.length || !mainRows?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2452,13 +2516,13 @@
          */
         function buildSoChuyenByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const fromD = parseDateInputYmd(filters ?.fromDate);
+            if (!ctRows?.length || !mainRows?.length) return byKey;
+            const fromD = parseDateInputYmd(filters?.fromDate);
             if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2488,13 +2552,13 @@
          */
         function buildTongKmT1ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const fromD = parseDateInputYmd(filters ?.fromDate);
+            if (!ctRows?.length || !mainRows?.length) return byKey;
+            const fromD = parseDateInputYmd(filters?.fromDate);
             if (!fromD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2524,13 +2588,13 @@
          */
         function buildTongKmT2ByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
-            const toD = parseDateInputYmd(filters ?.toDate);
+            if (!ctRows?.length || !mainRows?.length) return byKey;
+            const toD = parseDateInputYmd(filters?.toDate);
             if (!toD) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2586,7 +2650,7 @@
         }
 
         function pickModeTenNhomFromVoteMap(voteMap) {
-            if (!voteMap ?.size) return "";
+            if (!voteMap?.size) return "";
             let best = "";
             let bestN = -1;
             for (const [name, n] of voteMap) {
@@ -2605,12 +2669,12 @@
          */
         function buildTenNhomByTaiSanFromNtCt(mainRows, ctRows) {
             const byKey = new Map();
-            if (!mainRows ?.length) return byKey;
+            if (!mainRows?.length) return byKey;
 
             const mainAssetKeys = new Set();
             const mainNhomByKey = new Map();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -2653,7 +2717,7 @@
 
         function uniqueTenNhomFromCtRows(ctRows) {
             const set = new Set();
-            if (!ctRows ?.length) return [];
+            if (!ctRows?.length) return [];
             for (const r of ctRows) {
                 const t = pickCtTenNhom(r);
                 if (t) set.add(t);
@@ -2662,7 +2726,7 @@
         }
 
         function parseCtSortOrder(row) {
-            const raw = row ?.["STT"] ?? row ?.["Thứ tự"] ?? row ?.["Thu tu"] ?? row ?.["Dòng"] ?? row ?.["Dong"] ?? "";
+            const raw = row?.["STT"] ?? row?.["Thứ tự"] ?? row?.["Thu tu"] ?? row?.["Dòng"] ?? row?.["Dong"] ?? "";
             const n = parseInt(cellString(raw), 10);
             return isNaN(n) ? Number.MAX_SAFE_INTEGER : n;
         }
@@ -2673,13 +2737,13 @@
         }
 
         function applyCongViecFromNtCtByTaiSan(mainRows, normalizedRows, ctRows) {
-            if (!ctRows ?.length || !mainRows ?.length) return normalizedRows;
+            if (!ctRows?.length || !mainRows?.length) return normalizedRows;
             const pickCtDriverKeyPart = (row) => {
                 const ten = cellString(
-                    row ?.["Tên lái máy"] ?? row ?.["TenLaiMay"] ?? row ?.["Ten lai may"] ?? row ?.["Tên lái xe"] ?? row ?.["Ten lai xe"] ?? ""
+                    row?.["Tên lái máy"] ?? row?.["TenLaiMay"] ?? row?.["Ten lai may"] ?? row?.["Tên lái xe"] ?? row?.["Ten lai xe"] ?? ""
                 ).trim();
                 const ma = cellString(
-                    row ?.["Mã lái máy"] ?? row ?.["MaLaiMay"] ?? row ?.["Ma lai may"] ?? row ?.["Mã lái xe"] ?? row ?.["Ma lai xe"] ?? ""
+                    row?.["Mã lái máy"] ?? row?.["MaLaiMay"] ?? row?.["Ma lai may"] ?? row?.["Mã lái xe"] ?? row?.["Ma lai xe"] ?? ""
                 ).trim();
                 return normalizeKeyPart(ten || ma);
             };
@@ -2702,11 +2766,11 @@
                 if (!raw) return out;
                 const key = assetKeyFromName(out.TenThietBi || pickField(raw, "TenThietBi"));
                 const driverKeyPart = normalizeKeyPart(
-                    cellString(out ?.__mergeTenLaiXe).trim() ||
-                    cellString(out ?.TenLaiMay).trim() ||
-                    cellString(raw ?.["Tên lái máy"] ?? raw ?.["TenLaiMay"] ?? raw ?.["Ten lai may"] ?? "").trim() ||
-                    cellString(out ?.__mergeMaLaiMay).trim() ||
-                    cellString(raw ?.["Mã lái máy"] ?? raw ?.["MaLaiMay"] ?? raw ?.["Ma lai may"] ?? "").trim()
+                    cellString(out?.__mergeTenLaiXe).trim() ||
+                    cellString(out?.TenLaiMay).trim() ||
+                    cellString(raw?.["Tên lái máy"] ?? raw?.["TenLaiMay"] ?? raw?.["Ten lai may"] ?? "").trim() ||
+                    cellString(out?.__mergeMaLaiMay).trim() ||
+                    cellString(raw?.["Mã lái máy"] ?? raw?.["MaLaiMay"] ?? raw?.["Ma lai may"] ?? "").trim()
                 );
 
                 const tasks = [];
@@ -2742,7 +2806,7 @@
                 };
                 const pickDriverCodeFromRaw = () => {
                     const direct = cellString(
-                        raw ?.["Mã lái máy"] ?? raw ?.["Ma lai may"] ?? raw ?.["MaLaiMay"] ?? raw ?.["Mã lái xe"] ?? raw ?.["Ma lai xe"] ?? ""
+                        raw?.["Mã lái máy"] ?? raw?.["Ma lai may"] ?? raw?.["MaLaiMay"] ?? raw?.["Mã lái xe"] ?? raw?.["Ma lai xe"] ?? ""
                     ).trim();
                     if (direct) return direct;
                     for (const [k, v] of Object.entries(raw || {})) {
@@ -2764,12 +2828,12 @@
         }
 
         function rowMergeKeyByAssetAndDriver(row) {
-            const tenTaiSan = normalizeKeyPart(row ?.__mergeTenTaiSan ?? "");
-            const tenLaiXeRaw = cellString(row ?.__mergeTenLaiXe).trim() || cellString(row ?.TenLaiMay).trim();
-            const maLaiMayRaw = cellString(row ?.__mergeMaLaiMay).trim();
+            const tenTaiSan = normalizeKeyPart(row?.__mergeTenTaiSan ?? "");
+            const tenLaiXeRaw = cellString(row?.__mergeTenLaiXe).trim() || cellString(row?.TenLaiMay).trim();
+            const maLaiMayRaw = cellString(row?.__mergeMaLaiMay).trim();
             const driverKeyPart = normalizeKeyPart(tenLaiXeRaw || maLaiMayRaw);
             if (!tenTaiSan || !driverKeyPart) {
-                return `__no_merge__${row ?.__mergeRowIndex ?? ""}`;
+                return `__no_merge__${row?.__mergeRowIndex ?? ""}`;
             }
             return `${tenTaiSan}__${driverKeyPart}`;
         }
@@ -2778,7 +2842,7 @@
             let score = 0;
             for (const col of REPORT_COLUMNS) {
                 if (col === "TT") continue;
-                const v = cellString(row ?. [col]).trim();
+                const v = cellString(row?.[col]).trim();
                 if (v) score += 1;
             }
             return score;
@@ -2789,10 +2853,10 @@
          * Tính lại cột số theo từng khóa, rồi bù các ô text còn thiếu từ các dòng cùng khóa.
          */
         function mergeRowsByTenThietBiAndLaiXe(rows) {
-            if (!rows ?.length) return rows || [];
+            if (!rows?.length) return rows || [];
             const byKey = new Map();
             for (const row of rows) {
-                if (row ?.groupRow || row ?.subGroupRow || row ?.nhomTongRow) continue;
+                if (row?.groupRow || row?.subGroupRow || row?.nhomTongRow) continue;
                 const key = rowMergeKeyByAssetAndDriver(row);
                 if (!byKey.has(key)) byKey.set(key, []);
                 byKey.get(key).push(row);
@@ -2802,7 +2866,7 @@
             const out = [];
             const pushedKey = new Set();
             for (const row of rows) {
-                if (row ?.groupRow || row ?.subGroupRow || row ?.nhomTongRow) {
+                if (row?.groupRow || row?.subGroupRow || row?.nhomTongRow) {
                     out.push(row);
                     continue;
                 }
@@ -3025,7 +3089,7 @@
         }
 
         function pickPreferredTenNhomFromCandidates(candidates) {
-            if (!candidates ?.length) return "";
+            if (!candidates?.length) return "";
             for (const c of candidates) {
                 if (nhomTenLooksLikeXeBon(c)) return c;
             }
@@ -3256,11 +3320,11 @@
          */
         function buildTongGioXeBonSumByTaiSanFromNtCt(mainRows, ctRows, filters) {
             const byKey = new Map();
-            if (!ctRows ?.length || !mainRows ?.length) return byKey;
+            if (!ctRows?.length || !mainRows?.length) return byKey;
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -3268,8 +3332,8 @@
                 mainAssetKeys.add(key);
             }
 
-            const from = parseDateInputYmd(filters ?.fromDate);
-            const to = parseDateInputYmd(filters ?.toDate);
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
 
             for (const r of ctRows) {
                 if (from || to) {
@@ -3301,10 +3365,10 @@
          * Xe bồn: «Tên nhóm» từ CT; cột nhóm trên phiếu NT; «Nguồn gốc» từ DS hoặc phiếu NT.
          */
         function rowIsNhomXeBonForXeBonHours(raw, tenNhomByTaiSan, assetKey, nguonGocByTaiSan) {
-            const fromCt = assetKey && tenNhomByTaiSan ?.get ? tenNhomByTaiSan.get(assetKey) : "";
+            const fromCt = assetKey && tenNhomByTaiSan?.get ? tenNhomByTaiSan.get(assetKey) : "";
             if (nhomTenLooksLikeXeBon(fromCt)) return true;
             if (nhomTenLooksLikeXeBon(pickNtMainTenNhom(raw))) return true;
-            const ngDs = assetKey && nguonGocByTaiSan ?.get ? nguonGocByTaiSan.get(assetKey) : "";
+            const ngDs = assetKey && nguonGocByTaiSan?.get ? nguonGocByTaiSan.get(assetKey) : "";
             if (nhomTenLooksLikeXeBon(ngDs)) return true;
             if (nhomTenLooksLikeXeBon(pickField(raw, "NguonGoc"))) return true;
             if (ntRowLooseXeBonHint(raw)) return true;
@@ -3313,9 +3377,9 @@
 
         /** Có ít nhất một dòng dữ liệu (phiếu NT) thuộc nhóm Xe bồn — để hiện cột «Tổng giờ HĐ xe bồn». */
         function reportHasAnyXeBonRow(mainRows, tenNhomByTaiSan, nguonGocByTaiSan) {
-            if (!mainRows ?.length) return false;
+            if (!mainRows?.length) return false;
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
                 if (rowIsNhomXeBonForXeBonHours(raw, tenNhomByTaiSan, key, nguonGocByTaiSan)) return true;
@@ -3353,7 +3417,7 @@
                 const key = assetKeyFromName(out.TenThietBi);
 
                 if (rowIsNhomXeBonForXeBonHours(raw, tenNhomByTaiSan, key, nguonGocByTaiSan)) {
-                    const gio = key && sumXeBonHdByTaiSan ?.has(key) ? sumXeBonHdByTaiSan.get(key) : null;
+                    const gio = key && sumXeBonHdByTaiSan?.has(key) ? sumXeBonHdByTaiSan.get(key) : null;
                     out.TongGioHoatDongXeBon = gio != null && !isNaN(gio) ? formatHourDisplay(gio) : "";
                     return out;
                 }
@@ -3416,13 +3480,13 @@
          */
         function buildNlFuelSumsByTaiSan(mainRows, nlRows, filters) {
             const sums = emptyNlFuelSumsByTaiSan();
-            if (!nlRows ?.length || !mainRows ?.length) return sums;
-            const from = parseDateInputYmd(filters ?.fromDate);
-            const to = parseDateInputYmd(filters ?.toDate);
+            if (!nlRows?.length || !mainRows?.length) return sums;
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
 
             const mainAssetKeys = new Set();
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                 if (!asset) continue;
                 const key = assetKeyFromName(asset);
@@ -3465,13 +3529,13 @@
         function buildNlTonBoundaryByTaiSan(mainRows, nlRows, filters) {
             const tonDauByTaiSan = new Map();
             const tonCuoiByTaiSan = new Map();
-            if (!nlRows ?.length || !mainRows ?.length) return {
+            if (!nlRows?.length || !mainRows?.length) return {
                 tonDauByTaiSan,
                 tonCuoiByTaiSan
             };
 
-            const fromD = parseDateInputYmd(filters ?.fromDate);
-            const toD = parseDateInputYmd(filters ?.toDate);
+            const fromD = parseDateInputYmd(filters?.fromDate);
+            const toD = parseDateInputYmd(filters?.toDate);
             const fromKey = dateKeyYmd(fromD);
             if (!fromKey && !toD) return {
                 tonDauByTaiSan,
@@ -3482,7 +3546,7 @@
 
             const parents = [];
             for (const raw of mainRows) {
-                if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                if (raw?.groupRow || raw?.subGroupRow) continue;
                 const ids = getNtParentMatchIds(raw);
                 if (!ids.length) continue;
                 const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
@@ -3504,9 +3568,9 @@
                 for (const rref of getNlParentRefCandidates(r)) {
                     if (!rref) continue;
                     for (const {
-                            ids,
-                            key
-                        }
+                        ids,
+                        key
+                    }
                         of parents) {
                         for (const pid of ids) {
                             if (parentIdsMatch(rref, pid)) return key;
@@ -3567,9 +3631,9 @@
 
         function mergeFuelMapsByKey(a, b) {
             const out = new Map();
-            const keys = new Set([...(a ?.keys ?.() ?? []), ...(b ?.keys ?.() ?? [])]);
+            const keys = new Set([...(a?.keys?.() ?? []), ...(b?.keys?.() ?? [])]);
             for (const k of keys) {
-                const s = (a ?.get(k) ?? 0) + (b ?.get(k) ?? 0);
+                const s = (a?.get(k) ?? 0) + (b?.get(k) ?? 0);
                 out.set(k, s);
             }
             return out;
@@ -3579,10 +3643,10 @@
             const empty = () => new Map();
             return {
                 // Theo yêu cầu: 4 cột phụ chỉ lấy nguồn NXLC CT (bỏ nguồn Nhật trình NL).
-                TongMo: mergeFuelMapsByKey(empty(), nxlcSums ?.TongMo ?? empty()),
-                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums ?.TongNhot ?? empty()),
-                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums ?.DauThuyLuc ?? empty()),
-                DauCau: mergeFuelMapsByKey(empty(), nxlcSums ?.DauCau ?? empty())
+                TongMo: mergeFuelMapsByKey(empty(), nxlcSums?.TongMo ?? empty()),
+                TongNhot: mergeFuelMapsByKey(empty(), nxlcSums?.TongNhot ?? empty()),
+                DauThuyLuc: mergeFuelMapsByKey(empty(), nxlcSums?.DauThuyLuc ?? empty()),
+                DauCau: mergeFuelMapsByKey(empty(), nxlcSums?.DauCau ?? empty())
             };
         }
 
@@ -3594,15 +3658,15 @@
                 DauThuyLuc: new Map(),
                 DauCau: new Map()
             };
-            if (!nxlcCtRows ?.length) return sums;
-            const from = parseDateInputYmd(filters ?.fromDate);
-            const to = parseDateInputYmd(filters ?.toDate);
+            if (!nxlcCtRows?.length) return sums;
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
 
             const mainAssetKeys = new Set();
             const mainAssetPairs = [];
-            if (mainRows ?.length) {
+            if (mainRows?.length) {
                 for (const raw of mainRows) {
-                    if (raw ?.groupRow || raw ?.subGroupRow) continue;
+                    if (raw?.groupRow || raw?.subGroupRow) continue;
                     const asset = String(pickField(raw, "TenThietBi") ?? "").trim();
                     if (!asset) continue;
                     const key = assetKeyFromName(asset);
@@ -3627,7 +3691,7 @@
             }
 
             const xuatParentIds = [];
-            if (nxlcRows ?.length) {
+            if (nxlcRows?.length) {
                 for (const p of nxlcRows) {
                     if (!loaiPhieuIsXuat(getLoaiPhieuOnRow(p))) continue;
                     for (const pid of getNxlcParentMatchIds(p)) xuatParentIds.push(pid);
@@ -3682,7 +3746,7 @@
         function applyNlLuongDauNhapFromNl(mainRows, normalizedRows, nlSums) {
             if (!nlSums) return normalizedRows;
             const m = nlSums.LuongDauNhap;
-            if (!m ?.size) return normalizedRows;
+            if (!m?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
@@ -3697,7 +3761,7 @@
         /** 4 cột phụ: tổng «Nhật trình NL» + «NXLC CT» (cùng tài sản). */
         function applyMergedAuxiliaryFuelColumnsFromNlNxlc(mainRows, normalizedRows, mergedAux) {
             if (!mergedAux) return normalizedRows;
-            const hasAny = NXLC_AUX_FUEL_COLUMNS.some((c) => mergedAux[c] ?.size > 0);
+            const hasAny = NXLC_AUX_FUEL_COLUMNS.some((c) => mergedAux[c]?.size > 0);
             if (!hasAny) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
@@ -3707,7 +3771,7 @@
                 if (!key) return out;
                 for (const c of NXLC_AUX_FUEL_COLUMNS) {
                     const map = mergedAux[c];
-                    if (map ?.has(key)) out[c] = formatLitersDisplay(map.get(key));
+                    if (map?.has(key)) out[c] = formatLitersDisplay(map.get(key));
                 }
                 return out;
             });
@@ -3717,7 +3781,7 @@
             if (!tonBoundary) return normalizedRows;
             const tonDauMap = tonBoundary.tonDauByTaiSan;
             const tonCuoiMap = tonBoundary.tonCuoiByTaiSan;
-            const hasAny = (tonDauMap ?.size ?? 0) > 0 || (tonCuoiMap ?.size ?? 0) > 0;
+            const hasAny = (tonDauMap?.size ?? 0) > 0 || (tonCuoiMap?.size ?? 0) > 0;
             if (!hasAny) return normalizedRows;
 
             return normalizedRows.map((out, i) => {
@@ -3734,11 +3798,11 @@
                     return baseVal * dmTrongBinh;
                 };
 
-                if (tonDauMap ?.has(key)) {
+                if (tonDauMap?.has(key)) {
                     const tonDauDaNhan = nhanDinhMuc(tonDauMap.get(key));
                     out.TonDauKy = formatLitersDisplay(tonDauDaNhan);
                 }
-                if (tonCuoiMap ?.has(key)) {
+                if (tonCuoiMap?.has(key)) {
                     const tonCuoiDaNhan = nhanDinhMuc(tonCuoiMap.get(key));
                     out.TonCuoiKy = formatLitersDisplay(tonCuoiDaNhan);
                 }
@@ -3750,7 +3814,7 @@
         function applyFuelColumnsFromNxlcCt(mainRows, normalizedRows, fuelByTaiSan) {
             if (!fuelByTaiSan) return normalizedRows;
             const m = fuelByTaiSan.LuongDauTieuHao;
-            if (!m ?.size) return normalizedRows;
+            if (!m?.size) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow) return out;
                 const raw = mainRows[i];
@@ -3768,10 +3832,10 @@
          * Áp dụng ở bước cuối để luôn ưu tiên công thức này so với mọi nguồn khác.
          */
         function applyLuongDauTieuHaoFromTonFormula(mainRows, normalizedRows) {
-            if (!normalizedRows ?.length) return normalizedRows;
+            if (!normalizedRows?.length) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
-                const raw = mainRows ?.[i];
+                const raw = mainRows?.[i];
                 if (!raw) return out;
 
                 const nTonDau = parseNumericForLiters(out.TonDauKy);
@@ -3790,10 +3854,10 @@
          * T1 dùng TongKmHoatDongT1; T2 dùng TongKmHoatDongT2 (hai cột này hiện lưu tổng giờ theo tháng).
          */
         function applyTieuHaoThucTeFromTongKm(mainRows, normalizedRows) {
-            if (!normalizedRows ?.length) return normalizedRows;
+            if (!normalizedRows?.length) return normalizedRows;
             return normalizedRows.map((out, i) => {
                 if (out.groupRow || out.subGroupRow || out.nhomTongRow) return out;
-                const raw = mainRows ?.[i];
+                const raw = mainRows?.[i];
                 if (!raw) return out;
 
                 const nTieuHao = parseNumericForLiters(out.LuongDauTieuHao);
@@ -3808,7 +3872,7 @@
         }
 
         function countCtRowsTrongGioHC(ctRows) {
-            if (!ctRows ?.length) return 0;
+            if (!ctRows?.length) return 0;
             return ctRows.filter((r) =>
                 isLoaiTrongGioHC(r["Loại công việc"] ?? r["Loai cong viec"] ?? r["Loại CV"] ?? "")
             ).length;
@@ -3837,9 +3901,10 @@
             if (value instanceof Date) return formatDateVn(value);
             if (!value || typeof value !== "object") return value;
 
-            const out = {...value
+            const out = {
+                ...value
             };
-            for (const field of["DisplayValue", "displayValue", "FormattedValue", "formattedValue", "Text", "text", "Value", "value"]) {
+            for (const field of ["DisplayValue", "displayValue", "FormattedValue", "formattedValue", "Text", "text", "Value", "value"]) {
                 if (out[field] == null || typeof out[field] !== "string") continue;
                 out[field] = normalizeString(out[field]);
             }
@@ -3848,7 +3913,8 @@
 
         function normalizeAppSheetRowDates(row) {
             if (!row || typeof row !== "object") return row;
-            const out = {...row
+            const out = {
+                ...row
             };
             for (const [k, v] of Object.entries(row)) {
                 out[k] = normalizeAppSheetDateCell(v, k);
@@ -3934,9 +4000,9 @@
             }
             const allRows = Array.isArray(result) ?
                 result :
-                Array.isArray(result ?.Rows) ?
-                result.Rows :
-                [];
+                Array.isArray(result?.Rows) ?
+                    result.Rows :
+                    [];
             return allRows.map(normalizeAppSheetRowDates);
         }
 
@@ -4095,7 +4161,7 @@
             statusLine.textContent = message;
             statusLine.className = `status-line ${isError ? "text-red-600" : "text-[#2b7132]"}`;
         }
-        
+
         function closeAppSheetSummaryModal() {
             if (!appSheetSummaryModal) return;
             appSheetSummaryModal.classList.remove("open");
@@ -4202,7 +4268,7 @@
                 })
                 .join("");
         }
-        
+
         function openAppSheetSummaryModal(summaryRows) {
             if (!appSheetSummaryModal || !appSheetSummaryBody) return;
             const rowsHtml = (summaryRows || []).map((row) => {
@@ -4561,10 +4627,10 @@
 
         /** Lọc toàn bộ «Nhật trình máy CT» theo cột «Ngày làm việc». */
         function filterCtRowsByNgayLamViec(ctRows, filters) {
-            const from = parseDateInputYmd(filters ?.fromDate);
-            const to = parseDateInputYmd(filters ?.toDate);
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
             if (!from && !to) return ctRows || [];
-            if (!ctRows ?.length) return [];
+            if (!ctRows?.length) return [];
             return ctRows.filter((ct) => {
                 const d = parseCtNgayLamViec(ct);
                 if (!d || isNaN(d.getTime())) return false;
@@ -4579,10 +4645,10 @@
          * Khớp CT → phiếu chính bằng Tên tài sản và Ref/ID cha.
          */
         function applyNgayLamViecFilterByCt(mainRows, ctRows, filters) {
-            const from = parseDateInputYmd(filters ?.fromDate);
-            const to = parseDateInputYmd(filters ?.toDate);
+            const from = parseDateInputYmd(filters?.fromDate);
+            const to = parseDateInputYmd(filters?.toDate);
             if (!from && !to) return mainRows || [];
-            if (!mainRows ?.length) return [];
+            if (!mainRows?.length) return [];
 
             const fallbackByMainDate = (rows) =>
                 (rows || []).filter((raw) => {
@@ -4593,7 +4659,7 @@
                     return true;
                 });
 
-            if (!ctRows ?.length) return fallbackByMainDate(mainRows);
+            if (!ctRows?.length) return fallbackByMainDate(mainRows);
 
             const mainAssetByIndex = mainRows.map((raw) => String(pickField(raw, "TenThietBi") ?? "").trim());
             const mainByAssetKey = new Map();
@@ -4629,7 +4695,7 @@
                 for (const rref of refs) {
                     if (!rref) continue;
                     for (const x of mainIdsByIndex) {
-                        if (!x.ids ?.length) continue;
+                        if (!x.ids?.length) continue;
                         for (const pid of x.ids) {
                             if (parentIdsMatch(rref, pid)) {
                                 matchedMainIndexes.add(x.index);
@@ -4647,8 +4713,8 @@
 
         function updateDateRangeBanner(filters, rows) {
             if (!dateRangeEl) return;
-            const fromFilter = formatDateVn(filters ?.fromDate);
-            const toFilter = formatDateVn(filters ?.toDate);
+            const fromFilter = formatDateVn(filters?.fromDate);
+            const toFilter = formatDateVn(filters?.toDate);
             dateRangeEl.textContent = `(Từ ${fromFilter || "..."} đến ${toFilter || "..."})`;
         }
 
@@ -4665,8 +4731,8 @@
          * «Tiêu hao thực tế» dùng cùng hai mã tháng này (chỉ tháng, không lấy cả ngày).
          */
         function getKmMonthLabelsFromFiltersOrRows(filters) {
-            const fromF = parseDateInputYmd(filters ?.fromDate);
-            const toF = parseDateInputYmd(filters ?.toDate);
+            const fromF = parseDateInputYmd(filters?.fromDate);
+            const toF = parseDateInputYmd(filters?.toDate);
             return {
                 line1: fromF ? monthTokenLabel(fromF) : "",
                 line2: toF ? monthTokenLabel(toF) : ""
@@ -4675,8 +4741,8 @@
 
         /** «Tổng giờ hoạt động Txx (h)» — layout xuống dòng như mẫu in/bảng. */
         function thietBiTongGioHoatDongHeaderHtml(monthToken) {
-            if (!monthToken) return "Tổng<br>giờ<br>hoạt động<br>(h)";
-            return `Tổng<br>giờ<br>hoạt động<br>${escapeHtml(monthToken)} (h)`;
+            if (!monthToken) return "Tổng<br>ca<br>hoạt động<br>(ca)";
+            return `Tổng<br>ca<br>hoạt động<br>${escapeHtml(monthToken)} (ca)`;
         }
 
         function updateKmColumnHeaders(filters) {
@@ -4689,7 +4755,7 @@
                 line1,
                 line2
             } = getKmMonthLabelsFromFiltersOrRows(filters);
-            const tieuHaoUnit = "L/h";
+            const tieuHaoUnit = "L/cm";
             th1.innerHTML = thietBiTongGioHoatDongHeaderHtml(line1);
             th2.innerHTML = thietBiTongGioHoatDongHeaderHtml(line2);
 
@@ -4715,7 +4781,7 @@
 
         function updateSignatureDate(filters) {
             if (!signatureDateEl) return;
-            const d = parseDateInputYmd(filters ?.toDate) || new Date();
+            const d = parseDateInputYmd(filters?.toDate) || new Date();
             if (!d || isNaN(d.getTime())) {
                 signatureDateEl.textContent = "";
                 return;
@@ -4749,17 +4815,17 @@
 
         function pickAssetNameForGroupSummary(raw) {
             return String(
-                raw ?.["Tên tài sản"] ??
-                raw ?.["Ten tai san"] ??
-                raw ?.["Tên thiết bị"] ??
-                raw ?.["Ten thiet bi"] ??
+                raw?.["Tên tài sản"] ??
+                raw?.["Ten tai san"] ??
+                raw?.["Tên thiết bị"] ??
+                raw?.["Ten thiet bi"] ??
                 ""
             ).trim();
         }
 
         function uniqueNguonGocFromDanhSachTaiSan(dsRows) {
             const set = new Set();
-            if (!dsRows ?.length) return [];
+            if (!dsRows?.length) return [];
             for (const r of dsRows) {
                 const v = pickDanhSachNguonGoc(r);
                 if (v) set.add(v);
@@ -4769,7 +4835,7 @@
 
         function uniqueTenLoaiFromDanhSachTaiSan(dsRows) {
             const set = new Set();
-            if (!dsRows ?.length) return [];
+            if (!dsRows?.length) return [];
             for (const r of dsRows) {
                 const v = pickDanhSachTenLoai(r);
                 if (v) set.add(v);
@@ -4782,7 +4848,7 @@
             if (!n) return true;
             const asset = pickAssetNameForGroupSummary(raw) || String(pickField(raw, "TenThietBi") ?? "").trim();
             const key = assetKeyFromName(asset);
-            const fromDs = key && nguonGocByTaiSan ?.get ? nguonGocByTaiSan.get(key) : "";
+            const fromDs = key && nguonGocByTaiSan?.get ? nguonGocByTaiSan.get(key) : "";
             if (fromDs) {
                 const g = String(fromDs).trim().toLowerCase();
                 if (g === n) return true;
@@ -4796,7 +4862,7 @@
             if (!n) return true;
             const asset = pickAssetNameForGroupSummary(raw);
             const key = assetKeyFromName(asset);
-            const fromCt = key && tenNhomByTaiSan ?.get ? tenNhomByTaiSan.get(key) : "";
+            const fromCt = key && tenNhomByTaiSan?.get ? tenNhomByTaiSan.get(key) : "";
             if (fromCt) {
                 const g = String(fromCt).trim().toLowerCase();
                 if (g === n) return true;
@@ -4806,11 +4872,11 @@
         }
 
         function applyRawTextFilters(rows, filters, tenNhomByTaiSan, nguonGocByTaiSan, tenLoaiByTaiSan) {
-            if (!rows ?.length) return rows || [];
+            if (!rows?.length) return rows || [];
             return rows.filter((r) => {
                 const asset = String(pickField(r, "TenThietBi") ?? "").trim();
                 const key = assetKeyFromName(asset);
-                const tenNhom = (key && tenNhomByTaiSan ?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
+                const tenNhom = (key && tenNhomByTaiSan?.get) ? tenNhomByTaiSan.get(key) : pickNtMainTenNhom(r);
 
                 // Tab Xe Ben
                 if (currentReportTab === "xe-ben") {
@@ -4826,7 +4892,7 @@
                     if (rowIsNhomXeBon(r, tenNhomByTaiSan, key, nguonGocByTaiSan, tenLoaiByTaiSan)) return false;
                 }
 
-                for (const fk of["project", "driver"]) {
+                for (const fk of ["project", "driver"]) {
                     const needle = (filters[fk] ?? "").trim();
                     if (!needle) continue;
                     if (!rawCellMatchesNeedle(r, fk, needle)) return false;
@@ -4903,7 +4969,7 @@
          * Chèn dòng tổng ngang + chi tiết theo «Tên nhóm» (CT). Chỉ khi có ít nhất một tài sản đã gán nhóm từ CT.
          */
         function injectNhomTongRows(normalizedRows, tenNhomByTaiSan) {
-            if (!normalizedRows ?.length || !tenNhomByTaiSan ?.size) return normalizedRows;
+            if (!normalizedRows?.length || !tenNhomByTaiSan?.size) return normalizedRows;
             const dataRows = normalizedRows.filter((r) => !r.groupRow && !r.subGroupRow && !r.nhomTongRow);
             if (!dataRows.length) return normalizedRows;
 
@@ -5128,8 +5194,8 @@
                 const ctRowsByDate = filterCtRowsByNgayLamViec(ctRows, filters);
                 const sourceRowsForTab =
                     currentReportTab === "xe-ben" ?
-                    (ctRowsByDate || []) :
-                    applyNgayLamViecFilterByCt(allRows, ctRowsByDate, filters);
+                        (ctRowsByDate || []) :
+                        applyNgayLamViecFilterByCt(allRows, ctRowsByDate, filters);
                 const tenNhomByTaiSan = buildTenNhomByTaiSanFromNtCt(sourceRowsForTab, ctRowsByDate);
                 lastTenNhomByTaiSan = tenNhomByTaiSan;
                 const nguonGocByTaiSan = buildNguonGocByTaiSanFromDanhSachTaiSan(dsTaiSanRows);
@@ -5221,10 +5287,10 @@
                     if (bienSoByTaiSan.size > 0) {
                         ctPart += `; biển số: ${bienSoByTaiSan.size} tài sản từ «${TABLE_DS_TAI_SAN}» (khớp Tên tài sản ↔ Tên thiết bị)`;
                     }
-                    const nDmBinh = dinhMucByTaiSanFromDs ?.trongBinhByTaiSan ?.size ?? 0;
+                    const nDmBinh = dinhMucByTaiSanFromDs?.trongBinhByTaiSan?.size ?? 0;
                     const nDmTh = Math.max(
-                        dinhMucByTaiSanFromDs ?.tieuHaoRawByTaiSan ?.size ?? 0,
-                        dinhMucByTaiSanFromDs ?.tieuHaoByTaiSan ?.size ?? 0
+                        dinhMucByTaiSanFromDs?.tieuHaoRawByTaiSan?.size ?? 0,
+                        dinhMucByTaiSanFromDs?.tieuHaoByTaiSan?.size ?? 0
                     );
                     if (nDmBinh > 0 || nDmTh > 0) {
                         ctPart += `; định mức: ${nDmBinh} tài sản «ĐM đo bình_cm», ${nDmTh} tài sản «ĐM tiêu hao NL_lít_giờ» từ «${TABLE_DS_TAI_SAN}»`;
@@ -5237,8 +5303,8 @@
                     if (nTypes > 0) {
                         ctPart += `; NL: ${nTypes} loại nhiên liệu có tổng theo tài sản (Mỡ / Nhớt / TL / Cầu / Diezel).`;
                     }
-                    const nTonDau = tonBoundaryByTaiSan ?.tonDauByTaiSan ?.size ?? 0;
-                    const nTonCuoi = tonBoundaryByTaiSan ?.tonCuoiByTaiSan ?.size ?? 0;
+                    const nTonDau = tonBoundaryByTaiSan?.tonDauByTaiSan?.size ?? 0;
+                    const nTonCuoi = tonBoundaryByTaiSan?.tonCuoiByTaiSan?.size ?? 0;
                     if (filters.fromDate && nTonDau > 0) {
                         ctPart += `; tồn đầu kỳ: ${nTonDau} tài sản lấy «Tồn trước khi nhập» tại ngày ${formatDateVn(filters.fromDate)}`;
                     }
@@ -5249,7 +5315,7 @@
                 if (nxlcCtLoadError) {
                     ctPart += ` — không tải «${TABLE_NXLC_CT}»: ${nxlcCtLoadError.message}`;
                 } else if (nxlcCtRows.length && fuelByTaiSanFromNxlc) {
-                    const nFuelCols = NXLC_FUEL_REPORT_COLUMNS.filter((c) => fuelByTaiSanFromNxlc[c] ?.size > 0).length;
+                    const nFuelCols = NXLC_FUEL_REPORT_COLUMNS.filter((c) => fuelByTaiSanFromNxlc[c]?.size > 0).length;
                     if (nFuelCols > 0) {
                         ctPart += `; NL từ «${TABLE_NXLC_CT}»: ${nFuelCols} cột lấy tổng «SL» theo Tên nhiên liệu (Loại phiếu = Xuất)`;
                     }
@@ -5261,7 +5327,7 @@
                 if (usedNtCache) cacheBits.push("phiếu NT");
                 if (usedAuxCache) cacheBits.push("bảng phụ");
                 const cacheHint = cacheBits.length ? ` — dùng cache (${cacheBits.join(" + ")})` : "";
-                const hasDateFilter = !!(filters ?.fromDate || filters ?.toDate);
+                const hasDateFilter = !!(filters?.fromDate || filters?.toDate);
                 const ctDateHint = hasDateFilter ? ` (CT: ${ctRowsByDate.length}/${ctRows.length} dòng sau lọc ngày)` : "";
                 setStatus(`Đã hiển thị ${rows.length} dòng phù hợp.${cacheHint}${ctDateHint}`);
             } catch (error) {
@@ -5444,7 +5510,7 @@
                 }
 
                 const title = "BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY MÓC THIẾT BỊ TẠI CÔNG TRƯỜNG";
-                const periodText = (document.getElementById("report-date-range") ?.textContent || "").trim();
+                const periodText = (document.getElementById("report-date-range")?.textContent || "").trim();
 
                 /* Vùng A1:B2 để logo; chữ PHÒNG VẬT TƯ ở A3 để không đè ảnh. Ảnh nhúng trước merge để Excel hiển thị ổn định. */
                 worksheet.mergeCells(1, 1, 2, 2);
@@ -5547,7 +5613,7 @@
                 };
 
                 const exportRowsNormalized = (lastNormalizedRowsForExport || []).filter(
-                    (r) => !r ?.groupRow && !r ?.subGroupRow && !r ?.nhomTongRow
+                    (r) => !r?.groupRow && !r?.subGroupRow && !r?.nhomTongRow
                 );
 
                 /* Sau dòng tiêu đề (5–6), một dòng trống (7), bảng bắt đầu 8 — không còn khối filter trong Excel. */
@@ -5598,7 +5664,7 @@
                         const fontSize = Number.parseFloat(st.fontSize || "10");
                         const isBold = Number(st.fontWeight) >= 600 || st.fontWeight === "bold";
                         excelCell.font = {
-                            name: st.fontFamily ?.includes("Arial") ? "Arial" : "Times New Roman",
+                            name: st.fontFamily?.includes("Arial") ? "Arial" : "Times New Roman",
                             size: Math.max(8, Math.round(fontSize)),
                             bold: !!isBold,
                             color: fgArgb ? {
@@ -5813,8 +5879,8 @@
                 const workbookArray = await workbook.xlsx.writeBuffer();
                 const blob = new Blob(
                     [workbookArray], {
-                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    }
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                }
                 );
 
                 // Ưu tiên Save File Picker để tránh bị trình duyệt chặn download Blob.
@@ -5997,7 +6063,7 @@
             }, 180);
         }
 
-        for (const id of["filter-from-date", "filter-to-date"]) {
+        for (const id of ["filter-from-date", "filter-to-date"]) {
             const el = document.getElementById(id);
             if (!el) continue;
             const onDateFilterChange = () => syncReportPeriodUi(getFilters(), cachedRawRowsForBanner);
@@ -6016,12 +6082,12 @@
         wireNativeDatePickerButton("filter-from-date", "filter-from-date-picker", "filter-from-date-cal");
         wireNativeDatePickerButton("filter-to-date", "filter-to-date-picker", "filter-to-date-cal");
 
-        for (const id of["filter-project", "filter-group", "filter-driver"]) {
+        for (const id of ["filter-project", "filter-group", "filter-driver"]) {
             const el = document.getElementById(id);
             if (!el) continue;
             el.addEventListener("change", scheduleAutoLoadFromFilters);
         }
-        for (const id of["filter-origin", "filter-type"]) {
+        for (const id of ["filter-origin", "filter-type"]) {
             const el = document.getElementById(id);
             if (!el) continue;
             el.addEventListener("change", scheduleAutoLoadFromFilters);

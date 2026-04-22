@@ -202,14 +202,19 @@
         .filter-item input[type="date"],
         .filter-item select {
             padding: 8px 16px;
-            border: 1px solid #cbd5e1;
+            border: 2px solid #cbd5e1;
             border-radius: 9999px;
-            font-size: 16px;
-            min-width: 180px;
-            height: 44px;
+            font-size: 18px;
+            font-weight: 600;
+            min-width: 200px;
+            height: 48px;
             background-color: white;
             outline: none;
             transition: all 0.2s;
+        }
+
+        .filter-item input[type="date"] {
+            width: 220px;
         }
 
         .filter-item input[type="date"]:focus {
@@ -603,7 +608,15 @@
                 fromDate.setHours(0,0,0,0);
                 toDate.setHours(23,59,59,999);
 
-                const allRows = await fetchAppSheetTable("Nhật trình máy CT");
+                // Try "Báo cáo công việc" table first, fallback to "Nhật trình máy CT"
+                let allRows = [];
+                try {
+                    allRows = await fetchAppSheetTable("Báo cáo công việc");
+                } catch (e) {
+                    console.log("Table 'Báo cáo công việc' not found, falling back to 'Nhật trình máy CT'");
+                    allRows = await fetchAppSheetTable("Nhật trình máy CT");
+                }
+
                 populateProjectDropdown(allRows);
                 
                 const filtered = allRows.filter(r => {
@@ -618,19 +631,27 @@
                     return true;
                 });
 
+                if (filtered.length > 0) {
+                    const first = filtered[0];
+                    document.getElementById("table-project").innerText = `Công trình: ${first["Công trình"] || first["Cong trinh"] || first["CongTruong"] || ""}`;
+                    document.getElementById("table-mui").innerText = `Mũi thi công: ${first["Mũi thi công"] || first["Mui thi cong"] || first["Noi thi cong"] || ""}`;
+                    document.getElementById("table-phu-trach").innerText = `CB Phụ trách: ${first["CB phụ trách"] || first["CB phu trach"] || first["Người phụ trách"] || first["Nguoi phu trach"] || ""}`;
+                    document.getElementById("table-chuc-vu").innerText = `Chức vụ: ${first["Chức vụ"] || first["Chuc vu"] || ""}`;
+                }
+
                 const mapped = filtered.map(r => ({
-                    cbkt: "", 
-                    cbPhuTrach: r["Người phụ trách"] || r["Nguoi phu trach"] || "",
+                    cbkt: r["CBKT"] || "", 
+                    cbPhuTrach: r["Người phụ trách"] || r["Nguoi phu trach"] || r["CB phụ trách"] || "",
                     laiMay: r["Tên lái máy"] || r["Ten lai may"] || r["Lái máy"] || "",
                     loaiMay: r["Tên tài sản"] || r["Ten tai san"] || r["Tên thiết bị"] || "",
                     noiDung: r["Nội dung công việc"] || r["Noi dung cong viec"] || "",
-                    lyTrinhTu: r["Lý trình"] || r["Ly trinh"] || "",
-                    lyTrinhDen: "",
+                    lyTrinhTu: r["Lý trình"] || r["Ly trinh"] || r["Từ lý trình"] || "",
+                    lyTrinhDen: r["Đến lý trình"] || r["Den ly trinh"] || "",
                     dvt: r["ĐVT"] || r["DVT"] || "Giờ",
-                    khKh: "",
-                    khTt: r["Khối lượng"] || r["Khoi luong"] || "",
-                    tgKh: "",
-                    tgTt: r["Tổng giờ lv"] || r["Tong gio lv"] || "",
+                    khKh: r["Khối lượng kế hoạch"] || "",
+                    khTt: r["Khối lượng"] || r["Khoi luong"] || r["Khối lượng thực tế"] || "",
+                    tgKh: r["Thời gian kế hoạch"] || "",
+                    tgTt: r["Tổng giờ lv"] || r["Tong gio lv"] || r["Thời gian thực tế"] || "",
                     ghiChu: r["Ghi chú"] || r["Ghi chu"] || ""
                 }));
 
@@ -697,37 +718,59 @@
             try {
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet("Báo cáo công việc");
+                
+                // Set default row height
+                worksheet.properties.defaultRowHeight = 25;
+
                 const rows = Array.from(table.rows);
                 
                 rows.forEach((row, rowIndex) => {
                     const rowData = Array.from(row.cells).map(cell => cell.innerText.trim());
                     const excelRow = worksheet.addRow(rowData);
                     
-                    if (rowIndex < 3) { 
+                    // Title Header
+                    if (rowIndex === 0) {
+                        worksheet.mergeCells(1, 1, 1, row.cells.length);
+                        excelRow.height = 40;
+                        excelRow.font = { name: 'Times New Roman', bold: true, size: 20, color: { argb: 'FF0F172A' } };
+                        excelRow.alignment = { vertical: 'middle', horizontal: 'center' };
+                    } 
+                    // Project / Meta Headers
+                    else if (rowIndex >= 1 && rowIndex <= 2) {
+                        worksheet.mergeCells(rowIndex + 1, 1, rowIndex + 1, row.cells.length);
+                        excelRow.height = 30;
                         excelRow.font = { name: 'Times New Roman', bold: true, size: 14 };
-                        if (rowIndex === 0) excelRow.font.size = 18;
-                    } else if (rowIndex < 5) {
-                        excelRow.font = { name: 'Times New Roman', italic: true, size: 12 };
-                    } else if (rowIndex < 7) { 
+                        excelRow.alignment = { vertical: 'middle', horizontal: 'left' };
+                    }
+                    // Table Header
+                    else if (rowIndex >= 3 && rowIndex <= 4) {
+                        excelRow.height = 35;
                         excelRow.eachCell(cell => {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A8694' } };
                             cell.font = { name: 'Times New Roman', color: { argb: 'FFFFFFFF' }, bold: true, size: 11 };
                             cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                             cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                         });
-                    } else {
+                    } 
+                    // Body Rows
+                    else {
                         excelRow.eachCell(cell => {
-                            cell.font = { name: 'Times New Roman', size: 11 };
+                            cell.font = { name: 'Times New Roman', size: 12 };
                             cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                             cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                        });
+                        // Left align for text columns
+                        [2, 3, 4, 5, 6, 14].forEach(colIdx => {
+                            const cell = excelRow.getCell(colIdx);
+                            if (cell) cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
                         });
                     }
                 });
 
-                worksheet.columns.forEach((col, i) => {
-                    if (i === 5) col.width = 40;
-                    else if (i === 0) col.width = 5;
-                    else col.width = 15;
+                // Column Widths
+                const colWidths = [5, 15, 15, 18, 15, 35, 10, 10, 8, 12, 12, 12, 12, 20];
+                colWidths.forEach((w, i) => {
+                    worksheet.getColumn(i + 1).width = w;
                 });
 
                 const fileName = `bao-cao-cong-viec-${getTimestampForFileName()}.xlsx`;
