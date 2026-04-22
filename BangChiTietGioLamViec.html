@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +8,22 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
         /* Table font normalization */
+        
         table,
         table th,
         table td {
             font-family: "Times New Roman", Times, serif !important;
             font-size: 14pt !important;
         }
-
-        :root {
+        
+         :root {
             --border: #222;
         }
-
+        
         * {
             box-sizing: border-box;
         }
-
+        
         body {
             margin: 0;
             padding: 6px;
@@ -29,7 +31,7 @@
             font-family: "Times New Roman", Times, serif;
             color: #111;
         }
-
+        
         .page {
             width: 100%;
             max-width: 100%;
@@ -39,19 +41,19 @@
             box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
             padding: 8px;
         }
-
+        
         .top-header {
             display: flex;
             align-items: flex-start;
             padding: 8px;
             border-bottom: 1px solid #b4d6dc;
         }
-
+        
         .logo-container {
             width: 145px;
             text-align: center;
         }
-
+        
         .logo-container img {
             width: 100%;
             max-width: 145px;
@@ -59,7 +61,7 @@
             display: block;
             margin: 0 auto;
         }
-
+        
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -75,12 +77,12 @@
             display: inline-block;
             min-width: 0;
         }
-
+        
         .company-block {
             flex: 1;
             margin-top: 8px;
         }
-
+        
         .company-title {
             font-size: 17px;
             font-weight: 700;
@@ -88,13 +90,13 @@
             margin: 0;
             line-height: 1.05;
         }
-
+        
         .company-address {
             font-size: 13px;
             margin: 4px 0 0;
             font-style: italic;
         }
-
+        
         .company-contact {
             display: flex;
             flex-wrap: wrap;
@@ -103,13 +105,13 @@
             margin-top: 2px;
             font-size: 13px;
         }
-
+        
         .company-contact p {
             width: 50%;
             min-width: 160px;
             margin: 0;
         }
-
+        
         .title {
             text-align: center;
             margin: 0;
@@ -119,7 +121,7 @@
             letter-spacing: 0.2px;
             color: #111827;
         }
-
+        
         .title-band {
             text-align: center;
             border-bottom: 1px solid #b7c7d7;
@@ -127,7 +129,7 @@
             margin: 2px 0 6px;
             color: #0047ab;
         }
-
+        
         .title-subline {
             margin: 4px 0 0;
             font-size: 12px;
@@ -135,31 +137,31 @@
             font-style: italic;
             color: #0047ab;
         }
-
+        
         .meta {
             margin-bottom: 6px;
             font-size: 13px;
             line-height: 1.2;
             font-weight: 700;
         }
-
+        
         .meta-row {
             display: grid;
             grid-template-columns: 1fr;
             gap: 8px;
         }
-
+        
         .meta .label {
             font-weight: 700;
         }
-
+        
         .toolbar {
             display: flex;
             justify-content: flex-end;
             gap: 8px;
             padding: 0 0 6px;
         }
-
+        
         .action-btn {
             height: 26px;
             border-radius: 9999px;
@@ -172,23 +174,23 @@
             cursor: pointer;
             white-space: nowrap;
         }
-
+        
         .action-btn.action-btn-secondary {
             background: #fff;
             color: #2b7132;
         }
-
+        
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
-
+        
         table {
             border-collapse: collapse;
             width: 100%;
             table-layout: fixed;
         }
-
+        
         th,
         td {
             border: 1px solid var(--border);
@@ -198,13 +200,13 @@
             font-size: 9pt;
             line-height: 1.1;
         }
-
+        
         th {
             font-weight: 700;
             background: #4a8694;
             color: #fff;
         }
-
+        
         .h-main th {
             font-size: 9pt;
             padding-top: 3px;
@@ -212,7 +214,7 @@
             background: #4a8694;
             color: #fff;
         }
-
+        
         .h-shifts th {
             font-size: 9pt;
             padding-top: 3px;
@@ -220,7 +222,7 @@
             background: #4a8694;
             color: #fff;
         }
-
+        
         .h-sub th {
             font-size: 9pt;
             padding-top: 3px;
@@ -228,7 +230,7 @@
             background: #5b93a0;
             color: #fff;
         }
-
+        
         .h-num th {
             font-size: 9pt;
             height: 24px;
@@ -236,13 +238,13 @@
             color: #111;
             font-weight: 700;
         }
-
+        
         .body-row td {
             height: 24px;
             border-top-style: dotted;
             border-bottom-style: dotted;
         }
-
+        
         .body-row td:first-child,
         .body-row td:nth-child(2),
         .body-row td:nth-child(9),
@@ -252,29 +254,29 @@
             border-top-style: solid;
             border-bottom-style: solid;
         }
-
+        
         .left {
             text-align: left;
             padding-left: 6px;
         }
-
+        
         .sum-row td {
             font-weight: 700;
             font-size: 13px;
             background: #fafafa;
         }
-
+        
         .sum-row .sum-label {
             text-transform: uppercase;
         }
-
+        
         .footer-date {
             text-align: right;
             margin-top: 8px;
             font-size: 13px;
             font-style: italic;
         }
-
+        
         .signatures {
             margin-top: 2px;
             display: grid;
@@ -282,26 +284,25 @@
             gap: 12px;
             text-align: center;
         }
-
+        
         .sign-title {
             font-size: 18px;
             font-weight: 700;
             text-transform: uppercase;
             line-height: 1.1;
         }
-
+        
         .sign-note {
             font-size: 13px;
             font-style: italic;
             line-height: 1.1;
         }
-
+        
         @media print {
             @page {
                 size: auto;
                 margin: 8mm;
             }
-
             html,
             body,
             .page,
@@ -311,31 +312,25 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
             thead th {
                 background: #4a8694 !important;
                 color: #fff !important;
             }
-
             .h-sub th {
                 background: #5b93a0 !important;
                 color: #fff !important;
             }
-
             .h-num th {
                 background: #fff !important;
                 color: #111 !important;
             }
-
             .print-hide {
                 display: none !important;
             }
-
             body {
                 background: #fff;
                 padding: 0;
             }
-
             .page {
                 box-shadow: none;
                 border: none;
@@ -345,6 +340,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page">
         <header class="top-header">
@@ -367,13 +363,7 @@
             <p class="title-subline">(Từ 26/2/2025 đến 25/3/2026)</p>
         </div>
 
-        <div class="meta">
-            <div><span class="label">Đơn vị cho thuê :</span> Phạm Văn Vinh</div>
-            <div class="meta-row">
-                <div><span class="label">Lái máy :</span> Nguyễn Văn Diêm</div>
-            </div>
-            <div><span class="label">Tên máy :</span> Máy xúc SK200 - Đường gom đê Đông Anh</div>
-        </div>
+
 
         <div class="toolbar print-hide">
             <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
@@ -553,4 +543,5 @@
         })();
     </script>
 </body>
+
 </html>
