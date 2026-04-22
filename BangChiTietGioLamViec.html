@@ -5,63 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng chi tiết giờ làm việc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
         /* Table font normalization */
-        
         table,
         table th,
         table td {
             font-family: "Times New Roman", Times, serif !important;
             font-size: 14pt !important;
         }
-        
-         :root {
-            --border: #222;
-        }
-        
-        * {
-            box-sizing: border-box;
-        }
-        
+
         body {
-            margin: 0;
-            padding: 6px;
-            background: #f3f4f6;
-            font-family: "Times New Roman", Times, serif;
-            color: #111;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f9fafb;
+            padding: 8px;
         }
-        
-        .page {
+
+        .page-container {
             width: 100%;
             max-width: 100%;
-            margin: 0;
-            background: #fff;
-            border: 1px solid #d1d5db;
-            box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
-            padding: 8px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
-        .top-header {
-            display: flex;
-            align-items: flex-start;
-            padding: 8px;
-            border-bottom: 1px solid #b4d6dc;
-        }
-        
+
         .logo-container {
             width: 145px;
             text-align: center;
         }
-        
-        .logo-container img {
-            width: 100%;
-            max-width: 145px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        
+
         .logo-caption-box {
             margin-top: 6px;
             border: none;
@@ -77,471 +50,726 @@
             display: inline-block;
             min-width: 0;
         }
-        
-        .company-block {
-            flex: 1;
-            margin-top: 8px;
-        }
-        
-        .company-title {
-            font-size: 17px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin: 0;
-            line-height: 1.05;
-        }
-        
-        .company-address {
-            font-size: 13px;
-            margin: 4px 0 0;
-            font-style: italic;
-        }
-        
-        .company-contact {
+
+        .report-tabs-container {
             display: flex;
             flex-wrap: wrap;
-            width: 400px;
-            max-width: 100%;
-            margin-top: 2px;
-            font-size: 13px;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
         }
-        
-        .company-contact p {
-            width: 50%;
-            min-width: 160px;
-            margin: 0;
+
+        .report-tab-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        
-        .title {
-            text-align: center;
-            margin: 0;
-            font-size: 21px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-            color: #111827;
+
+        .report-tab-btn:hover {
+            background: #d1d5db;
         }
-        
-        .title-band {
-            text-align: center;
-            border-bottom: 1px solid #b7c7d7;
-            padding: 8px 8px 7px;
-            margin: 2px 0 6px;
-            color: #0047ab;
+
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
         }
-        
-        .title-subline {
-            margin: 4px 0 0;
-            font-size: 12px;
-            font-weight: 700;
-            font-style: italic;
-            color: #0047ab;
-        }
-        
-        .meta {
-            margin-bottom: 6px;
-            font-size: 13px;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-        
-        .meta-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-        
-        .meta .label {
-            font-weight: 700;
-        }
-        
-        .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            padding: 0 0 6px;
-        }
-        
+
         .action-btn {
             height: 26px;
             border-radius: 9999px;
             padding: 0 12px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
             color: #fff;
             cursor: pointer;
-            white-space: nowrap;
         }
-        
-        .action-btn.action-btn-secondary {
-            background: #fff;
-            color: #2b7132;
-        }
-        
+
         .action-btn:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
-        
-        table {
+
+        .action-btn.secondary {
+            border-color: #0047ab;
+            background: #fff;
+            color: #0047ab;
+        }
+
+        .action-btn.ghost {
+            border-color: #94a3b8;
+            background: #fff;
+            color: #334155;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0 4px 10px;
+        }
+
+        table.work-table {
             border-collapse: collapse;
             width: 100%;
+            min-width: 1350px;
             table-layout: fixed;
         }
-        
-        th,
-        td {
-            border: 1px solid var(--border);
+
+        .work-table th,
+        .work-table td {
+            border: 1px solid #333;
+            padding: 4px 3px;
             text-align: center;
             vertical-align: middle;
-            padding: 2px 2px;
+            word-wrap: break-word;
+        }
+
+        .work-table thead th {
+            background-color: #4a8694;
+            color: white;
+            font-weight: bold;
             font-size: 9pt;
-            line-height: 1.1;
-        }
-        
-        th {
-            font-weight: 700;
-            background: #4a8694;
-            color: #fff;
-        }
-        
-        .h-main th {
-            font-size: 9pt;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            background: #4a8694;
-            color: #fff;
-        }
-        
-        .h-shifts th {
-            font-size: 9pt;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            background: #4a8694;
-            color: #fff;
-        }
-        
-        .h-sub th {
-            font-size: 9pt;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            background: #5b93a0;
-            color: #fff;
-        }
-        
-        .h-num th {
-            font-size: 9pt;
-            height: 24px;
-            background: #fff;
-            color: #111;
-            font-weight: 700;
-        }
-        
-        .body-row td {
-            height: 24px;
-            border-top-style: dotted;
-            border-bottom-style: dotted;
-        }
-        
-        .body-row td:first-child,
-        .body-row td:nth-child(2),
-        .body-row td:nth-child(9),
-        .body-row td:nth-child(10),
-        .body-row td:nth-child(11),
-        .body-row td:last-child {
-            border-top-style: solid;
-            border-bottom-style: solid;
-        }
-        
-        .left {
-            text-align: left;
-            padding-left: 6px;
-        }
-        
-        .sum-row td {
-            font-weight: 700;
-            font-size: 13px;
-            background: #fafafa;
-        }
-        
-        .sum-row .sum-label {
+            line-height: 1.2;
             text-transform: uppercase;
         }
-        
-        .footer-date {
-            text-align: right;
-            margin-top: 8px;
-            font-size: 13px;
-            font-style: italic;
+
+        .work-table thead .sub-head th {
+            background-color: #5b93a0;
+            font-size: 9pt;
         }
-        
-        .signatures {
-            margin-top: 2px;
+
+        .work-table thead .meta-header th {
+            background-color: #fff;
+            color: #111;
+            text-align: left;
+            padding-left: 8px;
+            font-size: 11pt;
+            text-transform: none;
+            font-weight: normal;
+        }
+
+        .work-table thead .title-header th {
+            background-color: #fff;
+            color: #111;
+            font-size: 18pt;
+            font-weight: bold;
+            padding: 10px 0;
+        }
+
+        .work-table .body-row td {
+            height: 28px;
+            font-size: 9pt;
+        }
+
+        .work-table .text-left {
+            text-align: left !important;
+            padding-left: 8px;
+        }
+
+        .filter-section {
+            padding: 10px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-item label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .filter-item input,
+        .filter-item input[type="date"],
+        .filter-item select {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9999px;
+            font-size: 16px;
+            min-width: 180px;
+            height: 44px;
+            background-color: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .filter-item input[type="date"]:focus {
+            border-color: #4a8694;
+            box-shadow: 0 0 0 3px rgba(74, 134, 148, 0.2);
+        }
+
+        .editable:hover,
+        .editable-header:hover {
+            background-color: #f8fafc;
+            cursor: text;
+        }
+
+        .editable:focus,
+        .editable-header:focus {
+            background-color: #fff;
+            outline: 2px solid #4a8694;
+            outline-offset: -2px;
+        }
+
+        .filter-item input:focus,
+        .filter-item select:focus {
+            border-color: #0047ab;
+        }
+
+        .signature-section {
+            margin: 20px 0 10px;
+            padding: 0 8px 20px;
+            font-family: "Times New Roman", Times, serif;
+            color: #111;
+        }
+
+        .signature-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             text-align: center;
+            margin-top: 2px;
         }
-        
-        .sign-title {
-            font-size: 18px;
+
+        .signature-title {
             font-weight: 700;
+            font-size: 18px;
+            line-height: 1.15;
             text-transform: uppercase;
-            line-height: 1.1;
         }
-        
-        .sign-note {
-            font-size: 13px;
+
+        .signature-note {
             font-style: italic;
-            line-height: 1.1;
+            font-size: 12px;
+            margin-top: 2px;
         }
-        
+
         @media print {
             @page {
-                size: auto;
+                size: A4 landscape;
                 margin: 8mm;
             }
+
             html,
             body,
-            .page,
-            table,
-            th,
-            td {
+            .page-container,
+            .work-table,
+            .work-table th,
+            .work-table td {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            thead th {
-                background: #4a8694 !important;
-                color: #fff !important;
-            }
-            .h-sub th {
-                background: #5b93a0 !important;
-                color: #fff !important;
-            }
-            .h-num th {
-                background: #fff !important;
-                color: #111 !important;
-            }
+
             .print-hide {
                 display: none !important;
             }
+
             body {
                 background: #fff;
                 padding: 0;
             }
-            .page {
+
+            .page-container {
                 box-shadow: none;
-                border: none;
-                max-width: 100%;
-                padding: 0;
+            }
+
+            .table-wrapper {
+                overflow: visible;
+            }
+
+            table.work-table {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .work-table th,
+            .work-table td {
+                font-size: 7pt !important;
+                padding: 1px 1px;
+                line-height: 1.15;
+            }
+
+            .work-table thead th {
+                background-color: #4a8694 !important;
+                color: #fff !important;
+            }
+
+            .work-table thead .sub-head th {
+                background-color: #5b93a0 !important;
+                color: #fff !important;
+            }
+
+            .signature-title {
+                font-size: 12.5pt;
+            }
+
+            .signature-note {
+                font-size: 8.5pt;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="page">
-        <header class="top-header">
-            <div class="logo-container">
-                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong">
+    <div class="page-container">
+        <!-- Tab Navigation (Consistent with other reports) -->
+        <div class="report-tabs-container print-hide">
+            <button id="tab-xe-ben" class="report-tab-btn" type="button" onclick="switchReportTab('xe-ben')">Báo cáo xe ben</button>
+            <button id="tab-xe-bon" class="report-tab-btn" type="button" onclick="switchReportTab('xe-bon')">Báo cáo xe bồn</button>
+            <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
+            <button id="tab-thiet-bi-noi-ql" class="report-tab-btn" type="button" onclick="switchReportTab('thiet-bi-noi-ql')">Báo cáo TB theo nơi quản lý</button>
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-tong-hop-sc" class="report-tab-btn" type="button" onclick="switchReportTab('tong-hop-sc')">Báo cáo tổng hợp CP sửa chữa</button>
+            <button id="tab-kiem-ke-thiet-bi" class="report-tab-btn" type="button" onclick="switchReportTab('kiem-ke-thiet-bi')">Báo cáo kiểm kê thiết bị</button>
+            <button id="tab-cong-viec" class="report-tab-btn active" type="button" onclick="switchReportTab('cong-viec')">Báo cáo công việc</button>
+        </div>
+
+        <!-- Header -->
+        <div class="flex items-start p-2 bg-white">
+            <div class="logo-container mr-6">
+                <img src="z7735291380896_bb3a6b5aee83360918796e1b60382f86-removebg-preview.png" alt="Logo Đại Phong" class="w-full max-w-[145px] mx-auto h-auto object-contain">
                 <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
             </div>
-            <div class="company-block">
-                <div class="company-title">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</div>
-                <p class="company-address">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
-                <div class="company-contact">
-                    <p>Điện thoại: 0228.3823 484</p>
-                    <p>Fax: 0228.3953 567</p>
+            <div class="flex-1 mt-2">
+                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                    <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
+                    <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
                 </div>
             </div>
-        </header>
-
-        <div class="title-band">
-            <h1 class="title">BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
-            <p class="title-subline">(Từ 26/2/2025 đến 25/3/2026)</p>
         </div>
 
-
-
-        <div class="toolbar print-hide">
-            <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
-            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+        <!-- Title Band -->
+        <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
+            <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]" style="font-size: clamp(1.65rem, 2.1vw, 2.05rem); line-height: 1.2;">BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
+            <p id="report-period-text" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
 
-        <table>
-            <colgroup>
-                <col style="width:4.5%">
-                <col style="width:11%">
-                <col style="width:7.2%">
-                <col style="width:7.2%">
-                <col style="width:7.2%">
-                <col style="width:7.2%">
-                <col style="width:7.2%">
-                <col style="width:7.2%">
-                <col style="width:8.2%">
-                <col style="width:8.2%">
-                <col style="width:6.8%">
-                <col style="width:8.3%">
-            </colgroup>
-            <thead>
-                <tr class="h-main">
-                    <th rowspan="3">TT</th>
-                    <th rowspan="3">Ngày</th>
-                    <th colspan="6">Thời gian làm việc</th>
-                    <th rowspan="3">Tổng giờ HC</th>
-                    <th rowspan="3">Tổng giờ tăng ca</th>
-                    <th rowspan="3">Số ngày LV</th>
-                    <th rowspan="3">Ghi chú</th>
-                </tr>
-                <tr class="h-shifts">
-                    <th colspan="2">Sáng</th>
-                    <th colspan="2">Chiều</th>
-                    <th colspan="2">Tối</th>
-                </tr>
-                <tr class="h-sub">
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
-                </tr>
-                <tr class="h-num">
-                    <th>(1)</th>
-                    <th>(2)</th>
-                    <th>(3)</th>
-                    <th>(4)</th>
-                    <th>(5)</th>
-                    <th>(6)</th>
-                    <th>(7)</th>
-                    <th>(8)</th>
-                    <th>(9)</th>
-                    <th>(10)</th>
-                    <th>(11)</th>
-                    <th>(12)</th>
-                </tr>
-            </thead>
-            <tbody id="work-body"></tbody>
-            <tfoot>
-                <tr class="sum-row">
-                    <td colspan="8" class="sum-label">CỘNG</td>
-                    <td>0,00</td>
-                    <td>0,00</td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <div class="footer-date">Ý Yên, Ngày ... tháng 2 năm 2026</div>
-
-        <div class="signatures">
-            <div>
-                <div class="sign-title">XÁC NHẬN CHỈ HUY CÔNG TRƯỜNG</div>
-                <div class="sign-note">(Ký, ghi họ tên)</div>
+        <!-- Filter & Toolbar -->
+        <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <div class="filter-item">
+                        <label>Từ ngày</label>
+                        <input type="date" id="filter-from-date">
+                    </div>
+                    <div class="filter-item">
+                        <label>Đến ngày</label>
+                        <input type="date" id="filter-to-date">
+                    </div>
+                    <div class="filter-item">
+                        <label>Công trình</label>
+                        <select id="filter-project">
+                            <option value="">-- Tất cả --</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btn-load-data" class="action-btn mt-4">Tải dữ liệu</button>
+                </div>
+                <div class="flex items-center gap-1.5 mt-4">
+                    <button type="button" id="export-excel" class="action-btn" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                </div>
             </div>
-            <div>
-                <div class="sign-title">NGƯỜI LẬP</div>
-                <div class="sign-note">(Ký, ghi họ tên)</div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper bg-white">
+            <table class="work-table">
+                <colgroup>
+                    <col style="width: 35px">
+                    <col style="width: 120px">
+                    <col style="width: 120px">
+                    <col style="width: 140px">
+                    <col style="width: 120px">
+                    <col style="width: 250px">
+                    <col style="width: 70px">
+                    <col style="width: 70px">
+                    <col style="width: 60px">
+                    <col style="width: 75px">
+                    <col style="width: 75px">
+                    <col style="width: 75px">
+                    <col style="width: 75px">
+                    <col style="width: 120px">
+                </colgroup>
+                <thead>
+                    <tr class="title-header">
+                        <th colspan="14" id="table-title" contenteditable="true" class="editable-header">BÁO CÁO CÔNG VIỆC NGÀY ...</th>
+                    </tr>
+                    <tr class="meta-header">
+                        <th colspan="14" id="table-project" contenteditable="true" class="editable-header">Công trình: ...</th>
+                    </tr>
+                    <tr class="meta-header">
+                        <th colspan="3" id="table-mui" contenteditable="true" class="editable-header">Mũi thi công: ...</th>
+                        <th colspan="4" id="table-phu-trach" contenteditable="true" class="editable-header">CB Phụ trách: ...</th>
+                        <th colspan="7" id="table-chuc-vu" contenteditable="true" class="editable-header">Chức vụ: ...</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">TT</th>
+                        <th rowspan="2">CBKT</th>
+                        <th rowspan="2">CB Phụ trách</th>
+                        <th rowspan="2">Tên lái máy</th>
+                        <th rowspan="2">Loại máy</th>
+                        <th rowspan="2">Nội dung công việc</th>
+                        <th colspan="2">Lý trình</th>
+                        <th rowspan="2">ĐVT</th>
+                        <th colspan="2">Khối lượng</th>
+                        <th colspan="2">Thời gian</th>
+                        <th rowspan="2">Ghi chú</th>
+                    </tr>
+                    <tr class="sub-head">
+                        <th>Từ</th>
+                        <th>Đến</th>
+                        <th>Kế hoạch</th>
+                        <th>Thực tế</th>
+                        <th>Kế hoạch</th>
+                        <th>Thực tế</th>
+                    </tr>
+                </thead>
+                <tbody id="work-body">
+                    <!-- Data rows go here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer Date -->
+        <div id="footer-date-text" class="text-right p-4 italic text-sm">Ý Yên, Ngày ... tháng ... năm ...</div>
+
+        <!-- Signatures -->
+        <div class="signature-section">
+            <div class="signature-grid">
+                <div>
+                    <div class="signature-title">XÁC NHẬN CHỈ HUY CÔNG TRƯỜNG</div>
+                    <div class="signature-note">(Ký, ghi họ tên)</div>
+                </div>
+                <div>
+                    <div class="signature-title">NGƯỜI LẬP</div>
+                    <div class="signature-note">(Ký, ghi họ tên)</div>
+                </div>
             </div>
+        </div>
+
+        <!-- Add Row Button (Floating or at bottom) -->
+        <div class="no-print p-4 text-center">
+            <button id="btn-add-row" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-all transform hover:scale-105">
+                + Thêm dòng trống
+            </button>
         </div>
     </div>
 
     <script>
+        // --- Configuration & Constants ---
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+
+        const REPORT_TAB_URLS = {
+            "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
+            "xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon",
+            "trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi",
+            "thiet-bi-noi-ql": "Baocaothietbitheonoisx.html",
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
+            "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html",
+            "cong-viec": "BangChiTietGioLamViec.html"
+        };
+
+        // --- Navigation ---
+        function getCurrentTopGroup() {
+            return (new URLSearchParams(window.location.search).get("group") || "").trim();
+        }
+
+        function appendGroupToTarget(url) {
+            const group = getCurrentTopGroup();
+            if (!group) return url;
+            const sep = url.includes("?") ? "&" : "?";
+            return `${url}${sep}group=${encodeURIComponent(group)}`;
+        }
+
+        function switchReportTab(tabId) {
+            const target = REPORT_TAB_URLS[tabId];
+            if (!target) return;
+            if (tabId === "cong-viec") return; 
+            window.location.href = appendGroupToTarget(target);
+        }
+
+        // --- UI Initialization ---
+        function initDateFilters() {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const formatDate = (d) => d.toISOString().split('T')[0];
+            
+            document.getElementById("filter-from-date").value = formatDate(firstDay);
+            document.getElementById("filter-to-date").value = formatDate(now);
+            updatePeriodText();
+        }
+
+        function updatePeriodText() {
+            const from = document.getElementById("filter-from-date").value;
+            const to = document.getElementById("filter-to-date").value;
+            const project = document.getElementById("filter-project").value;
+            
+            if (from && to) {
+                const fd = new Date(from);
+                const td = new Date(to);
+                document.getElementById("report-period-text").innerText = `(Từ ngày ${fd.getDate()}/${fd.getMonth()+1}/${fd.getFullYear()} tới ngày ${td.getDate()}/${td.getMonth()+1}/${td.getFullYear()})`;
+                
+                const today = new Date();
+                document.getElementById("footer-date-text").innerText = `Ý Yên, Ngày ${today.getDate()} tháng ${today.getMonth()+1} năm ${today.getFullYear()}`;
+                document.getElementById("table-title").innerText = `BÁO CÁO CÔNG VIỆC NGÀY ${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+            }
+            
+            document.getElementById("table-project").innerText = `Công trình: ${project || "Tất cả"}`;
+        }
+
+        // --- AppSheet Data Fetching ---
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`${tableName}: ${response.status}`);
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.Rows || []);
+        }
+
+        function parseDate(val) {
+            if (!val) return null;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function populateProjectDropdown(rows) {
+            const select = document.getElementById("filter-project");
+            const currentVal = select.value;
+            const projects = new Set();
+            rows.forEach(r => {
+                const p = (r["Công trình"] || r["Cong trinh"] || r["CongTruong"] || "").trim();
+                if (p) projects.add(p);
+            });
+            
+            let html = '<option value="">-- Tất cả --</option>';
+            Array.from(projects).sort().forEach(p => {
+                html += `<option value="${p}">${p}</option>`;
+            });
+            select.innerHTML = html;
+            select.value = currentVal;
+        }
+
+        async function loadData() {
+            const btn = document.getElementById("btn-load-data");
+            btn.disabled = true;
+            btn.innerText = "Đang tải...";
+            
+            try {
+                const fromStr = document.getElementById("filter-from-date").value;
+                const toStr = document.getElementById("filter-to-date").value;
+                const projectFilter = document.getElementById("filter-project").value;
+                
+                const fromDate = new Date(fromStr);
+                const toDate = new Date(toStr);
+                fromDate.setHours(0,0,0,0);
+                toDate.setHours(23,59,59,999);
+
+                const allRows = await fetchAppSheetTable("Nhật trình máy CT");
+                populateProjectDropdown(allRows);
+                
+                const filtered = allRows.filter(r => {
+                    const d = parseDate(r["Ngày"] || r["Ngay"]);
+                    if (!d) return false;
+                    if (d < fromDate || d > toDate) return false;
+                    
+                    if (projectFilter && projectFilter !== "") {
+                        const p = (r["Công trình"] || r["Cong trinh"] || r["CongTruong"] || "").trim();
+                        if (p !== projectFilter) return false;
+                    }
+                    return true;
+                });
+
+                const mapped = filtered.map(r => ({
+                    cbkt: "", 
+                    cbPhuTrach: r["Người phụ trách"] || r["Nguoi phu trach"] || "",
+                    laiMay: r["Tên lái máy"] || r["Ten lai may"] || r["Lái máy"] || "",
+                    loaiMay: r["Tên tài sản"] || r["Ten tai san"] || r["Tên thiết bị"] || "",
+                    noiDung: r["Nội dung công việc"] || r["Noi dung cong viec"] || "",
+                    lyTrinhTu: r["Lý trình"] || r["Ly trinh"] || "",
+                    lyTrinhDen: "",
+                    dvt: r["ĐVT"] || r["DVT"] || "Giờ",
+                    khKh: "",
+                    khTt: r["Khối lượng"] || r["Khoi luong"] || "",
+                    tgKh: "",
+                    tgTt: r["Tổng giờ lv"] || r["Tong gio lv"] || "",
+                    ghiChu: r["Ghi chú"] || r["Ghi chu"] || ""
+                }));
+
+                renderRows(mapped);
+                updatePeriodText();
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi tải dữ liệu: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Tải dữ liệu";
+            }
+        }
+
+        // --- Data Rendering ---
+        function renderRows(data = []) {
+            const tbody = document.getElementById("work-body");
+            tbody.innerHTML = "";
+            
+            const displayData = data.length > 0 ? data : Array(15).fill({});
+            
+            displayData.forEach((item, i) => {
+                addRow(item, i + 1);
+            });
+        }
+
+        function addRow(item = {}, index) {
+            const tbody = document.getElementById("work-body");
+            const tr = document.createElement("tr");
+            tr.className = "body-row";
+            const i = index || tbody.rows.length + 1;
+            tr.innerHTML = `
+                <td>${i}</td>
+                <td class="editable text-left" contenteditable="true">${item.cbkt || ""}</td>
+                <td class="editable text-left" contenteditable="true">${item.cbPhuTrach || ""}</td>
+                <td class="editable" contenteditable="true">${item.laiMay || ""}</td>
+                <td class="editable" contenteditable="true">${item.loaiMay || ""}</td>
+                <td class="editable text-left" contenteditable="true">${item.noiDung || ""}</td>
+                <td class="editable" contenteditable="true">${item.lyTrinhTu || ""}</td>
+                <td class="editable" contenteditable="true">${item.lyTrinhDen || ""}</td>
+                <td class="editable" contenteditable="true">${item.dvt || ""}</td>
+                <td class="editable" contenteditable="true">${item.khKh || ""}</td>
+                <td class="editable" contenteditable="true">${item.khTt || ""}</td>
+                <td class="editable" contenteditable="true">${item.tgKh || ""}</td>
+                <td class="editable" contenteditable="true">${item.tgTt || ""}</td>
+                <td class="editable text-left" contenteditable="true">${item.ghiChu || ""}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // --- Export Functions ---
         function getTimestampForFileName() {
             const now = new Date();
             const pad = (n) => String(n).padStart(2, "0");
             return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
         }
 
-        async function exportPageTableToExcel(tableSelector, filePrefix) {
-            const table = document.querySelector(tableSelector) || document.querySelector("table");
-            if (!table || !window.ExcelJS) {
-                alert("Không thể xuất Excel ở thời điểm này.");
-                return;
-            }
-
-            const button = document.getElementById("export-excel");
-            if (button) button.disabled = true;
+        async function exportToExcel() {
+            const table = document.querySelector(".work-table");
+            if (!table || !window.ExcelJS) return;
+            const btn = document.getElementById("export-excel");
+            btn.disabled = true;
 
             try {
                 const workbook = new ExcelJS.Workbook();
-                const worksheet = workbook.addWorksheet("BaoCao");
-                const rows = Array.from(table.rows).map((row) =>
-                    Array.from(row.cells).map((cell) => String(cell.innerText || "").replace(/\s+/g, " ").trim())
-                );
-                rows.forEach((r) => worksheet.addRow(r));
-
-                const fileName = `${filePrefix}-${getTimestampForFileName()}.xlsx`;
-                const buffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([buffer], {
-                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                const worksheet = workbook.addWorksheet("Báo cáo công việc");
+                const rows = Array.from(table.rows);
+                
+                rows.forEach((row, rowIndex) => {
+                    const rowData = Array.from(row.cells).map(cell => cell.innerText.trim());
+                    const excelRow = worksheet.addRow(rowData);
+                    
+                    if (rowIndex < 3) { 
+                        excelRow.font = { name: 'Times New Roman', bold: true, size: 14 };
+                        if (rowIndex === 0) excelRow.font.size = 18;
+                    } else if (rowIndex < 5) {
+                        excelRow.font = { name: 'Times New Roman', italic: true, size: 12 };
+                    } else if (rowIndex < 7) { 
+                        excelRow.eachCell(cell => {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A8694' } };
+                            cell.font = { name: 'Times New Roman', color: { argb: 'FFFFFFFF' }, bold: true, size: 11 };
+                            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                        });
+                    } else {
+                        excelRow.eachCell(cell => {
+                            cell.font = { name: 'Times New Roman', size: 11 };
+                            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                        });
+                    }
                 });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                URL.revokeObjectURL(url);
+
+                worksheet.columns.forEach((col, i) => {
+                    if (i === 5) col.width = 40;
+                    else if (i === 0) col.width = 5;
+                    else col.width = 15;
+                });
+
+                const fileName = `bao-cao-cong-viec-${getTimestampForFileName()}.xlsx`;
+                const buffer = await workbook.xlsx.writeBuffer();
+                saveAs(new Blob([buffer]), fileName);
             } catch (error) {
-                alert(`Xuất Excel thất bại: ${error?.message || error}`);
+                console.error(error);
+                alert("Lỗi xuất Excel: " + error.message);
             } finally {
-                if (button) button.disabled = false;
+                btn.disabled = false;
             }
         }
 
-        function exportPageToPdf() {
-            window.print();
+        function saveAs(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(url);
         }
 
-        const exportExcelBtn = document.getElementById("export-excel");
-        const exportPdfBtn = document.getElementById("export-pdf");
-
-        if (exportExcelBtn) {
-            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel("table", "bao-cao-cong-viec"));
-        }
-        if (exportPdfBtn) {
-            exportPdfBtn.addEventListener("click", exportPageToPdf);
-        }
-
-        (function renderRows() {
-            const tbody = document.getElementById("work-body");
-            if (!tbody) return;
-
-            const start = new Date(2026, 1, 26);
-            const end = new Date(2026, 2, 25);
-            let stt = 1;
-
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                const day = String(d.getDate()).padStart(2, "0");
-                const month = String(d.getMonth() + 1).padStart(2, "0");
-                const year = d.getFullYear();
-
-                const tr = document.createElement("tr");
-                tr.className = "body-row";
-                tr.innerHTML = `
-                    <td>${stt}</td>
-                    <td>${day}/${month}/${year}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>0:00</td>
-                    <td>0:00</td>
-                    <td>0,0</td>
-                    <td></td>
-                `;
-                tbody.appendChild(tr);
-                stt += 1;
-            }
-        })();
+        // --- Event Listeners ---
+        document.addEventListener("DOMContentLoaded", () => {
+            initDateFilters();
+            renderRows();
+            
+            document.getElementById("filter-from-date").addEventListener("change", updatePeriodText);
+            document.getElementById("filter-to-date").addEventListener("change", updatePeriodText);
+            document.getElementById("filter-project").addEventListener("change", updatePeriodText);
+            
+            document.getElementById("export-excel").addEventListener("click", exportToExcel);
+            document.getElementById("export-pdf").addEventListener("click", () => window.print());
+            document.getElementById("btn-load-data").addEventListener("click", loadData);
+            document.getElementById("btn-add-row").addEventListener("click", () => addRow());
+            
+            // Initial load
+            loadData();
+        });
     </script>
+
+
 </body>
 
 </html>

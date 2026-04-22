@@ -98,11 +98,11 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 32px;
+            height: 40px;
             width: 100%;
-            max-width: 200px;
-            padding: 0 12px;
-            font-size: 14px;
+            max-width: none;
+            padding: 0 14px;
+            font-size: 15px;
             outline: none;
         }
         
@@ -113,8 +113,8 @@
         /* Ô ngày: gõ dd/mm/yyyy + nút mở lịch (native date picker) */
         
         .date-filter-field {
-            height: 32px;
-            max-width: 200px;
+            height: 40px;
+            max-width: none;
         }
         
         .date-filter-field .filter-input {
@@ -125,8 +125,8 @@
         
         .date-cal-btn {
             flex-shrink: 0;
-            width: 36px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             margin: 0;
             border: 1px solid #94a3b8;
@@ -152,11 +152,11 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 32px;
+            height: 40px;
             width: 100%;
-            max-width: 200px;
-            padding: 0 28px 0 10px;
-            font-size: 14px;
+            max-width: none;
+            padding: 0 32px 0 14px;
+            font-size: 15px;
             outline: none;
             cursor: pointer;
             -webkit-appearance: none;
@@ -177,11 +177,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 34px;
+            min-height: 40px;
             height: auto;
             border-radius: 9999px;
-            padding: 6px 14px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 15px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -235,6 +235,54 @@
             font-size: 12px;
             font-weight: bold;
             margin-top: 8px;
+        }
+
+        .report-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 10px 12px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .report-filter-item {
+            grid-column: span 12;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-filter-item span {
+            width: 98px;
+            flex-shrink: 0;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .report-filter-item.date-item span {
+            width: 78px;
+        }
+
+        .report-filter-actions {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dbe3ef;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        @media (min-width: 900px) {
+            .report-filter-item {
+                grid-column: span 4;
+            }
+
+            .report-filter-item.date-item {
+                grid-column: span 3;
+            }
         }
         
         .appsheet-summary-modal {
@@ -392,9 +440,11 @@
         }
 
         #report-main-title {
-            line-height: 1.25;
-            font-size: 14pt;
-            white-space: nowrap;
+            line-height: 1.2;
+            font-size: clamp(1.65rem, 2.1vw, 2.05rem);
+            font-weight: 900;
+            letter-spacing: 0.6px;
+            white-space: normal;
         }
         /* Custom scrollbar for table wrapper */
         
@@ -793,7 +843,7 @@
             <!-- TITLE BANNER -->
             <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
                 <div class="report-title-block">
-                    <h1 id="report-main-title" class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px] text-[#111827]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY TẠI CÔNG TRƯỜNG</h1>
+                    <h1 id="report-main-title" class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]">BẢNG TỔNG HỢP TIÊU HAO NHIÊN LIỆU MÁY TẠI CÔNG TRƯỜNG</h1>
                     <p id="report-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ … đến …)</p>
                 </div>
             </div>
@@ -805,37 +855,37 @@
                 <span><b>NHÓM XE:</b> <span id="print-filter-group">Tất cả</span></span>
             </div>
 
-            <!-- FILTERS: một hàng — cuộn ngang khi màn hẹp -->
+            <!-- FILTERS: hai hàng cố định -->
             <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-                <div class="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-2 w-full min-w-0 overflow-visible pb-1 font-bold text-[#2b7132] text-[12px]">
-                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
-                        <span class="w-[88px] shrink-0 whitespace-nowrap">CÔNG TRƯỜNG:</span>
+                <div class="report-filter-grid font-bold text-[#2b7132]">
+                    <div class="report-filter-item">
+                        <span>CÔNG TRƯỜNG:</span>
                         <select id="filter-project" class="filter-select flex-1 min-w-0">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
-                        <span class="w-[88px] shrink-0 whitespace-nowrap">TÊN LÁI MÁY:</span>
+                    <div class="report-filter-item">
+                        <span>TÊN LÁI MÁY:</span>
                         <select id="filter-driver" class="filter-select flex-1 min-w-0">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
-                        <span class="w-[88px] shrink-0 whitespace-nowrap">NGUỒN GỐC:</span>
+                    <div class="report-filter-item">
+                        <span>NGUỒN GỐC:</span>
                         <select id="filter-origin" class="filter-select flex-1 min-w-0">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0 min-w-[200px] max-w-[240px]">
-                        <span class="w-[88px] shrink-0 whitespace-nowrap">NHÓM XE:</span>
+                    <div class="report-filter-item">
+                        <span>NHÓM XE:</span>
                         <select id="filter-group" class="filter-select flex-1 min-w-0">
                             <option value="">— Tất cả —</option>
                         </select>
                     </div>
-                    <div class="hidden sm:block w-px h-6 shrink-0 bg-gray-200 self-center" aria-hidden="true"></div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="whitespace-nowrap">TỪ NGÀY:</span>
-                        <div class="date-filter-field flex items-stretch w-[118px] sm:w-[130px]">
+
+                    <div class="report-filter-item date-item">
+                        <span>TỪ NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch flex-1 min-w-0">
                             <input id="filter-from-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
                             <button type="button" id="filter-from-date-cal" class="date-cal-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -843,9 +893,9 @@
                         </div>
                         <input type="date" id="filter-from-date-picker" class="sr-only">
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="whitespace-nowrap">ĐẾN NGÀY:</span>
-                        <div class="date-filter-field flex items-stretch w-[118px] sm:w-[130px]">
+                    <div class="report-filter-item date-item">
+                        <span>ĐẾN NGÀY:</span>
+                        <div class="date-filter-field flex items-stretch flex-1 min-w-0">
                             <input id="filter-to-date" type="text" placeholder="dd/mm/yyyy" class="filter-input flex-1 min-w-0">
                             <button type="button" id="filter-to-date-cal" class="date-cal-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2b7132" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -853,13 +903,13 @@
                         </div>
                         <input type="date" id="filter-to-date-picker" class="sr-only">
                     </div>
-                    <div class="flex flex-wrap items-center justify-end gap-1.5 w-full mt-1 no-print">
-                        <button id="load-appsheet" class="action-btn whitespace-nowrap">Tải dữ liệu AppSheet</button>
-                        <button id="check-appsheet" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xem AppSheet</button>
-                        <button id="reset-filter" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xóa lọc</button>
-                        <button id="export-excel" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xuất Excel</button>
-                        <button id="export-pdf" class="action-btn whitespace-nowrap">Xuất PDF</button>
-                    </div>
+                </div>
+                <div class="report-filter-actions no-print">
+                    <button id="load-appsheet" class="action-btn whitespace-nowrap">Tải dữ liệu AppSheet</button>
+                    <button id="check-appsheet" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xem AppSheet</button>
+                    <button id="reset-filter" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xóa lọc</button>
+                    <button id="export-excel" class="action-btn whitespace-nowrap" style="background:#fff;color:#2b7132;">Xuất Excel</button>
+                    <button id="export-pdf" class="action-btn whitespace-nowrap">Xuất PDF</button>
                 </div>
                 <div id="appsheet-status" class="status-line text-[#2b7132] mt-1"></div>
             </div>

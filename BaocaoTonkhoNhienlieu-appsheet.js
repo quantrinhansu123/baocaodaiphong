@@ -7,7 +7,7 @@
  * «Nhập trong kỳ» / «Xuất trong kỳ» (SL): «Nhập xuất luân chuyển CT» — tổng «Số lượng NL»;
  * Giá trị nhập/xuất kỳ: lấy từ cột «Thành tiền NL» trên «Nhập xuất luân chuyển CT».
  * Nhập / Xuất trong kỳ: chỉ theo cột «Loại phiếu» = Nhập hoặc Xuất (cùng bộ lọc ngày & NCC / nơi nhập / xe).
- * Các ô SL (tồn/nhập/xuất/tồn cuối) hiển thị kèm «(ĐVT)» từ cột ĐVT trên «Danh sách tài sản» của dòng đó.
+ * Các ô SL (tồn/nhập/xuất/tồn cuối) chỉ hiển thị số; cột ĐVT hiển thị riêng.
  */
 (function () {
     "use strict";
@@ -1103,15 +1103,10 @@
         return o + i - x;
     }
 
-    /** SL kèm đơn vị nhiên liệu từ DS (cột ĐVT) — vd. `1.234 (Lít)`. */
+    /** SL chỉ hiển thị số (không ghép đơn vị). */
     function displaySlWithDvtNl(n, dvtRaw) {
         const num = displayCell(n);
-        if (num === "") return "";
-        const u = String(dvtRaw ?? "")
-            .trim()
-            .replace(/\s+/g, " ");
-        if (!u) return num;
-        return `${num} (${u})`;
+        return num;
     }
 
     function renderTable(rows) {

@@ -96,7 +96,7 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 32px;
+            height: 36px;
             width: 100%;
             max-width: 200px;
             padding: 0 12px;
@@ -122,7 +122,7 @@
         }
 
         .date-filter-field {
-            height: 32px;
+            height: 36px;
             min-width: 0;
             flex: 1 1 auto;
         }
@@ -136,7 +136,7 @@
         .date-cal-btn {
             flex-shrink: 0;
             width: 36px;
-            height: 32px;
+            height: 36px;
             padding: 0;
             margin: 0;
             border: 1px solid #94a3b8;
@@ -159,7 +159,7 @@
         }
 
         .action-btn {
-            height: 34px;
+            height: 36px;
             border-radius: 9999px;
             padding: 0 14px;
             font-size: 14px;
@@ -173,7 +173,7 @@
         .tonkho-filter-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 8px 10px;
             flex-wrap: wrap;
             overflow: visible;
             font-weight: bold;
@@ -183,12 +183,19 @@
             padding-bottom: 2px;
         }
 
+        .tonkho-filter-row + .tonkho-filter-row {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #dbe3ef;
+        }
+
         .tonkho-filter-item {
             display: flex;
             align-items: center;
             gap: 4px;
-            flex: 1 1 280px;
+            flex: 1 1 230px;
             white-space: nowrap;
+            min-width: 0;
         }
 
         .tonkho-filter-item-label {
@@ -201,19 +208,22 @@
         }
 
         .tonkho-filter-item.date-item .date-filter-field {
-            width: 100%;
-            flex: 1 1 auto;
+            width: 170px;
+            flex: 0 1 170px;
+        }
+
+        .tonkho-filter-row.bottom-row .tonkho-filter-item.date-item {
+            flex: 0 1 250px;
         }
 
         .tonkho-filter-actions {
             display: flex;
             align-items: center;
             gap: 6px;
-            flex: 1 1 100%;
-            margin-left: 0;
+            flex: 1 1 auto;
+            margin-left: auto;
             white-space: nowrap;
             justify-content: flex-end;
-            margin-top: 4px;
             flex-wrap: wrap;
         }
 
@@ -226,7 +236,15 @@
             font-size: 11px;
             margin-left: 8px;
             color: #374151;
-            max-width: 260px;
+            max-width: 320px;
+        }
+
+        @media (max-width: 900px) {
+            .tonkho-filter-actions {
+                flex-basis: 100%;
+                margin-left: 0;
+                justify-content: flex-start;
+            }
         }
 
         .thxl-source-note {
@@ -379,7 +397,7 @@
 
         <!-- TITLE BANNER -->
         <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
-            <h1 class="text-lg font-extrabold uppercase mb-1 tracking-[0.3px]">BÁO CÁO TỔNG HỢP XUẤT NHIÊN LIỆU THEO CÔNG TRÌNH</h1>
+            <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]" style="font-size: clamp(1.65rem, 2.1vw, 2.05rem); line-height: 1.2;">BÁO CÁO TỔNG HỢP XUẤT NHIÊN LIỆU THEO CÔNG TRÌNH</h1>
             <p id="thxl-banner-cong-trinh-line" class="font-bold text-sm text-[#0047ab] mb-1 px-2">CT HỐ SÓI - SÔNG ĐUỐNG</p>
             <p id="thxl-date-range" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
@@ -387,7 +405,7 @@
         <p class="thxl-source-note">Tồn đầu tháng: «Tồn kho ĐK». Nhập trong tháng, xuất theo công trình và ghi chú: «Nhập xuất luân chuyển CT».</p>
 
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-            <div class="tonkho-filter-row">
+            <div class="tonkho-filter-row top-row">
                 <div class="tonkho-filter-item">
                     <span class="tonkho-filter-item-label">NHÓM NHÀ CC</span>
                     <select class="filter-input" title="Dự phòng — có thể nối dữ liệu sau">
@@ -424,6 +442,9 @@
                     <span class="tonkho-filter-item-label">TÊN NHIÊN LIỆU</span>
                     <input type="text" id="thxl-filter-ten-nl" class="filter-input" placeholder="Lọc chứa…" title="Lọc dòng theo tên nhiên liệu" autocomplete="off">
                 </div>
+            </div>
+
+            <div class="tonkho-filter-row bottom-row">
                 <div class="tonkho-filter-item date-item">
                     <span class="tonkho-filter-item-label">TỪ NGÀY</span>
                     <div class="date-filter-field flex items-stretch">

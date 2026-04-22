@@ -109,10 +109,11 @@
 
         .title-band h1 {
             margin: 0;
-            font-size: 1.55rem;
-            font-weight: 800;
-            line-height: 1.1;
-            color: #111827;
+            font-size: clamp(1.65rem, 2.1vw, 2.05rem);
+            font-weight: 900;
+            line-height: 1.2;
+            color: #0f172a;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
@@ -735,7 +736,13 @@
                 "Tên link kiện sửa chữa",
                 "Tên linh kiện sửa chữa",
                 "Ten link kien sua chua",
-                "Ten linh kien sua chua"
+                "Ten linh kien sua chua",
+                "Tên linh kiện",
+                "Ten linh kien",
+                "Diễn giải",
+                "Dien giai",
+                "Nội dung",
+                "Noi dung"
             ]);
             if (direct) return direct;
             return pickByRegex(row, /t[eê]n.*(linh|link).*(ki[eệ]n).*(s[ửu]a).*(ch[uữ]a)/i);
@@ -833,7 +840,7 @@
 
         function renderDetailRows() {
             const tbody = document.getElementById("sc3-tbody");
-            if (!tbody) return;
+            if (!tbody) return 0;
             const dateRange = getDateRangeFromFilters();
             if (dateRange.hasFrom && dateRange.hasTo && dateRange.from > dateRange.to) {
                 const tmp = dateRange.from;
@@ -846,20 +853,24 @@
                 const tenLk = pickTenLinhKienSuaChua(r);
                 const tenTb = pickTenThietBiSuaChua(r);
                 const ngay = parseNgaySuaChuaValue(r["Ngày sửa chữa"] ?? r["Ngay sua chua"] ?? r["Ngày SC"] ?? r["Ngay SC"]);
-                if (!tenLk || !tenTb || !rowInDateRange(ngay, dateRange)) continue;
+                if (!rowInDateRange(ngay, dateRange)) continue;
                 const sl = pickSoLuongSc(r);
                 const dg = pickDonGiaSc(r);
                 const ttRaw = pickThanhTienSc(r);
                 const tt = ttRaw != null ? ttRaw : ((sl != null && dg != null) ? sl * dg : null);
+                const dgChung = pickDgChung(r);
+                const dienGiai = [tenTb, tenLk].filter(Boolean).join(" - ") || dgChung;
+                const hasMeaningfulData = !!(dienGiai || (sl != null) || (dg != null) || (tt != null) || pickTenLaiMay(r) || pickDvtSc(r));
+                if (!hasMeaningfulData) continue;
                 rows.push({
-                    dienGiai: `${tenTb} - ${tenLk}`,
+                    dienGiai,
                     dvt: pickDvtSc(r),
                     ngay,
                     sl,
                     dg,
                     tt,
                     tenLm: pickTenLaiMay(r),
-                    dgChung: pickDgChung(r)
+                    dgChung
                 });
             }
 
@@ -867,7 +878,7 @@
 
             if (!rows.length) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>';
-                return;
+                return 0;
             }
 
             const htmlRows = rows.map((r) => {
@@ -884,6 +895,7 @@
                 </tr>`;
             }).join("");
             tbody.innerHTML = htmlRows;
+            return rows.length;
         }
 
         async function loadFromAppSheet(forceRefresh) {
@@ -897,8 +909,8 @@
                 if (!cacheNxlcCtRows) {
                     cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
                 }
-                renderDetailRows();
-                setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}».`, false);
+                const shown = renderDetailRows();
+                setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
             } catch (error) {
                 console.error(error);
                 setStatus(`Lỗi: ${error?.message || error}`, true);
@@ -987,8 +999,14 @@
 
         document.getElementById("sc3-btn-load")?.addEventListener("click", () => loadFromAppSheet(false));
         document.getElementById("sc3-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
-        document.getElementById("sc3-filter-from-datetime")?.addEventListener("change", () => renderDetailRows());
-        document.getElementById("sc3-filter-to-datetime")?.addEventListener("change", () => renderDetailRows());
+        document.getElementById("sc3-filter-from-datetime")?.addEventListener("change", () => {
+            const shown = renderDetailRows();
+            setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
+        });
+        document.getElementById("sc3-filter-to-datetime")?.addEventListener("change", () => {
+            const shown = renderDetailRows();
+            setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
+        });
         loadFromAppSheet(false);
     </script>
 </body>
