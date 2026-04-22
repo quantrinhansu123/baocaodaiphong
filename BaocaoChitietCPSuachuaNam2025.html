@@ -862,11 +862,13 @@
             }
 
             const rawItems = [];
+            console.log("[BC03] Tổng dòng NXLC CT từ API:", (cacheNxlcCtRows || []).length);
+            let skippedDateRange = 0, skippedNoData = 0;
             for (const r of cacheNxlcCtRows || []) {
                 const tenTb = pickTenThietBiSuaChua(r);
                 const tenLk = pickTenLinhKienSuaChua(r);
                 const ngay = parseNgaySuaChuaValue(r["Ngày sửa chữa"] ?? r["Ngay sua chua"] ?? r["Ngày SC"] ?? r["Ngay SC"]);
-                if (!rowInDateRange(ngay, dateRange)) continue;
+                if (!rowInDateRange(ngay, dateRange)) { skippedDateRange++; continue; }
 
                 const sl = pickSoLuongSc(r);
                 const dg = pickDonGiaSc(r);
@@ -876,11 +878,13 @@
                 const dvt = pickDvtSc(r);
                 const tenLm = pickTenLaiMay(r);
 
-                if (!tenTb && !tenLk && !dgChung && tt === 0) continue;
+                if (!tenTb && !tenLk && !dgChung && tt === 0) { skippedNoData++; continue; }
+                // Bỏ dòng không có tên linh kiện sửa chữa VÀ số tiền = 0 (dòng rác/trống)
+                if (!tenLk && tt === 0) { skippedNoData++; continue; }
 
                 rawItems.push({
                     tenTb: tenTb || "Không xác định",
-                    tenLk: tenLk || dgChung || "Chi phí khác",
+                    tenLk: tenLk || dgChung || "",
                     dvt,
                     ngay,
                     sl,
@@ -890,6 +894,7 @@
                     dgChung
                 });
             }
+            console.log("[BC03] Bỏ do ngày:", skippedDateRange, "| Bỏ do trống:", skippedNoData, "| Hiển thị:", rawItems.length);
 
             if (!rawItems.length) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>';
