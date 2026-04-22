@@ -480,10 +480,10 @@
         }
 
         .nl-filter-grid {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            align-items: end;
+            gap: 10px 12px;
             min-width: 0;
             width: 100%;
         }
@@ -492,14 +492,23 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            min-width: 220px;
-            flex: 1 1 280px;
+            min-width: 0;
+            grid-column: span 3;
         }
 
         .nl-filter-item--wide {
             align-items: flex-start;
-            flex: 2.6 1 520px;
-            min-width: 420px;
+            grid-column: span 5;
+            min-width: 0;
+        }
+
+        .nl-filter-grid > .nl-filter-item:nth-child(2) {
+            grid-column: span 3;
+        }
+
+        .nl-filter-grid > .nl-filter-item:nth-child(3),
+        .nl-filter-grid > .nl-filter-item:nth-child(4) {
+            grid-column: span 2;
         }
 
         .nl-filter-label {
@@ -520,9 +529,10 @@
         .nl-filter-actions {
             display: flex;
             flex-wrap: wrap;
-            justify-content: flex-end;
+            justify-content: center;
             gap: 8px;
-            flex: 1 1 340px;
+            grid-column: 1 / -1;
+            margin-top: 4px;
         }
         
         .nl-cong-trinh-actions {
@@ -541,7 +551,15 @@
             }
 
             .nl-filter-grid {
-                min-width: 0;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .nl-filter-item,
+            .nl-filter-item--wide,
+            .nl-filter-grid > .nl-filter-item:nth-child(2),
+            .nl-filter-grid > .nl-filter-item:nth-child(3),
+            .nl-filter-grid > .nl-filter-item:nth-child(4) {
+                grid-column: span 1;
             }
         }
 
@@ -639,7 +657,7 @@
 
         <!-- FILTERS -->
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-            <div class="max-w-[1400px] nl-filter-strip">
+            <div class="w-full nl-filter-strip">
                 <div class="nl-filter-grid">
                     <div class="nl-filter-item nl-filter-item--wide">
                         <span class="nl-filter-label">CÔNG TRÌNH</span>

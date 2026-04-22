@@ -152,10 +152,10 @@
 
         .thang-filter-row {
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             align-items: flex-end;
             gap: 12px;
-            min-width: 780px;
+            min-width: 0;
             font-weight: 700;
             color: #2b7132;
             font-size: 15px;
@@ -178,7 +178,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            flex: 0 0 auto;
+            flex: 1 1 100%;
+            justify-content: flex-end;
+            flex-wrap: wrap;
         }
 
         .filter-input {

@@ -203,11 +203,11 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 22px;
+            height: 32px;
             width: 100%;
             max-width: 200px;
-            padding: 0 10px;
-            font-size: 11px;
+            padding: 0 12px;
+            font-size: 14px;
             outline: none;
             color: #111827;
         }
@@ -235,12 +235,12 @@
             display: flex;
             align-items: flex-end;
             gap: 8px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            flex-wrap: wrap;
+            overflow: visible;
             overflow-y: visible;
             font-weight: bold;
             color: #2b7132;
-            font-size: 11px;
+            font-size: 12px;
             line-height: 1.2;
             padding-bottom: 2px;
         }
@@ -249,7 +249,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            flex: 0 0 auto;
+            flex: 1 1 260px;
             white-space: nowrap;
         }
         
@@ -258,13 +258,13 @@
         }
         
         .tonkho-filter-item .filter-input {
-            width: 170px;
-            max-width: 170px;
+            width: 100%;
+            max-width: none;
         }
 
         .tbx-select-noi-compact {
-            width: 200px;
-            max-width: 200px;
+            width: 100%;
+            max-width: none;
             min-width: 140px;
         }
 
@@ -343,18 +343,21 @@
             flex-direction: column;
             align-items: stretch;
             gap: 2px;
-            flex: 0 0 auto;
+            flex: 1 1 260px;
             min-width: 0;
-            max-width: 272px;
+            max-width: none;
         }
         
         .tonkho-filter-actions {
             display: flex;
             align-items: center;
             gap: 6px;
-            flex: 0 0 auto;
-            margin-left: 4px;
+            flex: 1 1 100%;
+            margin-left: 0;
             white-space: nowrap;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 4px;
         }
         
         .tonkho-filter-actions .action-btn {
@@ -372,10 +375,10 @@
         }
         
         .action-btn {
-            height: 26px;
+            height: 34px;
             border-radius: 9999px;
-            padding: 0 12px;
-            font-size: 11px;
+            padding: 0 14px;
+            font-size: 14px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;

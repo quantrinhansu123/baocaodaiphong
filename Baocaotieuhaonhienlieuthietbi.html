@@ -97,11 +97,11 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 22px;
+            height: 32px;
             width: 100%;
             max-width: 200px;
-            padding: 0 10px;
-            font-size: 11px;
+            padding: 0 12px;
+            font-size: 14px;
             outline: none;
         }
         
@@ -112,7 +112,7 @@
         /* Ô ngày: gõ dd/mm/yyyy + nút mở lịch (native date picker) */
         
         .date-filter-field {
-            height: 22px;
+            height: 32px;
             max-width: 200px;
         }
         
@@ -124,8 +124,8 @@
         
         .date-cal-btn {
             flex-shrink: 0;
-            width: 28px;
-            height: 22px;
+            width: 36px;
+            height: 32px;
             padding: 0;
             margin: 0;
             border: 1px solid #94a3b8;
@@ -151,11 +151,11 @@
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
             border-radius: 9999px;
-            height: 22px;
+            height: 32px;
             width: 100%;
             max-width: 200px;
             padding: 0 28px 0 10px;
-            font-size: 11px;
+            font-size: 14px;
             outline: none;
             cursor: pointer;
             -webkit-appearance: none;
@@ -176,11 +176,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 28px;
+            min-height: 34px;
             height: auto;
             border-radius: 9999px;
-            padding: 4px 14px;
-            font-size: 11px;
+            padding: 6px 14px;
+            font-size: 14px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -742,7 +742,7 @@
 
             <!-- FILTERS -->
             <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
-                <div class="flex flex-nowrap items-center gap-2 max-w-[1400px] overflow-x-auto whitespace-nowrap pb-1 font-bold text-[#2b7132] text-[10px]">
+                <div class="flex flex-wrap items-center gap-2 w-full overflow-visible pb-1 font-bold text-[#2b7132] text-[12px]">
                     <div class="flex items-center gap-2 shrink-0 w-[245px]">
                         <span class="w-[90px] shrink-0">CÔNG TRƯỜNG:</span>
                         <select id="filter-project" class="filter-select flex-1">
@@ -787,7 +787,7 @@
                         </div>
                         <input type="date" id="filter-to-date-picker" class="sr-only">
                     </div>
-                    <div class="flex items-center gap-1.5 no-print shrink-0 ml-1">
+                    <div class="flex flex-wrap items-center justify-end gap-1.5 no-print w-full mt-1">
                         <button id="load-appsheet" class="action-btn">Tải dữ liệu AppSheet</button>
                         <button id="check-appsheet" class="action-btn" style="background:#fff;color:#2b7132;">Xem AppSheet</button>
                         <button id="reset-filter" class="action-btn" style="background:#fff;color:#2b7132;">Xóa lọc</button>

@@ -152,7 +152,7 @@
 
         .repair-filter-bar {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-columns: 1fr;
             align-items: center;
             gap: 14px 20px;
             font-weight: 700;
@@ -199,6 +199,8 @@
             align-items: center;
             justify-content: flex-end;
             gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         @media (max-width: 1024px) {
