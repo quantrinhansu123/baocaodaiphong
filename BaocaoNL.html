@@ -292,11 +292,12 @@
             padding: 4px 8px 0;
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
+            align-items: stretch;
         }
         
         .report-tab-btn {
-            padding: 8px 16px;
-            font-size: 14px;
+            padding: 10px 16px;
+            font-size: 16px;
             font-weight: bold;
             color: #475569;
             background: #e2e8f0;
@@ -305,6 +306,8 @@
             border-radius: 6px 6px 0 0;
             cursor: pointer;
             transition: all 0.2s ease;
+            flex: 1 1 260px;
+            text-align: center;
         }
         
         .report-tab-btn:hover {
@@ -472,31 +475,31 @@
         }
 
         .nl-filter-strip {
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: visible;
             padding-bottom: 2px;
         }
 
         .nl-filter-grid {
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             align-items: flex-end;
             gap: 10px;
-            min-width: 1520px;
+            min-width: 0;
+            width: 100%;
         }
 
         .nl-filter-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            min-width: 210px;
-            flex: 1 1 0;
+            min-width: 220px;
+            flex: 1 1 280px;
         }
 
         .nl-filter-item--wide {
             align-items: flex-start;
-            flex: 2.8 1 0;
-            min-width: 520px;
+            flex: 2.6 1 520px;
+            min-width: 420px;
         }
 
         .nl-filter-label {
@@ -516,10 +519,10 @@
 
         .nl-filter-actions {
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             justify-content: flex-end;
             gap: 8px;
-            flex: 0 0 auto;
+            flex: 1 1 340px;
         }
         
         .nl-cong-trinh-actions {
@@ -538,13 +541,17 @@
             }
 
             .nl-filter-grid {
-                min-width: 1460px;
+                min-width: 0;
             }
         }
 
         @media (max-width: 640px) {
             .nl-filter-grid {
-                min-width: 1400px;
+                min-width: 0;
+            }
+
+            .report-tab-btn {
+                flex-basis: 100%;
             }
         }
         

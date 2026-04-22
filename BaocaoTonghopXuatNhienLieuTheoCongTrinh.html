@@ -29,6 +29,48 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
+        .report-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #f1f5f9;
+            padding: 4px 8px 0;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            align-items: stretch;
+        }
+
+        .report-tab-btn {
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1 1 0;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .report-tab-btn:hover {
+            background: #d1d5db;
+        }
+
+        .report-tab-btn.active {
+            background: #0047ab;
+            color: white;
+            border-color: #0047ab;
+        }
+
+        @media (max-width: 640px) {
+            .report-tab-btn {
+                flex-basis: 100%;
+            }
+        }
+
         .logo-container {
             width: 145px;
             text-align: center;
@@ -310,6 +352,12 @@
 <body>
     <div class="page-container">
 
+        <div class="report-tabs-container print-hide">
+            <button id="tab-chi-tiet-nl" class="report-tab-btn" type="button" onclick="switchReportTab('chi-tiet-nl')">Bảng kê nhập xuất NL</button>
+            <button id="tab-ton-kho-nl" class="report-tab-btn" type="button" onclick="switchReportTab('ton-kho-nl')">Báo cáo tồn kho NL</button>
+            <button id="tab-xuat-nl-theo-ct" class="report-tab-btn active" type="button" onclick="switchReportTab('xuat-nl-theo-ct')">Báo cáo xuất nhiên liệu theo công trình</button>
+        </div>
+
         <!-- HEADER — cùng format BaocaoTonkhoNhienlieu / BaocaoNL -->
         <div class="flex items-start p-2 bg-white">
             <div class="logo-container mr-6">
@@ -430,5 +478,32 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const REPORT_TAB_URLS = {
+            "chi-tiet-nl": "BaocaoNL.html",
+            "ton-kho-nl": "BaocaoTonkhoNhienlieu.html",
+            "xuat-nl-theo-ct": "BaocaoTonghopXuatNhienLieuTheoCongTrinh.html"
+        };
+
+        function appendGroupToTarget(url) {
+            const group = (new URLSearchParams(window.location.search).get("group") || "").trim();
+            if (!group) return url;
+            try {
+                const targetUrl = new URL(url, window.location.href);
+                targetUrl.searchParams.set("group", group);
+                return `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+            } catch (error) {
+                const separator = url.includes("?") ? "&" : "?";
+                return `${url}${separator}group=${encodeURIComponent(group)}`;
+            }
+        }
+
+        function switchReportTab(tabId) {
+            const targetUrl = REPORT_TAB_URLS[tabId];
+            if (!targetUrl) return;
+            window.location.href = appendGroupToTarget(targetUrl);
+        }
+    </script>
 </body>
 </html>
