@@ -105,7 +105,7 @@
         const buttons = Array.from(document.querySelectorAll(".tab-btn"));
         const panel = document.getElementById("panel-report");
         let currentTopTab = "bc-thiet-bi";
-        const CACHE_VER = "20260423-14";
+        const CACHE_VER = "20260423-23";
 
         const TAB_SOURCES = {
             "bc-thiet-bi": `./Baocaotieuhaonhienlieu.html?v=${CACHE_VER}&tab=trang-thiet-bi&group=thiet-bi`,
@@ -122,7 +122,7 @@
             "bc-sua-chua": new Set(["tab-sc-bc02", "tab-sc-bc03", "tab-sc-bc04"]),
             "bc-kiem-ke": new Set(["tab-kiem-ke-thiet-bi"]),
             "bc-ke-hoach": new Set([]),
-            "bc-cong-viec": new Set(["tab-cong-viec"])
+            "bc-cong-viec": new Set(["tab-cong-viec", "tab-cong-viec-ngay"])
         };
 
         function applyChildTabGrouping() {
