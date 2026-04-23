@@ -352,7 +352,7 @@
             "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
             "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html",
             "cong-viec": "BangChiTietGioLamViec.html",
-            "cong-viec-ngay": "ChiTietThoiGianLamViecTheoNgay.html?v=20260423-23"
+            "cong-viec-ngay": "ChiTietThoiGianLamViecTheoNgay.html?v=20260423-24"
         };
 
         const K_DATE = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
@@ -368,7 +368,13 @@
         const K_TONG_GIO_BC = ["Tổng giờ BC", "Tong gio BC", "Tổng giờ", "Tong gio"];
         const K_TONG_CONG_TAC = ["Tổng công tác", "Tong cong tac", "Tổng công", "Tong cong"];
         const K_SO_NGAY_LV = ["Số ngày LV", "So ngay LV", "Số ngày làm việc", "So ngay lam viec"];
-        const K_GHI_CHU = ["Ghi chú", "Ghi chu", "Nội dung", "Noi dung"];
+        /** Cột «Ghi chú» trên báo cáo lấy theo nội dung công việc trên CT */
+        const K_CONG_VIEC_THUC_HIEN = [
+            "Công việc thực hiện", "Cong viec thuc hien",
+            "Nội dung công việc", "Noi dung cong viec",
+            "Công tác thực hiện", "Cong tac thuc hien",
+            "Nội dung", "Noi dung"
+        ];
         const K_CA_LAM_VIEC = ["Ca làm việc", "Ca lam viec", "Ca", "Shift"];
         const K_TG_BAT_DAU = ["TG bắt đầu", "TG bat dau", "Thời gian bắt đầu", "Thoi gian bat dau", "Giờ bắt đầu", "Gio bat dau"];
         const K_TG_KET_THUC = ["TG kết thúc", "TG ket thuc", "Thời gian kết thúc", "Thoi gian ket thuc", "Giờ kết thúc", "Gio ket thuc"];
@@ -850,7 +856,11 @@
                     const tongGioRaw = pickByHeaderFallback(r, K_TONG_GIO_BC, /tong.*gio.*bc|tong.*gio/);
                     const tongCongRaw = pickByHeaderFallback(r, K_TONG_CONG_TAC, /tong.*cong.*tac|tong.*cong/);
                     const soNgayRaw = pickByHeaderFallback(r, K_SO_NGAY_LV, /so.*ngay.*lv|so.*ngay.*lam.*viec/);
-                    const ghiChuRaw = pickByHeaderFallback(r, K_GHI_CHU, /ghi.*chu|noi.*dung/);
+                    const ghiChuRaw = pickByHeaderFallback(
+                        r,
+                        K_CONG_VIEC_THUC_HIEN,
+                        /cong.*viec.*thuc.*hien|noi.*dung.*cong.*viec|cong.*tac.*thuc.*hien|noi.*dung/
+                    );
 
                     if (!dailyMap.has(dayKey)) {
                         dailyMap.set(dayKey, {
