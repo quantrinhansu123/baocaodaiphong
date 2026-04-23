@@ -387,14 +387,17 @@
             </div>
             <div class="meta-row meta-wide">
                 <label for="meta-machine">Tên máy :</label>
-                <input id="meta-machine" type="text" value="Máy xúc SK200 - Đường gom đê Đông Anh" autocomplete="off">
+                <input id="meta-machine" type="text" value="Máy xúc SK200 - Đường gom đê Đông Anh" autocomplete="off" list="meta-machine-options">
+                <datalist id="meta-machine-options"></datalist>
             </div>
         </div>
 
         <div class="toolbar print-hide">
+            <button type="button" id="btn-load-appsheet" class="action-btn action-btn-secondary">Tải dữ liệu AppSheet</button>
             <button type="button" id="btn-rebuild-rows" class="action-btn action-btn-secondary">Tạo lại dòng theo ngày</button>
             <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
             <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+            <span id="appsheet-status" style="align-self:center;font-size:12px;font-weight:700;color:#334155;"></span>
         </div>
 
         <div class="table-wrap">
@@ -479,6 +482,17 @@
     </div>
 
     <script>
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+        const TABLE_DS_TAI_SAN = "Danh sách tài sản";
+        const TABLE_NT_CT = "Nhật trình máy CT";
+
+        let _cacheDsRows = null;
+        let _cacheCtRows = null;
+        let _rentalAssetMap = new Map();
+
         function getTimestampForFileName() {
             const now = new Date();
             const pad = (n) => String(n).padStart(2, "0");
@@ -498,6 +512,123 @@
             const [y, m, day] = iso.split("-").map(Number);
             if (!y || !m || !day) return null;
             return new Date(y, m - 1, day);
+        }
+
+        function cellString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value);
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value);
+            return String(v);
+        }
+
+        function cellDisplayString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null) {
+                const d = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
+                if (d != null && String(d).trim() !== "") return String(d);
+            }
+            return cellString(v);
+        }
+
+        function pickFirstCell(row, keys) {
+            if (!row || !Array.isArray(keys)) return "";
+            for (const k of keys) {
+                const s = String(cellDisplayString(row[k])).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function normalizeKeyText(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "");
+        }
+
+        function machineKeysMatch(a, b) {
+            const ka = normalizeKeyText(a);
+            const kb = normalizeKeyText(b);
+            if (!ka || !kb) return false;
+            if (ka === kb) return true;
+            if (ka.length >= 6 && kb.length >= 6 && (ka.includes(kb) || kb.includes(ka))) return true;
+            return false;
+        }
+
+        function containsNormalized(haystack, needle) {
+            const h = normalizeKeyText(haystack);
+            const n = normalizeKeyText(needle);
+            if (!n) return true;
+            if (!h) return false;
+            return h.includes(n);
+        }
+
+        function parseDateFlexible(raw) {
+            if (raw == null) return null;
+            const s = String(cellDisplayString(raw)).trim();
+            if (!s) return null;
+            let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+            if (m) {
+                const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+                return isNaN(d.getTime()) ? null : d;
+            }
+            m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,].*)?$/);
+            if (m) {
+                const a = Number(m[1]);
+                const b = Number(m[2]);
+                const y = Number(m[3]);
+                const d = a > 12 ? new Date(y, b - 1, a) : (b > 12 ? new Date(y, a - 1, b) : new Date(y, b - 1, a));
+                return isNaN(d.getTime()) ? null : d;
+            }
+            const native = new Date(s);
+            return isNaN(native.getTime()) ? null : native;
+        }
+
+        function parseNumber(raw) {
+            const s0 = String(raw == null ? "" : cellDisplayString(raw)).trim();
+            if (!s0) return 0;
+            const m = s0.match(/-?[\d.,]+/);
+            if (!m) return 0;
+            let s = m[0];
+            const comma = s.indexOf(",");
+            const dot = s.indexOf(".");
+            if (comma !== -1 && dot !== -1) {
+                if (comma > dot) s = s.replace(/\./g, "").replace(",", ".");
+                else s = s.replace(/,/g, "");
+            } else if (comma !== -1) {
+                s = s.replace(",", ".");
+            } else if (dot !== -1 && s.indexOf(".", dot + 1) !== -1) {
+                s = s.replace(/\./g, "");
+            }
+            const n = parseFloat(s);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function parseDurationTextToMinutes(raw) {
+            const s = String(raw == null ? "" : raw).trim();
+            if (!s) return 0;
+            const hm = s.match(/^(\d+)\s*:\s*(\d{1,2})$/);
+            if (hm) return Number(hm[1]) * 60 + Number(hm[2]);
+            return Math.round(parseNumber(s) * 60);
+        }
+
+        function normalizeTimeValue(raw) {
+            const s = String(raw == null ? "" : cellDisplayString(raw)).trim();
+            if (!s) return "";
+            let m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+            if (m) return `${pad2(Number(m[1]))}:${pad2(Number(m[2]))}`;
+            m = s.match(/^(\d{1,2})h(\d{1,2})$/i);
+            if (m) return `${pad2(Number(m[1]))}:${pad2(Number(m[2]))}`;
+            m = s.match(/^(\d{1,2})h$/i);
+            if (m) return `${pad2(Number(m[1]))}:00`;
+            return "";
+        }
+
+        function formatDateKey(d) {
+            if (!d || isNaN(d.getTime())) return "";
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
         }
 
         function durationMinutesFromTime(startVal, endVal) {
@@ -528,6 +659,271 @@
 
         function formatDaysVN(num) {
             return num.toFixed(1).replace(".", ",");
+        }
+
+        function setStatus(text, isErr) {
+            const el = document.getElementById("appsheet-status");
+            if (!el) return;
+            el.textContent = text || "";
+            el.style.color = isErr ? "#b91c1c" : "#334155";
+        }
+
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`${tableName}: ${response.status}`);
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.Rows || []);
+        }
+
+        function buildRentalAssetMap(dsRows) {
+            const map = new Map();
+            for (const row of dsRows || []) {
+                const tenTaiSan = pickFirstCell(row, ["Tên tài sản", "Ten tai san"]);
+                const tenDonVi = pickFirstCell(row, ["Tên đơn vị", "Ten don vi", "Đơn vị", "Don vi", "Đơn vị cho thuê", "Don vi cho thue"]);
+                if (!tenTaiSan || !tenDonVi) continue;
+                const key = normalizeKeyText(tenTaiSan);
+                if (!key) continue;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        displayName: tenTaiSan,
+                        tenDonVi,
+                        matchKeys: new Set([key])
+                    });
+                }
+            }
+            return map;
+        }
+
+        function getUniqueRentalAssets(rentalMap) {
+            return [...new Set((rentalMap ? [...rentalMap.values()] : []))];
+        }
+
+        function fillMachineOptionsFromRentalMap(rentalMap) {
+            const list = document.getElementById("meta-machine-options");
+            const input = document.getElementById("meta-machine");
+            if (!list || !input) return;
+            list.innerHTML = "";
+            const items = getUniqueRentalAssets(rentalMap)
+                .map((v) => v.displayName)
+                .filter(Boolean)
+                .sort((a, b) => a.localeCompare(b, "vi"));
+            items.forEach((name) => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                list.appendChild(opt);
+            });
+            const curKey = normalizeKeyText(input.value);
+            if (curKey && rentalMap.has(curKey)) {
+                input.value = rentalMap.get(curKey).displayName || input.value;
+            } else {
+                input.value = items[0] || "";
+            }
+        }
+
+        function syncLessorByMachine() {
+            const machine = document.getElementById("meta-machine")?.value || "";
+            const lessorInput = document.getElementById("meta-lessor");
+            if (!lessorInput) return;
+            const matched = _rentalAssetMap.get(normalizeKeyText(machine));
+            if (matched?.tenDonVi) lessorInput.value = matched.tenDonVi;
+        }
+
+        function pickCtDate(row) {
+            const d = pickFirstCell(row, ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"]);
+            return parseDateFlexible(d);
+        }
+
+        function pickCtMachineName(row) {
+            return pickFirstCell(row, ["Tên tài sản", "Ten tai san"]);
+        }
+
+        function detectSessionBucket(ca) {
+            const s = String(ca ?? "").toLowerCase();
+            if (/s[aá]ng/.test(s)) return "s";
+            if (/chi[eề]u|tr[uư]a/.test(s)) return "c";
+            if (/t[oố]i|đ[eê]m|dem/.test(s)) return "t";
+            return "";
+        }
+
+        function mergeTimeField(cur, next, mode) {
+            if (!next) return cur || "";
+            if (!cur) return next;
+            const toMin = (t) => {
+                const m = t.match(/^(\d{2}):(\d{2})$/);
+                return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+            };
+            const a = toMin(cur);
+            const b = toMin(next);
+            if (a == null || b == null) return cur;
+            if (mode === "min") return b < a ? next : cur;
+            return b > a ? next : cur;
+        }
+
+        function computeDailyDataFromCt(machineName, fromDate, toDate, filters = {}) {
+            const out = new Map();
+            const machineKey = normalizeKeyText(machineName);
+            const selectedAsset = machineKey ? _rentalAssetMap.get(machineKey) : null;
+            if (!selectedAsset) return { dailyMap: out, matchedRows: 0 };
+            const selectedMatchKeys = selectedAsset.matchKeys || new Set([machineKey]);
+            const lessorNeedle = String(filters.lessor || "").trim();
+            const operatorNeedle = String(filters.operator || "").trim();
+            let matchedRows = 0;
+
+            for (const row of _cacheCtRows || []) {
+                const ctMachine = pickCtMachineName(row);
+                const ctMachineKey = normalizeKeyText(ctMachine);
+                const strictMatch = selectedMatchKeys.has(ctMachineKey);
+                const fuzzyMatch = machineKeysMatch(ctMachine, machineName);
+                if (!strictMatch && !fuzzyMatch) continue;
+
+                const d = pickCtDate(row);
+                if (!d) continue;
+                if (fromDate && d < fromDate) continue;
+                if (toDate && d > toDate) continue;
+
+                const tenLaiMay = pickFirstCell(row, ["Tên lái máy", "Ten lai may", "Lái máy", "Lai may", "Tên lái xe", "Ten lai xe"]);
+                if (operatorNeedle && !containsNormalized(tenLaiMay, operatorNeedle)) continue;
+
+                if (lessorNeedle) {
+                    const ctLessor = pickFirstCell(row, ["Đơn vị cho thuê", "Don vi cho thue", "Tên đơn vị", "Ten don vi", "Đơn vị", "Don vi"]);
+                    const byAsset = selectedAsset?.tenDonVi || "";
+                    if (!containsNormalized(byAsset, lessorNeedle) && !containsNormalized(ctLessor, lessorNeedle)) continue;
+                }
+                matchedRows += 1;
+
+                const key = formatDateKey(d);
+                if (!key) continue;
+
+                if (!out.has(key)) {
+                    out.set(key, {
+                        sStart: "", sEnd: "",
+                        cStart: "", cEnd: "",
+                        tStart: "", tEnd: "",
+                        hcMinutes: 0,
+                        tcMinutes: 0,
+                        days: 0,
+                        note: "",
+                        driverHit: new Map()
+                    });
+                }
+                const item = out.get(key);
+                const ca = pickFirstCell(row, ["Ca làm việc", "Ca lam viec", "Ca"]);
+                const bucket = detectSessionBucket(ca);
+                const start = normalizeTimeValue(pickFirstCell(row, ["TG bắt đầu", "TG bat dau", "Thời gian bắt đầu", "Thoi gian bat dau", "Giờ bắt đầu", "Gio bat dau"]));
+                const end = normalizeTimeValue(pickFirstCell(row, ["TG kết thúc", "TG ket thuc", "Thời gian kết thúc", "Thoi gian ket thuc", "Giờ kết thúc", "Gio ket thuc"]));
+
+                if (bucket === "s") {
+                    item.sStart = mergeTimeField(item.sStart, start, "min");
+                    item.sEnd = mergeTimeField(item.sEnd, end, "max");
+                } else if (bucket === "c") {
+                    item.cStart = mergeTimeField(item.cStart, start, "min");
+                    item.cEnd = mergeTimeField(item.cEnd, end, "max");
+                } else if (bucket === "t") {
+                    item.tStart = mergeTimeField(item.tStart, start, "min");
+                    item.tEnd = mergeTimeField(item.tEnd, end, "max");
+                }
+
+                const tongGioLv = pickFirstCell(row, ["Tổng giờ lv", "Tong gio lv", "Tổng giờ LV", "Tong gio LV", "Tổng giờ làm việc", "Tong gio lam viec"]);
+                const tongGioTangCa = pickFirstCell(row, ["Tổng giờ tăng ca", "Tong gio tang ca", "Giờ tăng ca", "Gio tang ca"]);
+                const soNgayLvThucTe = pickFirstCell(row, ["Số ngày lv thực tế", "So ngay lv thuc te", "Số ngày lv", "So ngay lv", "Số ngày làm việc", "So ngay lam viec"]);
+                const soNgayKiemTra = pickFirstCell(row, ["Số ngày kiểm tra", "So ngay kiem tra"]);
+                const loaiCongViec = pickFirstCell(row, ["Loại công việc", "Loai cong viec"]);
+                const ghiChu = pickFirstCell(row, ["Công việc thực hiện", "Cong viec thuc hien", "Ghi chú", "Ghi chu"]);
+                // Ưu tiên cột tổng giờ từ CT; nếu trống thì fallback theo TG bắt đầu/kết thúc của ca.
+                const rowMinutes = parseDurationTextToMinutes(tongGioLv) || durationMinutesFromTime(start, end);
+                if (loaiCongViec && (/tang\s*ca|tăng\s*ca/i.test(loaiCongViec) || !/trong.*gi[oờ].*hc/i.test(loaiCongViec))) {
+                    item.tcMinutes += rowMinutes;
+                } else {
+                    item.hcMinutes += rowMinutes;
+                }
+                item.tcMinutes += parseDurationTextToMinutes(tongGioTangCa);
+                item.days += parseNumber(soNgayLvThucTe || soNgayKiemTra);
+
+                if (ghiChu) {
+                    const parts = new Set(String(item.note || "").split(/\s*;\s*/).filter(Boolean));
+                    parts.add(ghiChu);
+                    item.note = [...parts].join("; ");
+                }
+                if (soNgayKiemTra) {
+                    const parts = new Set(String(item.note || "").split(/\s*;\s*/).filter(Boolean));
+                    parts.add(`Số ngày kiểm tra: ${soNgayKiemTra}`);
+                    item.note = [...parts].join("; ");
+                }
+                if (tenLaiMay) {
+                    const k = tenLaiMay.trim();
+                    item.driverHit.set(k, (item.driverHit.get(k) || 0) + 1);
+                }
+            }
+
+            return { dailyMap: out, matchedRows };
+        }
+
+        function getMostFrequentDriver(dailyMap) {
+            const hit = new Map();
+            for (const d of dailyMap.values()) {
+                for (const [name, cnt] of d.driverHit || []) {
+                    hit.set(name, (hit.get(name) || 0) + cnt);
+                }
+            }
+            let best = "";
+            let bestCnt = 0;
+            for (const [name, cnt] of hit) {
+                if (cnt > bestCnt) {
+                    best = name;
+                    bestCnt = cnt;
+                }
+            }
+            return best;
+        }
+
+        async function loadAppSheetData(forceRefresh) {
+            const btn = document.getElementById("btn-load-appsheet");
+            if (btn) btn.disabled = true;
+            try {
+                if (forceRefresh) {
+                    _cacheDsRows = null;
+                    _cacheCtRows = null;
+                }
+                setStatus("Đang tải AppSheet...", false);
+                if (!_cacheDsRows) _cacheDsRows = await fetchAppSheetTable(TABLE_DS_TAI_SAN);
+                if (!_cacheCtRows) _cacheCtRows = await fetchAppSheetTable(TABLE_NT_CT);
+
+                _rentalAssetMap = buildRentalAssetMap(_cacheDsRows);
+                fillMachineOptionsFromRentalMap(_rentalAssetMap);
+                syncLessorByMachine();
+                setStatus(`Đã tải ${getUniqueRentalAssets(_rentalAssetMap).length} thiết bị thuê, ${(_cacheCtRows || []).length} dòng Nhật trình máy CT.`, false);
+            } catch (e) {
+                console.error(e);
+                setStatus(`Lỗi tải dữ liệu: ${e?.message || e}`, true);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function initDateDefaults() {
+            const s = document.getElementById("meta-start");
+            const e = document.getElementById("meta-end");
+            if (!s || !e) return;
+            const isOldPreset = s.value === "2026-02-26" && e.value === "2026-03-25";
+            if (!isOldPreset) return;
+            const now = new Date();
+            const first = new Date(now.getFullYear(), now.getMonth(), 1);
+            const toYmd = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            s.value = toYmd(first);
+            e.value = toYmd(now);
         }
 
         function enumerateDaysInclusive(start, end) {
@@ -680,6 +1076,9 @@
 
             const start = parseISODateLocal(startIn.value);
             const end = parseISODateLocal(endIn.value);
+            const machine = document.getElementById("meta-machine")?.value || "";
+            const lessor = document.getElementById("meta-lessor")?.value || "";
+            const operator = document.getElementById("meta-operator")?.value || "";
             body.innerHTML = "";
 
             if (!start || !end || end < start) {
@@ -687,10 +1086,49 @@
                 return;
             }
 
+            const result = computeDailyDataFromCt(machine, start, end, {
+                lessor,
+                operator
+            });
+            const dailyMap = result.dailyMap;
             const days = enumerateDaysInclusive(start, end);
             days.forEach((d, i) => {
-                body.appendChild(buildRow(i + 1, d));
+                const tr = buildRow(i + 1, d);
+                const info = dailyMap.get(formatDateKey(d));
+                if (info) {
+                    const setTime = (role, val) => {
+                        const el = tr.querySelector(`input[data-role="${role}"]`);
+                        if (el && val) el.value = val;
+                    };
+                    setTime("s-start", info.sStart);
+                    setTime("s-end", info.sEnd);
+                    setTime("c-start", info.cStart);
+                    setTime("c-end", info.cEnd);
+                    setTime("t-start", info.tStart);
+                    setTime("t-end", info.tEnd);
+
+                    const hcCell = tr.querySelector(".cell-hc");
+                    if (hcCell) hcCell.textContent = formatHM(info.hcMinutes);
+
+                    const tcInp = tr.querySelector('input[data-role="ot"]');
+                    if (tcInp && info.tcMinutes > 0) tcInp.value = formatHM(info.tcMinutes);
+
+                    const dCell = tr.querySelector(".cell-days");
+                    if (dCell) dCell.textContent = formatDaysVN(info.days > 0 ? info.days : (info.hcMinutes > 0 ? 1 : 0));
+
+                    const noteInp = tr.querySelector(".note-field");
+                    if (noteInp && info.note) noteInp.value = info.note;
+                }
+                body.appendChild(tr);
             });
+            const driverName = getMostFrequentDriver(dailyMap);
+            const opInput = document.getElementById("meta-operator");
+            if (opInput && driverName && !String(opInput.value || "").trim()) opInput.value = driverName;
+            if (result.matchedRows === 0) {
+                setStatus("Không có dòng «Nhật trình máy CT» khớp bộ lọc hiện tại.", true);
+            } else {
+                setStatus(`Đang hiển thị ${result.matchedRows} dòng CT theo bộ lọc.`, false);
+            }
             recalculateFooter();
         }
 
@@ -752,6 +1190,10 @@
         const exportExcelBtn = document.getElementById("export-excel");
         const exportPdfBtn = document.getElementById("export-pdf");
         const rebuildBtn = document.getElementById("btn-rebuild-rows");
+        const loadBtn = document.getElementById("btn-load-appsheet");
+        const machineInput = document.getElementById("meta-machine");
+        const startInput = document.getElementById("meta-start");
+        const endInput = document.getElementById("meta-end");
 
         if (exportExcelBtn) {
             exportExcelBtn.addEventListener("click", () =>
@@ -764,12 +1206,37 @@
         if (rebuildBtn) {
             rebuildBtn.addEventListener("click", rebuildTableBody);
         }
+        if (loadBtn) {
+            loadBtn.addEventListener("click", async () => {
+                await loadAppSheetData(true);
+                rebuildTableBody();
+            });
+        }
+        if (machineInput) {
+            machineInput.addEventListener("change", () => {
+                syncLessorByMachine();
+                rebuildTableBody();
+            });
+            machineInput.addEventListener("input", rebuildTableBody);
+        }
+        document.getElementById("meta-lessor")?.addEventListener("change", rebuildTableBody);
+        document.getElementById("meta-lessor")?.addEventListener("input", rebuildTableBody);
+        document.getElementById("meta-operator")?.addEventListener("change", rebuildTableBody);
+        document.getElementById("meta-operator")?.addEventListener("input", rebuildTableBody);
+        if (startInput) {
+            startInput.addEventListener("change", rebuildTableBody);
+            startInput.addEventListener("input", rebuildTableBody);
+        }
+        if (endInput) {
+            endInput.addEventListener("change", rebuildTableBody);
+            endInput.addEventListener("input", rebuildTableBody);
+        }
 
         const TAB_REDIRECTS = {
             "tab-xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben&group=thiet-bi",
             "tab-xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon&group=thiet-bi",
             "tab-trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi",
-            "tab-thue-thiet-bi": "BaocaoThueThietBi.html"
+            "tab-thue-thiet-bi": "BaocaoThueThietBi.html?v=20260423-27"
         };
 
         function activateCurrentTab() {
@@ -789,7 +1256,8 @@
         });
 
         activateCurrentTab();
-        rebuildTableBody();
+        initDateDefaults();
+        loadAppSheetData(false).finally(rebuildTableBody);
     </script>
 </body>
 </html>

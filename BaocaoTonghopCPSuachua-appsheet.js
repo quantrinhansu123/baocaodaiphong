@@ -189,6 +189,25 @@
         return "";
     }
 
+    function normalizeHeaderKey(s) {
+        return String(s ?? "")
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, " ");
+    }
+
+    function pickByHeaderAliases(row, aliases) {
+        const want = new Set((aliases || []).map((a) => normalizeHeaderKey(a)));
+        for (const [k, v] of Object.entries(row || {})) {
+            if (!want.has(normalizeHeaderKey(k))) continue;
+            const s = normalizeSpaces(cellDisplayString(v));
+            if (s) return s;
+        }
+        return "";
+    }
+
     function pickTenLinhKienSuaChua(row) {
         const direct = pickFirstCell(row, [
             "Tên link kiện sửa chữa",
@@ -301,18 +320,31 @@
     }
 
     function pickNhomTextAgg(row) {
-        const nhom = pickFirstCell(row, [
+        const aliases = [
             "Tên nhóm",
             "Ten nhom",
             "TenNhom",
+            "Tên loại",
+            "Ten loai",
+            "Loại",
+            "Loai",
             "Nhóm thiết bị",
             "Nhom thiet bi",
             "Nhóm xe máy thiết bị",
             "Nhom xe may thiet bi",
             "Nhóm XMTB",
-            "Nhom XMTB"
-        ]);
+            "Nhom XMTB",
+            "Loại máy",
+            "Loai may",
+            "Tên loại xe",
+            "Ten loai xe"
+        ];
+        const nhom = pickFirstCell(row, aliases);
         if (nhom) return nhom;
+        const nhomAlias = pickByHeaderAliases(row, aliases);
+        if (nhomAlias) return nhomAlias;
+        const nhomRegex = pickByRegex(row, /t[eê]n.*nh[oô]m|t[eê]n.*lo[aạ]i|lo[aạ]i.*(m[aá]y|xe|thi[eế]t\s*b[iị]|xmtb)|nh[oô]m.*(th[iệ]t\s*b[iị]|xe\s*m[aá]y|xmtb)/i);
+        if (nhomRegex) return nhomRegex;
         return pickFirstCell(row, ["Tên thiết bị", "Ten thiet bi", "TenThietBi"]);
     }
 

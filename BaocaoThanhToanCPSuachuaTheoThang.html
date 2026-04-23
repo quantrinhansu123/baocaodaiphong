@@ -747,12 +747,20 @@
                 "Tên nhóm",
                 "Ten nhom",
                 "TenNhom",
+                "Tên loại",
+                "Ten loai",
+                "Loai",
+                "Loại",
                 "Nhóm thiết bị",
                 "Nhom thiet bi",
                 "Nhóm xe máy thiết bị",
                 "Nhom xe may thiet bi",
                 "Nhóm XMTB",
-                "Nhom XMTB"
+                "Nhom XMTB",
+                "Loại máy",
+                "Loai may",
+                "Tên loại xe",
+                "Ten loai xe"
             ];
             const fromExact = pickFirstCell(row, exactKeys);
             if (fromExact) return fromExact;
@@ -760,6 +768,8 @@
             if (fromAlias) return fromAlias;
             const fromKeyRx = pickByRegex(row, /t[eê]n.*nh[oô]m/i);
             if (fromKeyRx) return fromKeyRx;
+            const fromLoai = pickByRegex(row, /t[eê]n.*lo[aạ]i|lo[aạ]i.*(m[aá]y|xe|thi[eế]t\s*b[iị]|xmtb)/i);
+            if (fromLoai) return fromLoai;
             return pickByRegex(row, /nh[oô]m.*(th[iệ]t\s*b[iị]|xe\s*m[aá]y|xmtb)/i);
         }
 
@@ -859,7 +869,7 @@
             if (legacy) return legacy;
             const tenTb = pickTenThietBiSuaChua(row);
             const m = tenTb.match(/^(\d{1,2}\.\s*[^-]+)/);
-            return m ? normalizeSpaces(m[1]) : "";
+            return m ? normalizeSpaces(m[1]) : normalizeSpaces(tenTb);
         }
 
         function pickTenLinhKienSuaChua(row) {

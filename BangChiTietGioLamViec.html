@@ -642,6 +642,7 @@
 
         const TABLE_NHAT_TRINH_MAY_CT = "Nhật trình máy CT";
         const TABLE_NHAT_TRINH_MAY = "Nhật trình máy";
+        const TABLE_KH_CONG_VIEC_NT_MAY = "KH công việc NT máy";
         const CT_NGAY_KEYS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
         /** Công trình — chỉ cột «Tên nơi quản lý» trên Nhật trình máy CT (bộ lọc + mô tả) */
         const K_CONG_TRINH_TEN_NOI_QL = ["Tên nơi quản lý", "Ten noi quan ly", "Tên nơi QL", "Ten noi QL", "Nơi quản lý", "Noi quan ly"];
@@ -655,6 +656,10 @@
             "Tên người tạo", "Ten nguoi tao", "Người tạo", "Nguoi tao",
             "User", "EMAIL", "Email", "Created by", "Tạo bởi", "Tao boi"
         ];
+        const K_KH_LAI_MAY = ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"];
+        const K_KH_NGAY_LAM_VIEC = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
+        const K_KH_KL_THEO_KE_HOACH = ["KL theo Kế hoạch", "KL theo Ke hoach", "Khối lượng kế hoạch", "Khoi luong ke hoach", "KL kế hoạch"];
+        const K_KH_TONG_GIO_LV = ["Tổng giờ lv", "Tong gio lv", "Tổng giờ LV", "Tong gio LV", "Tổng giờ làm việc", "Tong gio lam viec"];
 
         function normFilterVal(s) {
             if (s == null) return "";
@@ -664,6 +669,7 @@
         /** Bộ nhật trình CT đã tải (lọc lại client không cần gọi lại AppSheet) */
         let _cacheNtCt = null;
         let _cacheNtPhieuLookup = null;
+        let _cacheKhPlanLookup = null;
 
         function cellString(v) {
             if (v == null) return "";
@@ -740,6 +746,57 @@
                 if (s) return s;
             }
             return "";
+        }
+
+        function toLocalDateKey(d) {
+            if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+
+        function makeDriverDayKey(driverName, dateObj) {
+            const nameKey = normalizeKeyPart(driverName);
+            const dayKey = toLocalDateKey(dateObj);
+            if (!nameKey || !dayKey) return "";
+            return `${nameKey}__${dayKey}`;
+        }
+
+        function mergePreferNumeric(currentVal, nextVal) {
+            const cur = String(currentVal ?? "").trim();
+            const nxt = String(nextVal ?? "").trim();
+            if (!nxt) return cur;
+            if (!cur) return nxt;
+            const a = Number(cur.replace(",", "."));
+            const b = Number(nxt.replace(",", "."));
+            if (Number.isFinite(a) && Number.isFinite(b)) {
+                return String(a + b);
+            }
+            if (cur === nxt) return cur;
+            const parts = new Set(cur.split(/\s*;\s*/).filter(Boolean));
+            if (!parts.has(nxt)) parts.add(nxt);
+            return [...parts].join("; ");
+        }
+
+        function buildKhPlanLookup(rows) {
+            const map = new Map();
+            for (const row of rows || []) {
+                const laiMay = pickFirstCell(row, K_KH_LAI_MAY);
+                const ngay = parseDateFlexible(pickFirstCell(row, K_KH_NGAY_LAM_VIEC));
+                const key = makeDriverDayKey(laiMay, ngay);
+                if (!key) continue;
+
+                const klKh = pickFirstCell(row, K_KH_KL_THEO_KE_HOACH);
+                const tgKh = pickFirstCell(row, K_KH_TONG_GIO_LV);
+                if (!klKh && !tgKh) continue;
+
+                const old = map.get(key) || { khKh: "", tgKh: "" };
+                old.khKh = mergePreferNumeric(old.khKh, klKh);
+                old.tgKh = mergePreferNumeric(old.tgKh, tgKh);
+                map.set(key, old);
+            }
+            return map;
         }
 
         function normalizeKeyPart(s) {
@@ -1045,10 +1102,10 @@
 
         function applyLocalFilters() {
             if (!_cacheNtCt) return;
-            filterMapRenderFromRows(_cacheNtCt, _cacheNtPhieuLookup);
+            filterMapRenderFromRows(_cacheNtCt, _cacheNtPhieuLookup, _cacheKhPlanLookup);
         }
 
-        function filterMapRenderFromRows(allRows, ntPhieuLookup) {
+        function filterMapRenderFromRows(allRows, ntPhieuLookup, khPlanLookup) {
             const fromStr = document.getElementById("filter-from-date").value;
             const toStr = document.getElementById("filter-to-date").value;
             const fromDate = fromStr ? parseYmdToLocalStart(fromStr) : null;
@@ -1111,24 +1168,33 @@
                 const tLyTu = pickFirstCell(r, K_LTU);
                 const tLyDen = pickFirstCell(r, K_LDEN);
                 const oneLy = pickFirstCell(r, K_LY1);
+                const laiMay = pickFirstCell(r, K_LAI);
+                const ngayCt = pickNgayLamViecFromCt(r);
+                const planByDriverDay = (khPlanLookup && makeDriverDayKey(laiMay, ngayCt))
+                    ? khPlanLookup.get(makeDriverDayKey(laiMay, ngayCt))
+                    : null;
                 return {
                     cbkt:
                         pickFirstCell(r, K_TEN_NGUOI_TAO) ||
                         valueFromNtPhieuTheoIdCha(r, ntPhieuLookup, "nguoiTao") ||
                         pickFirstCell(r, K_CBKT),
                     cbPhuTrach: pickFirstCell(r, K_PHU),
-                    laiMay: pickFirstCell(r, K_LAI),
+                    laiMay,
                     loaiMay: pickFirstCell(r, K_LOAI_MAY_FILTER),
                     noiDung: pickFirstCell(r, K_CVIEC),
                     lyTrinhTu: tLyTu || (tLyDen ? "" : oneLy),
                     lyTrinhDen: tLyDen,
                     dvt: pickFirstCell(r, ["ĐVT", "DVT", "Đơn vị tính", "Don vi tinh", "DVT công tác", "DVT công tác tính giờ"]) || "Giờ",
-                    khKh: pickFirstCell(r, ["Khối lượng kế hoạch", "Khoi luong ke hoach", "KL kế hoạch", "Sản lượng theo mẫu", "Gio theo mẫu (giờ)"]),
+                    khKh:
+                        planByDriverDay?.khKh ||
+                        pickFirstCell(r, ["Khối lượng kế hoạch", "Khoi luong ke hoach", "KL kế hoạch", "Sản lượng theo mẫu", "Gio theo mẫu (giờ)"]),
                     khTt: pickFirstCell(r, [
                         "Khối lượng", "Khoi luong", "Khối lượng thực tế", "Khoi luong thuc te",
                         "Klg thực tế theo công tác thực hiện", "Klg theo công tác thực hiện"
                     ]),
-                    tgKh: pickFirstCell(r, ["Thời gian kế hoạch", "Thoi gian ke hoach", "Hệ số theo mẫu (giờ)"]),
+                    tgKh:
+                        planByDriverDay?.tgKh ||
+                        pickFirstCell(r, ["Thời gian kế hoạch", "Thoi gian ke hoach", "Hệ số theo mẫu (giờ)"]),
                     tgTt: pickTongGioLvFromCt(r) || pickFirstCell(r, ["Tổng thời gian", "Số giờ theo công tác thực hiện (giờ)"]),
                     ghiChu:
                         valueFromNtPhieuTheoIdCha(r, ntPhieuLookup, "noiDung") ||
@@ -1219,16 +1285,24 @@
             try {
                 const allRows = await fetchAppSheetTable(TABLE_NHAT_TRINH_MAY_CT);
                 let ntMayRows = [];
+                let khPlanRows = [];
                 try {
                     ntMayRows = await fetchAppSheetTable(TABLE_NHAT_TRINH_MAY);
                 } catch (e) {
                     console.warn("«Nhật trình máy» không tải được — Ghi chú chỉ lấy từ cột trên CT nếu có:", e);
                 }
+                try {
+                    khPlanRows = await fetchAppSheetTable(TABLE_KH_CONG_VIEC_NT_MAY);
+                } catch (e) {
+                    console.warn("«KH công việc NT máy» không tải được — cột Kế hoạch sẽ fallback theo CT:", e);
+                }
                 const ntPhieuLookup = buildNtMayPhieuLookup(ntMayRows);
+                const khPlanLookup = buildKhPlanLookup(khPlanRows);
                 _cacheNtCt = allRows;
                 _cacheNtPhieuLookup = ntPhieuLookup;
+                _cacheKhPlanLookup = khPlanLookup;
                 populateFilterMultiselects(allRows);
-                filterMapRenderFromRows(allRows, ntPhieuLookup);
+                filterMapRenderFromRows(allRows, ntPhieuLookup, khPlanLookup);
             } catch (error) {
                 console.error(error);
                 alert("Lỗi tải dữ liệu: " + error.message);
