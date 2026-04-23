@@ -352,8 +352,14 @@
             "tong-hop-sc": "BaocaoTonghopCPSuachua.html",
             "kiem-ke-thiet-bi": "BaocaoKiemKeThietBi.html",
             "cong-viec": "BangChiTietGioLamViec.html",
-            "cong-viec-ngay": "ChiTietThoiGianLamViecTheoNgay.html?v=20260423-24"
+            "cong-viec-ngay": "ChiTietThoiGianLamViecTheoNgay.html?v=20260423-25"
         };
+
+        /** Bộ dữ liệu đã tải: lọc theo bộ lọc chạy cục bộ, không gọi lại AppSheet */
+        let _cacheCtRows = null;
+        let _cacheNtRows = null;
+        let _ntNgayLookupCache = null;
+        let _dataReady = false;
 
         const K_DATE = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
         const K_MACHINE = ["Tên tài sản", "Ten tai san", "Tên XMTB", "Ten XMTB", "Tên thiết bị", "Ten thiet bi"];
@@ -796,19 +802,129 @@
             document.getElementById("sum-days").innerText = sumDays.toFixed(2);
         }
 
+        function applyFromCache() {
+            if (!_dataReady || !Array.isArray(_cacheCtRows) || !_ntNgayLookupCache) {
+                updateLoadStatus("Chưa có dữ liệu. Bấm «Tải dữ liệu» trước.");
+                return;
+            }
+
+            updatePeriodAndFooter();
+            const from = parseYmdStart(document.getElementById("filter-from-date").value);
+            const to = parseYmdEnd(document.getElementById("filter-to-date").value);
+            const machineKeyword = normText(document.getElementById("filter-machine").value);
+            const renterKeyword = normText(document.getElementById("filter-renter").value);
+            const driverKeyword = normText(document.getElementById("filter-driver").value);
+
+            const rows = _cacheCtRows;
+            const ntNgayLookup = _ntNgayLookupCache;
+
+            const filtered = (rows || []).filter((r) => {
+                const d = pickNgayByIdCha(r, ntNgayLookup) || pickNgayLamViecFromCt(r);
+                if (!d) return false;
+                if (from && d < from) return false;
+                if (to && d > to) return false;
+                if (machineKeyword) {
+                    const machine = normText(pickFirstCell(r, K_MACHINE));
+                    if (machine !== machineKeyword && !machine.includes(machineKeyword)) return false;
+                }
+                if (renterKeyword) {
+                    const renter = normText(pickFirstCell(r, K_DON_VI_CHO_THUE));
+                    if (renter !== renterKeyword && !renter.includes(renterKeyword)) return false;
+                }
+                if (driverKeyword) {
+                    const driver = normText(pickFirstCell(r, K_LAI_MAY));
+                    if (driver !== driverKeyword && !driver.includes(driverKeyword)) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                const da = pickNgayByIdCha(a, ntNgayLookup) || pickNgayLamViecFromCt(a);
+                const db = pickNgayByIdCha(b, ntNgayLookup) || pickNgayLamViecFromCt(b);
+                return (da?.getTime() || 0) - (db?.getTime() || 0);
+            });
+
+            const dailyMap = new Map();
+            filtered.forEach((r) => {
+                const d = pickNgayByIdCha(r, ntNgayLookup) || pickNgayLamViecFromCt(r);
+                if (!d) return;
+                const dayKey = formatDateKey(d);
+                const caLamViec = pickByHeaderFallback(r, K_CA_LAM_VIEC, /ca.*lam.*viec|^ca$/);
+                const tgBatDau = pickByHeaderFallback(r, K_TG_BAT_DAU, /tg.*bat.*dau|thoi.*gian.*bat.*dau|gio.*bat.*dau/);
+                const tgKetThuc = pickByHeaderFallback(r, K_TG_KET_THUC, /tg.*ket.*thuc|thoi.*gian.*ket.*thuc|gio.*ket.*thuc/);
+                const caBucket = detectCaBucket(caLamViec);
+                const tongGioRaw = pickByHeaderFallback(r, K_TONG_GIO_BC, /tong.*gio.*bc|tong.*gio/);
+                const tongCongRaw = pickByHeaderFallback(r, K_TONG_CONG_TAC, /tong.*cong.*tac|tong.*cong/);
+                const soNgayRaw = pickByHeaderFallback(r, K_SO_NGAY_LV, /so.*ngay.*lv|so.*ngay.*lam.*viec/);
+                const ghiChuRaw = pickByHeaderFallback(
+                    r,
+                    K_CONG_VIEC_THUC_HIEN,
+                    /cong.*viec.*thuc.*hien|noi.*dung.*cong.*viec|cong.*tac.*thuc.*hien|noi.*dung/
+                );
+
+                if (!dailyMap.has(dayKey)) {
+                    dailyMap.set(dayKey, {
+                        __date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+                        ngay: formatDate(d),
+                        sangRaiDa: "",
+                        sangKhoiThuc: "",
+                        chieuRaiDa: "",
+                        chieuKhoiThuc: "",
+                        toiRaiDa: "",
+                        toiKhoiThuc: "",
+                        tongGioBc: 0,
+                        tongCongTac: 0,
+                        soNgayLv: 0,
+                        ghiChu: ""
+                    });
+                }
+
+                const item = dailyMap.get(dayKey);
+                if (caBucket === "sang") {
+                    item.sangRaiDa = mergeText(item.sangRaiDa, tgBatDau);
+                    item.sangKhoiThuc = mergeText(item.sangKhoiThuc, tgKetThuc);
+                } else if (caBucket === "chieu") {
+                    item.chieuRaiDa = mergeText(item.chieuRaiDa, tgBatDau);
+                    item.chieuKhoiThuc = mergeText(item.chieuKhoiThuc, tgKetThuc);
+                } else if (caBucket === "toi") {
+                    item.toiRaiDa = mergeText(item.toiRaiDa, tgBatDau);
+                    item.toiKhoiThuc = mergeText(item.toiKhoiThuc, tgKetThuc);
+                }
+                item.tongGioBc += parseNumber(tongGioRaw);
+                item.tongCongTac += parseNumber(tongCongRaw);
+                item.soNgayLv += parseNumber(soNgayRaw);
+                item.ghiChu = mergeText(item.ghiChu, ghiChuRaw);
+            });
+
+            const mapped = Array.from(dailyMap.values())
+                .sort((a, b) => a.__date - b.__date)
+                .map((x) => ({
+                    ngay: x.ngay,
+                    sangRaiDa: x.sangRaiDa,
+                    sangKhoiThuc: x.sangKhoiThuc,
+                    chieuRaiDa: x.chieuRaiDa,
+                    chieuKhoiThuc: x.chieuKhoiThuc,
+                    toiRaiDa: x.toiRaiDa,
+                    toiKhoiThuc: x.toiKhoiThuc,
+                    tongGioBc: x.tongGioBc ? x.tongGioBc.toFixed(2) : "",
+                    tongCongTac: x.tongCongTac ? x.tongCongTac.toFixed(2) : "",
+                    soNgayLv: x.soNgayLv ? x.soNgayLv.toFixed(2) : "",
+                    ghiChu: x.ghiChu
+                }));
+
+            renderRows(mapped);
+            updateReportInfo(filtered);
+            updateLoadStatus(
+                `Đã lọc ${mapped.length} ngày từ ${filtered.length} dòng / ${rows.length} dòng tổng (theo bộ nhớ, không tải lại AppSheet)`
+            );
+        }
+
         async function loadData() {
             const btn = document.getElementById("btn-load-data");
             const oldText = btn.innerText;
             btn.disabled = true;
             btn.innerText = "Đang tải...";
             try {
-                updatePeriodAndFooter();
-                const from = parseYmdStart(document.getElementById("filter-from-date").value);
-                const to = parseYmdEnd(document.getElementById("filter-to-date").value);
-                const machineKeyword = normText(document.getElementById("filter-machine").value);
-                const renterKeyword = normText(document.getElementById("filter-renter").value);
-                const driverKeyword = normText(document.getElementById("filter-driver").value);
-
                 const rows = await fetchAppSheetTable(TABLE_NHAT_TRINH_MAY_CT);
                 let ntRows = [];
                 try {
@@ -816,107 +932,20 @@
                 } catch (e) {
                     console.warn("Không tải được bảng Nhật trình máy, tạm dùng ngày trên CT:", e);
                 }
-                const ntNgayLookup = buildNtNgayLookup(ntRows);
+
+                _cacheCtRows = rows;
+                _cacheNtRows = ntRows;
+                _ntNgayLookupCache = buildNtNgayLookup(ntRows);
                 rebuildCategoricalFilters(rows);
-                const filtered = (rows || []).filter((r) => {
-                    const d = pickNgayByIdCha(r, ntNgayLookup) || pickNgayLamViecFromCt(r);
-                    if (!d) return false;
-                    if (from && d < from) return false;
-                    if (to && d > to) return false;
-                    if (machineKeyword) {
-                        const machine = normText(pickFirstCell(r, K_MACHINE));
-                        if (!machine.includes(machineKeyword)) return false;
-                    }
-                    if (renterKeyword) {
-                        const renter = normText(pickFirstCell(r, K_DON_VI_CHO_THUE));
-                        if (!renter.includes(renterKeyword)) return false;
-                    }
-                    if (driverKeyword) {
-                        const driver = normText(pickFirstCell(r, K_LAI_MAY));
-                        if (!driver.includes(driverKeyword)) return false;
-                    }
-                    return true;
-                });
+                _dataReady = true;
 
-                filtered.sort((a, b) => {
-                    const da = pickNgayByIdCha(a, ntNgayLookup) || pickNgayLamViecFromCt(a);
-                    const db = pickNgayByIdCha(b, ntNgayLookup) || pickNgayLamViecFromCt(b);
-                    return (da?.getTime() || 0) - (db?.getTime() || 0);
-                });
-
-                const dailyMap = new Map();
-                filtered.forEach((r) => {
-                    const d = pickNgayByIdCha(r, ntNgayLookup) || pickNgayLamViecFromCt(r);
-                    if (!d) return;
-                    const dayKey = formatDateKey(d);
-                    const caLamViec = pickByHeaderFallback(r, K_CA_LAM_VIEC, /ca.*lam.*viec|^ca$/);
-                    const tgBatDau = pickByHeaderFallback(r, K_TG_BAT_DAU, /tg.*bat.*dau|thoi.*gian.*bat.*dau|gio.*bat.*dau/);
-                    const tgKetThuc = pickByHeaderFallback(r, K_TG_KET_THUC, /tg.*ket.*thuc|thoi.*gian.*ket.*thuc|gio.*ket.*thuc/);
-                    const caBucket = detectCaBucket(caLamViec);
-                    const tongGioRaw = pickByHeaderFallback(r, K_TONG_GIO_BC, /tong.*gio.*bc|tong.*gio/);
-                    const tongCongRaw = pickByHeaderFallback(r, K_TONG_CONG_TAC, /tong.*cong.*tac|tong.*cong/);
-                    const soNgayRaw = pickByHeaderFallback(r, K_SO_NGAY_LV, /so.*ngay.*lv|so.*ngay.*lam.*viec/);
-                    const ghiChuRaw = pickByHeaderFallback(
-                        r,
-                        K_CONG_VIEC_THUC_HIEN,
-                        /cong.*viec.*thuc.*hien|noi.*dung.*cong.*viec|cong.*tac.*thuc.*hien|noi.*dung/
-                    );
-
-                    if (!dailyMap.has(dayKey)) {
-                        dailyMap.set(dayKey, {
-                            __date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
-                            ngay: formatDate(d),
-                            sangRaiDa: "",
-                            sangKhoiThuc: "",
-                            chieuRaiDa: "",
-                            chieuKhoiThuc: "",
-                            toiRaiDa: "",
-                            toiKhoiThuc: "",
-                            tongGioBc: 0,
-                            tongCongTac: 0,
-                            soNgayLv: 0,
-                            ghiChu: ""
-                        });
-                    }
-
-                    const item = dailyMap.get(dayKey);
-                    if (caBucket === "sang") {
-                        item.sangRaiDa = mergeText(item.sangRaiDa, tgBatDau);
-                        item.sangKhoiThuc = mergeText(item.sangKhoiThuc, tgKetThuc);
-                    } else if (caBucket === "chieu") {
-                        item.chieuRaiDa = mergeText(item.chieuRaiDa, tgBatDau);
-                        item.chieuKhoiThuc = mergeText(item.chieuKhoiThuc, tgKetThuc);
-                    } else if (caBucket === "toi") {
-                        item.toiRaiDa = mergeText(item.toiRaiDa, tgBatDau);
-                        item.toiKhoiThuc = mergeText(item.toiKhoiThuc, tgKetThuc);
-                    }
-                    item.tongGioBc += parseNumber(tongGioRaw);
-                    item.tongCongTac += parseNumber(tongCongRaw);
-                    item.soNgayLv += parseNumber(soNgayRaw);
-                    item.ghiChu = mergeText(item.ghiChu, ghiChuRaw);
-                });
-
-                const mapped = Array.from(dailyMap.values())
-                    .sort((a, b) => a.__date - b.__date)
-                    .map((x) => ({
-                        ngay: x.ngay,
-                        sangRaiDa: x.sangRaiDa,
-                        sangKhoiThuc: x.sangKhoiThuc,
-                        chieuRaiDa: x.chieuRaiDa,
-                        chieuKhoiThuc: x.chieuKhoiThuc,
-                        toiRaiDa: x.toiRaiDa,
-                        toiKhoiThuc: x.toiKhoiThuc,
-                        tongGioBc: x.tongGioBc ? x.tongGioBc.toFixed(2) : "",
-                        tongCongTac: x.tongCongTac ? x.tongCongTac.toFixed(2) : "",
-                        soNgayLv: x.soNgayLv ? x.soNgayLv.toFixed(2) : "",
-                        ghiChu: x.ghiChu
-                    }));
-
-                renderRows(mapped);
-                updateReportInfo(filtered);
-                updateLoadStatus(`Đã tải ${mapped.length}/${rows.length} dòng từ Nhật trình máy CT (ngày lấy theo ID cha -> Nhật trình máy)`);
+                applyFromCache();
             } catch (e) {
                 console.error(e);
+                _dataReady = false;
+                _cacheCtRows = null;
+                _cacheNtRows = null;
+                _ntNgayLookupCache = null;
                 updateReportInfo([]);
                 updateLoadStatus("Tải dữ liệu lỗi");
                 alert("Lỗi tải dữ liệu: " + e.message);
@@ -946,11 +975,11 @@
 
             document.getElementById("btn-load-data").addEventListener("click", loadData);
             document.getElementById("btn-print").addEventListener("click", () => window.print());
-            document.getElementById("filter-from-date").addEventListener("change", loadData);
-            document.getElementById("filter-to-date").addEventListener("change", loadData);
-            document.getElementById("filter-machine").addEventListener("change", loadData);
-            document.getElementById("filter-renter").addEventListener("change", loadData);
-            document.getElementById("filter-driver").addEventListener("change", loadData);
+            document.getElementById("filter-from-date").addEventListener("change", applyFromCache);
+            document.getElementById("filter-to-date").addEventListener("change", applyFromCache);
+            document.getElementById("filter-machine").addEventListener("change", applyFromCache);
+            document.getElementById("filter-renter").addEventListener("change", applyFromCache);
+            document.getElementById("filter-driver").addEventListener("change", applyFromCache);
             document.getElementById("work-body").addEventListener("input", recalcSummary);
         });
     </script>
