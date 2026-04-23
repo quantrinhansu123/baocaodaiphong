@@ -272,6 +272,108 @@
         return null;
     }
 
+    function pickTenThietBiSuaChuaAgg(row) {
+        const direct = pickFirstCell(row, [
+            "Tên XMTB",
+            "Ten XMTB",
+            "Tên thiết bị sửa chữa",
+            "Ten thiet bi sua chua"
+        ]);
+        if (direct) return direct;
+        return pickFirstCell(row, ["Tên tài sản", "Ten tai san", "Tên thiết bị", "Ten thiet bi"]);
+    }
+
+    function pickTenLaiMayAgg(row) {
+        const direct = pickFirstCell(row, [
+            "Tên LM",
+            "Ten LM",
+            "Tên lái máy",
+            "Ten lai may",
+            "Lái máy",
+            "Lai may",
+            "Tên lái máy/XMTB",
+            "Ten lai may/XMTB",
+            "Tên người vận hành",
+            "Ten nguoi van hanh"
+        ]);
+        if (direct) return direct;
+        return pickByRegex(row, /(t[eê]n.*(l[aá]i|lm).*(m[aá]y|xmtb)|l[aá]i.*m[aá]y|t[eê]n.*v[aậ]n.*h[aà]nh)/i);
+    }
+
+    function pickNhomTextAgg(row) {
+        const nhom = pickFirstCell(row, [
+            "Tên nhóm",
+            "Ten nhom",
+            "TenNhom",
+            "Nhóm thiết bị",
+            "Nhom thiet bi",
+            "Nhóm xe máy thiết bị",
+            "Nhom xe may thiet bi",
+            "Nhóm XMTB",
+            "Nhom XMTB"
+        ]);
+        if (nhom) return nhom;
+        return pickFirstCell(row, ["Tên thiết bị", "Ten thiet bi", "TenThietBi"]);
+    }
+
+    function getNxlcTextFilterNeedles() {
+        const g = (id) => normalizeSpaces(document.getElementById(id)?.value ?? "").toLowerCase();
+        return {
+            tenTb: g("sc-filter-ten-thiet-bi"),
+            tenLm: g("sc-filter-ten-lai-may"),
+            nhom: g("sc-filter-nhom")
+        };
+    }
+
+    function rowMatchesNxlcTextFilters(row, needles) {
+        const n = needles || getNxlcTextFilterNeedles();
+        const hayTb = normalizeSpaces(pickTenThietBiSuaChuaAgg(row)).toLowerCase();
+        const hayLm = normalizeSpaces(pickTenLaiMayAgg(row)).toLowerCase();
+        const hayNhom = normalizeSpaces(pickNhomTextAgg(row)).toLowerCase();
+        if (n.tenTb && hayTb !== n.tenTb) return false;
+        if (n.tenLm && hayLm !== n.tenLm) return false;
+        if (n.nhom && hayNhom !== n.nhom) return false;
+        return true;
+    }
+
+    function fillRepairFilterSelect(el, values, emptyLabel) {
+        if (!el || el.tagName !== "SELECT") return;
+        const prev = el.value;
+        el.innerHTML = "";
+        const o0 = document.createElement("option");
+        o0.value = "";
+        o0.textContent = emptyLabel || "— Tất cả —";
+        el.appendChild(o0);
+        for (const v of values) {
+            const t = normalizeSpaces(v);
+            if (!t) continue;
+            const o = document.createElement("option");
+            o.value = t;
+            o.textContent = t;
+            el.appendChild(o);
+        }
+        const hasPrev = prev && [...el.options].some((op) => op.value === prev);
+        el.value = hasPrev ? prev : "";
+    }
+
+    function populateNxlcFilterSelects(rows) {
+        const setTb = new Set();
+        const setLm = new Set();
+        const setNhom = new Set();
+        for (const row of rows || []) {
+            const tb = normalizeSpaces(pickTenThietBiSuaChuaAgg(row));
+            const lm = normalizeSpaces(pickTenLaiMayAgg(row));
+            const nh = normalizeSpaces(pickNhomTextAgg(row));
+            if (tb) setTb.add(tb);
+            if (lm) setLm.add(lm);
+            if (nh) setNhom.add(nh);
+        }
+        const sortVi = (a, b) => String(a).localeCompare(String(b), "vi");
+        fillRepairFilterSelect(document.getElementById("sc-filter-ten-thiet-bi"), [...setTb].sort(sortVi));
+        fillRepairFilterSelect(document.getElementById("sc-filter-ten-lai-may"), [...setLm].sort(sortVi));
+        fillRepairFilterSelect(document.getElementById("sc-filter-nhom"), [...setNhom].sort(sortVi));
+    }
+
     function getDateRangeFromFilters() {
         const fromRaw = document.getElementById("sc-filter-from-datetime")?.value?.trim() ?? "";
         const toRaw = document.getElementById("sc-filter-to-datetime")?.value?.trim() ?? "";
@@ -320,10 +422,12 @@
         }
 
         const filteredRows = [];
+        const textNeedles = getNxlcTextFilterNeedles();
         for (const row of rows || []) {
             const ten = pickTenLinhKienSuaChua(row);
             const ngay = pickNgaySuaChua(row);
             if (!ten || !rowInDateRange(ngay, dateRange)) continue;
+            if (!rowMatchesNxlcTextFilters(row, textNeedles)) continue;
             filteredRows.push({ raw: row, ten, ngay });
         }
 
@@ -556,6 +660,7 @@
                 setStatus(`Đang tải «${TABLE_NXLC_CT}»…`, false);
                 cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
             }
+            populateNxlcFilterSelects(cacheNxlcCtRows || []);
             renderRepairSummaryTable();
             setStatus(`Đã tải ${(cacheNxlcCtRows || []).length} dòng «${TABLE_NXLC_CT}».`, false);
         } catch (error) {
@@ -625,6 +730,13 @@
         };
         document.getElementById("sc-filter-from-datetime")?.addEventListener("change", rerender);
         document.getElementById("sc-filter-to-datetime")?.addEventListener("change", rerender);
+        const textRerender = () => {
+            syncDateRangeBanner();
+            renderRepairSummaryTable();
+        };
+        for (const id of ["sc-filter-ten-thiet-bi", "sc-filter-ten-lai-may", "sc-filter-nhom"]) {
+            document.getElementById(id)?.addEventListener("change", textRerender);
+        }
         syncDateRangeBanner();
 
         loadFromAppSheet(false);

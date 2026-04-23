@@ -118,16 +118,16 @@
         }
 
         .toolbar {
-            padding: 8px;
+            padding: 14px 16px 16px;
             background: #f8fafc;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .action-btn {
-            height: 32px;
-            border-radius: 9999px;
-            padding: 0 14px;
-            font-size: 14px;
+            height: 44px;
+            border-radius: 12px;
+            padding: 0 18px;
+            font-size: 15px;
             font-weight: 700;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -149,18 +149,26 @@
             display: grid;
             grid-template-columns: 1fr;
             align-items: center;
-            gap: 14px 20px;
+            gap: 18px 20px;
             font-weight: 700;
             color: #2b7132;
-            font-size: 14px;
-            line-height: 1.25;
+            font-size: 16px;
+            line-height: 1.35;
         }
 
         .repair-filter-dates {
             display: grid;
-            grid-template-columns: 120px minmax(210px, 1fr) 120px minmax(210px, 1fr);
+            grid-template-columns: 130px minmax(220px, 1fr) 130px minmax(220px, 1fr);
             align-items: center;
-            gap: 10px;
+            gap: 12px 16px;
+            width: 100%;
+        }
+
+        .repair-filter-extra {
+            display: grid;
+            grid-template-columns: 140px minmax(200px, 1fr) 120px minmax(200px, 1fr) 72px minmax(200px, 1fr);
+            align-items: center;
+            gap: 12px 16px;
             width: 100%;
         }
 
@@ -175,13 +183,22 @@
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
-            border-radius: 9999px;
-            height: 32px;
+            border-radius: 12px;
+            height: 44px;
             width: 100%;
-            max-width: 220px;
-            padding: 0 12px;
-            font-size: 14px;
+            max-width: 280px;
+            padding: 0 14px;
+            font-size: 16px;
             outline: none;
+        }
+
+        .filter-input.filter-input-text {
+            max-width: none;
+        }
+
+        select.filter-input {
+            cursor: pointer;
+            background-color: #fff;
         }
 
         .filter-input:focus {
@@ -209,6 +226,14 @@
         }
 
         @media (max-width: 760px) {
+            .repair-filter-extra {
+                grid-template-columns: 1fr;
+            }
+
+            .repair-filter-extra .repair-filter-label.right {
+                text-align: left;
+            }
+
             .repair-filter-dates {
                 grid-template-columns: 1fr;
                 gap: 8px;
@@ -366,6 +391,20 @@
                     <input type="datetime-local" id="sc3-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
                     <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
                     <input type="datetime-local" id="sc3-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
+                </div>
+                <div class="repair-filter-extra">
+                    <span class="repair-filter-label">TÊN THIẾT BỊ</span>
+                    <select id="sc3-filter-ten-thiet-bi" class="filter-input filter-input-text" aria-label="Lọc tên thiết bị">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                    <span class="repair-filter-label right">TÊN LÁI MÁY</span>
+                    <select id="sc3-filter-ten-lai-may" class="filter-input filter-input-text" aria-label="Lọc tên lái máy">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                    <span class="repair-filter-label right">NHÓM</span>
+                    <select id="sc3-filter-nhom" class="filter-input filter-input-text" aria-label="Lọc nhóm">
+                        <option value="">— Tất cả —</option>
+                    </select>
                 </div>
                 <div class="repair-filter-actions">
                     <button type="button" id="sc3-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
@@ -614,7 +653,10 @@
             accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
         };
         const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
+        const TABLE_NXLC = "Nhập xuất luân chuyển";
         let cacheNxlcCtRows = null;
+        let cacheNxlcRows = null;
+        let nxlcIdToGhiChu = null;
 
         function normalizeSpaces(s) {
             return String(s ?? "").trim().replace(/\s+/g, " ");
@@ -744,6 +786,20 @@
             return pickByRegex(row, /(t[eê]n.*(l[aá]i|lm).*(m[aá]y|xmtb)|l[aá]i.*m[aá]y|t[eê]n.*v[aậ]n.*h[aà]nh)/i);
         }
 
+        function pickTenNhomBc03(row) {
+            return pickFirstCell(row, [
+                "Tên nhóm",
+                "Ten nhom",
+                "TenNhom",
+                "Nhóm thiết bị",
+                "Nhom thiet bi",
+                "Nhóm xe máy thiết bị",
+                "Nhom xe may thiet bi",
+                "Nhóm",
+                "Nhom"
+            ]);
+        }
+
         function pickTenLinhKienSuaChua(row) {
             const direct = pickFirstCell(row, [
                 "Tên link kiện sửa chữa",
@@ -794,7 +850,54 @@
             return null;
         }
 
+        function joinKeyIdPhieu(s) {
+            return String(s ?? "").trim().toLowerCase();
+        }
+
+        function pickIdPhieuNxlcJoin(row) {
+            const keys = [
+                "ID phiếu",
+                "ID phieu",
+                "ID Phiếu",
+                "Id phieu",
+                "Ref",
+                "REF",
+                "Nhập xuất luân chuyển",
+                "ID cha"
+            ];
+            for (const k of keys) {
+                if (row?.[k] == null) continue;
+                const s = joinKeyIdPhieu(cellString(row[k]));
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function rebuildNxlcIdToGhiChuMap() {
+            nxlcIdToGhiChu = new Map();
+            for (const p of cacheNxlcRows || []) {
+                const idKeys = ["ID", "Id", "ROW ID", "Row ID", "RowId"];
+                let idK = "";
+                for (const k of idKeys) {
+                    if (p?.[k] == null) continue;
+                    const raw = joinKeyIdPhieu(cellString(p[k]));
+                    if (raw) {
+                        idK = raw;
+                        break;
+                    }
+                }
+                if (!idK) continue;
+                const gc = pickFirstCell(p, ["Ghi chú", "Ghi chu", "GhiChu", "Mô tả", "Mo ta"]);
+                if (gc) nxlcIdToGhiChu.set(idK, gc);
+            }
+        }
+
         function pickDgChung(row) {
+            const ref = pickIdPhieuNxlcJoin(row);
+            if (ref && nxlcIdToGhiChu?.has(ref)) {
+                const fromPhieu = nxlcIdToGhiChu.get(ref);
+                if (fromPhieu) return fromPhieu;
+            }
             return pickFirstCell(row, ["DG chung", "Dg chung", "Diễn giải chung", "Dien giai chung", "Ghi chú", "Ghi chu"]);
         }
 
@@ -851,6 +954,44 @@
             return [];
         }
 
+        function fillSc3SelectOptions(selectEl, values, emptyLabel) {
+            if (!selectEl || selectEl.tagName !== "SELECT") return;
+            const prev = selectEl.value;
+            selectEl.innerHTML = "";
+            const o0 = document.createElement("option");
+            o0.value = "";
+            o0.textContent = emptyLabel || "— Tất cả —";
+            selectEl.appendChild(o0);
+            for (const v of values) {
+                const t = normalizeSpaces(v);
+                if (!t) continue;
+                const o = document.createElement("option");
+                o.value = t;
+                o.textContent = t;
+                selectEl.appendChild(o);
+            }
+            const hasPrev = prev && [...selectEl.options].some((op) => op.value === prev);
+            selectEl.value = hasPrev ? prev : "";
+        }
+
+        function populateSc3FilterSelects() {
+            const setTb = new Set();
+            const setLm = new Set();
+            const setNhom = new Set();
+            for (const r of cacheNxlcCtRows || []) {
+                const tb = normalizeSpaces(pickTenThietBiSuaChua(r));
+                const lm = normalizeSpaces(pickTenLaiMay(r));
+                const nh = normalizeSpaces(pickTenNhomBc03(r));
+                if (tb) setTb.add(tb);
+                if (lm) setLm.add(lm);
+                if (nh) setNhom.add(nh);
+            }
+            const sortVi = (a, b) => String(a).localeCompare(String(b), "vi");
+            fillSc3SelectOptions(document.getElementById("sc3-filter-ten-thiet-bi"), [...setTb].sort(sortVi));
+            fillSc3SelectOptions(document.getElementById("sc3-filter-ten-lai-may"), [...setLm].sort(sortVi));
+            fillSc3SelectOptions(document.getElementById("sc3-filter-nhom"), [...setNhom].sort(sortVi));
+        }
+
         function renderDetailRows() {
             const tbody = document.getElementById("sc3-tbody");
             if (!tbody) return 0;
@@ -862,6 +1003,9 @@
             }
 
             const rawItems = [];
+            const qTb = normalizeSpaces(document.getElementById("sc3-filter-ten-thiet-bi")?.value ?? "").toLowerCase();
+            const qLm = normalizeSpaces(document.getElementById("sc3-filter-ten-lai-may")?.value ?? "").toLowerCase();
+            const qNhom = normalizeSpaces(document.getElementById("sc3-filter-nhom")?.value ?? "").toLowerCase();
             console.log("[BC03] Tổng dòng NXLC CT từ API:", (cacheNxlcCtRows || []).length);
             let skippedDateRange = 0, skippedNoData = 0;
             for (const r of cacheNxlcCtRows || []) {
@@ -877,6 +1021,11 @@
                 const dgChung = pickDgChung(r);
                 const dvt = pickDvtSc(r);
                 const tenLm = pickTenLaiMay(r);
+                const tenNhomRow = pickTenNhomBc03(r);
+
+                if (qTb && normalizeSpaces(tenTb || "").toLowerCase() !== qTb) { skippedNoData++; continue; }
+                if (qLm && normalizeSpaces(tenLm || "").toLowerCase() !== qLm) { skippedNoData++; continue; }
+                if (qNhom && normalizeSpaces(tenNhomRow || "").toLowerCase() !== qNhom) { skippedNoData++; continue; }
 
                 if (!tenTb && !tenLk && !dgChung && tt === 0) { skippedNoData++; continue; }
                 // Bỏ dòng không có tên linh kiện sửa chữa VÀ số tiền = 0 (dòng rác/trống)
@@ -897,7 +1046,10 @@
             console.log("[BC03] Bỏ do ngày:", skippedDateRange, "| Bỏ do trống:", skippedNoData, "| Hiển thị:", rawItems.length);
 
             if (!rawItems.length) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>';
+                const hadText = !!(qTb || qLm || qNhom);
+                tbody.innerHTML = hadText
+                    ? '<tr><td colspan="8" class="text-left">Không có dòng phù hợp khoảng ngày và/hoặc bộ lọc (tên thiết bị / lái máy / nhóm).</td></tr>'
+                    : '<tr><td colspan="8" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>';
                 return 0;
             }
 
@@ -978,13 +1130,26 @@
             if (btnLoad) btnLoad.disabled = true;
             if (btnRefresh) btnRefresh.disabled = true;
             try {
-                if (forceRefresh) cacheNxlcCtRows = null;
+                if (forceRefresh) {
+                    cacheNxlcCtRows = null;
+                    cacheNxlcRows = null;
+                    nxlcIdToGhiChu = null;
+                }
                 setStatus("Đang tải AppSheet…", false);
                 if (!cacheNxlcCtRows) {
                     cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
                 }
+                if (!cacheNxlcRows) {
+                    setStatus(`Đang tải «${TABLE_NXLC}»…`, false);
+                    cacheNxlcRows = await fetchAppSheetTable(TABLE_NXLC);
+                }
+                rebuildNxlcIdToGhiChuMap();
+                populateSc3FilterSelects();
                 const shown = renderDetailRows();
-                setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
+                setStatus(
+                    `Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», ${(cacheNxlcRows || []).length} dòng «${TABLE_NXLC}», đang hiển thị ${shown} dòng.`,
+                    false
+                );
             } catch (error) {
                 console.error(error);
                 setStatus(`Lỗi: ${error?.message || error}`, true);
@@ -1100,6 +1265,12 @@
             const shown = renderDetailRows();
             setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
         });
+        for (const id of ["sc3-filter-ten-thiet-bi", "sc3-filter-ten-lai-may", "sc3-filter-nhom"]) {
+            document.getElementById(id)?.addEventListener("change", () => {
+                const shown = renderDetailRows();
+                if (cacheNxlcCtRows) setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
+            });
+        }
         loadFromAppSheet(false);
     </script>
 </body>

@@ -121,7 +121,7 @@
         }
 
         .toolbar {
-            padding: 8px;
+            padding: 14px 16px 16px;
             background: #f8fafc;
             border-bottom: 1px solid #e5e7eb;
             overflow-x: auto;
@@ -129,9 +129,9 @@
         }
 
         .action-btn {
-            height: 38px;
-            border-radius: 9999px;
-            padding: 0 16px;
+            height: 44px;
+            border-radius: 12px;
+            padding: 0 18px;
             font-size: 15px;
             font-weight: 700;
             border: 1px solid #2b7132;
@@ -158,8 +158,26 @@
             min-width: 0;
             font-weight: 700;
             color: #2b7132;
-            font-size: 15px;
-            line-height: 1.25;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .thang-filter-row-secondary {
+            margin-top: 14px;
+            gap: 14px 18px;
+        }
+
+        .thang-filter-stretch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1 1 220px;
+            min-width: 180px;
+        }
+
+        .thang-filter-stretch .filter-input {
+            flex: 1;
+            min-width: 0;
         }
 
         .thang-filter-item {
@@ -186,14 +204,23 @@
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
-            border-radius: 9999px;
-            height: 38px;
+            border-radius: 12px;
+            height: 44px;
             width: 100%;
-            max-width: 220px;
+            max-width: 260px;
             padding: 0 14px;
-            font-size: 15px;
+            font-size: 16px;
             outline: none;
             color: #111827;
+        }
+
+        .filter-input.filter-input-wide {
+            max-width: none;
+        }
+
+        select.filter-input {
+            cursor: pointer;
+            background-color: #fff;
         }
 
         .filter-input:focus {
@@ -338,7 +365,7 @@
             <h1 id="thang-main-title">BÁO CÁO TỔNG HỢP CP SỬA CHỮA</h1>
         </div>
 
-        <div class="toolbar print-hide" aria-label="Bộ lọc theo khoảng ngày">
+        <div class="toolbar print-hide" aria-label="Bộ lọc báo cáo">
             <div class="thang-filter-row">
                 <div class="thang-filter-item">
                     <span class="thang-filter-item-label">TỪ NGÀY</span>
@@ -353,6 +380,26 @@
                     <button type="button" id="thang-btn-refresh" class="action-btn action-btn-secondary">Làm mới toàn bộ</button>
                     <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
                     <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                </div>
+            </div>
+            <div class="thang-filter-row thang-filter-row-secondary">
+                <div class="thang-filter-stretch">
+                    <span class="thang-filter-item-label">TÊN THIẾT BỊ</span>
+                    <select id="thang-filter-ten-tb" class="filter-input filter-input-wide" aria-label="Lọc tên thiết bị">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="thang-filter-stretch">
+                    <span class="thang-filter-item-label">TÊN LÁI MÁY</span>
+                    <select id="thang-filter-ten-lm" class="filter-input filter-input-wide" aria-label="Lọc tên lái máy">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                </div>
+                <div class="thang-filter-stretch">
+                    <span class="thang-filter-item-label">NHÓM</span>
+                    <select id="thang-filter-nhom" class="filter-input filter-input-wide" aria-label="Lọc nhóm">
+                        <option value="">— Tất cả —</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -656,6 +703,61 @@
             return pickFirstCell(row, ["Tên nhóm", "Ten nhom", "Nhóm", "Nhom"]);
         }
 
+        function pickTenLaiMay(row) {
+            const direct = pickFirstCell(row, [
+                "Tên LM",
+                "Ten LM",
+                "Tên lái máy",
+                "Ten lai may",
+                "Lái máy",
+                "Lai may",
+                "Tên lái máy/XMTB",
+                "Ten lai may/XMTB",
+                "Tên người vận hành",
+                "Ten nguoi van hanh"
+            ]);
+            if (direct) return direct;
+            return pickByRegex(row, /(t[eê]n.*(l[aá]i|lm).*(m[aá]y|xmtb)|l[aá]i.*m[aá]y|t[eê]n.*v[aậ]n.*h[aà]nh)/i);
+        }
+
+        function fillThangSelectOptions(selectEl, values, emptyLabel) {
+            if (!selectEl || selectEl.tagName !== "SELECT") return;
+            const prev = selectEl.value;
+            selectEl.innerHTML = "";
+            const o0 = document.createElement("option");
+            o0.value = "";
+            o0.textContent = emptyLabel || "— Tất cả —";
+            selectEl.appendChild(o0);
+            for (const v of values) {
+                const t = normalizeSpaces(v);
+                if (!t) continue;
+                const o = document.createElement("option");
+                o.value = t;
+                o.textContent = t;
+                selectEl.appendChild(o);
+            }
+            const hasPrev = prev && [...selectEl.options].some((op) => op.value === prev);
+            selectEl.value = hasPrev ? prev : "";
+        }
+
+        function populateThangFilterSelects() {
+            const setTb = new Set();
+            const setLm = new Set();
+            const setNhom = new Set();
+            for (const r of cacheNxlcCtRows || []) {
+                const tb = normalizeSpaces(pickTenThietBiSuaChua(r));
+                const lm = normalizeSpaces(pickTenLaiMay(r));
+                const nh = normalizeSpaces(pickTenNhom(r));
+                if (tb) setTb.add(tb);
+                if (lm) setLm.add(lm);
+                if (nh) setNhom.add(nh);
+            }
+            const sortVi = (a, b) => String(a).localeCompare(String(b), "vi");
+            fillThangSelectOptions(document.getElementById("thang-filter-ten-tb"), [...setTb].sort(sortVi));
+            fillThangSelectOptions(document.getElementById("thang-filter-ten-lm"), [...setLm].sort(sortVi));
+            fillThangSelectOptions(document.getElementById("thang-filter-nhom"), [...setNhom].sort(sortVi));
+        }
+
         function getDateRangeFromFilters() {
             const fromRaw = document.getElementById("thang-filter-from-date")?.value?.trim() ?? "";
             const toRaw = document.getElementById("thang-filter-to-date")?.value?.trim() ?? "";
@@ -714,11 +816,20 @@
 
             // Parse and filter rows
             const rawItems = [];
+            const qTb = normalizeSpaces(document.getElementById("thang-filter-ten-tb")?.value ?? "").toLowerCase();
+            const qLm = normalizeSpaces(document.getElementById("thang-filter-ten-lm")?.value ?? "").toLowerCase();
+            const qNhom = normalizeSpaces(document.getElementById("thang-filter-nhom")?.value ?? "").toLowerCase();
             for (const r of cacheNxlcCtRows || []) {
                 const tenTb = pickTenThietBiSuaChua(r);
                 const tenLk = pickTenLinhKienSuaChua(r);
+                const tenLm = pickTenLaiMay(r);
+                const nhomRow = pickTenNhom(r);
                 const ngay = parseNgaySuaChuaValue(r["Ngày sửa chữa"] ?? r["Ngay sua chua"] ?? r["Ngày SC"] ?? r["Ngay SC"]);
                 if (!rowInDateRange(ngay, dateRange)) continue;
+
+                if (qTb && normalizeSpaces(tenTb || "").toLowerCase() !== qTb) continue;
+                if (qLm && normalizeSpaces(tenLm || "").toLowerCase() !== qLm) continue;
+                if (qNhom && normalizeSpaces(nhomRow || "").toLowerCase() !== qNhom) continue;
 
                 const sl = pickSoLuongSc(r);
                 const dg = pickDonGiaSc(r);
@@ -733,13 +844,16 @@
                     tenLk: tenLk || "",
                     ngay,
                     tt,
-                    nhom: pickTenNhom(r)
+                    nhom: nhomRow
                 });
             }
 
             if (!rawItems.length) {
                 thead.innerHTML = `<tr><th>DIỄN GIẢI</th><th>Tổng cộng</th></tr>`;
-                tbody.innerHTML = `<tr><td colspan="2" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>`;
+                const hadText = !!(qTb || qLm || qNhom);
+                tbody.innerHTML = hadText
+                    ? `<tr><td colspan="2" class="text-left">Không có dòng phù hợp khoảng ngày và/hoặc bộ lọc (tên thiết bị / lái máy / nhóm).</td></tr>`
+                    : `<tr><td colspan="2" class="text-left">Không có dữ liệu phù hợp từ «Nhập xuất luân chuyển CT».</td></tr>`;
                 return 0;
             }
 
@@ -837,6 +951,7 @@
                 if (!cacheNxlcCtRows) {
                     cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
                 }
+                populateThangFilterSelects();
                 syncMainTitleFromDateRange();
                 const shown = renderMonthlyTable();
                 setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} thiết bị.`, false);
@@ -851,8 +966,10 @@
 
         document.getElementById("thang-btn-load")?.addEventListener("click", () => loadFromAppSheet(false));
         document.getElementById("thang-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
-        for (const id of ["thang-filter-from-date", "thang-filter-to-date"]) {
-            document.getElementById(id)?.addEventListener("change", () => {
+        for (const id of ["thang-filter-from-date", "thang-filter-to-date", "thang-filter-ten-tb", "thang-filter-ten-lm", "thang-filter-nhom"]) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            el.addEventListener("change", () => {
                 if (cacheNxlcCtRows) {
                     syncMainTitleFromDateRange();
                     renderMonthlyTable();

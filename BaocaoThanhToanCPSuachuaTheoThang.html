@@ -124,16 +124,16 @@
         }
 
         .toolbar {
-            padding: 8px;
+            padding: 14px 16px 16px;
             background: #f8fafc;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .action-btn {
-            height: 32px;
-            border-radius: 9999px;
-            padding: 0 14px;
-            font-size: 14px;
+            height: 44px;
+            border-radius: 12px;
+            padding: 0 18px;
+            font-size: 15px;
             font-weight: 700;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -155,18 +155,26 @@
             display: grid;
             grid-template-columns: 1fr;
             align-items: center;
-            gap: 14px 20px;
+            gap: 18px 20px;
             font-weight: 700;
             color: #2b7132;
-            font-size: 14px;
-            line-height: 1.25;
+            font-size: 16px;
+            line-height: 1.35;
         }
 
         .repair-filter-dates {
             display: grid;
-            grid-template-columns: 120px minmax(210px, 1fr) 120px minmax(210px, 1fr);
+            grid-template-columns: 130px minmax(220px, 1fr) 130px minmax(220px, 1fr);
             align-items: center;
-            gap: 10px;
+            gap: 12px 16px;
+            width: 100%;
+        }
+
+        .repair-filter-extra {
+            display: grid;
+            grid-template-columns: 140px minmax(200px, 1fr) 120px minmax(200px, 1fr) 72px minmax(200px, 1fr);
+            align-items: center;
+            gap: 12px 16px;
             width: 100%;
         }
 
@@ -181,13 +189,22 @@
         .filter-input {
             background-color: #f8fafc;
             border: 1px solid #94a3b8;
-            border-radius: 9999px;
-            height: 32px;
+            border-radius: 12px;
+            height: 44px;
             width: 100%;
-            max-width: 220px;
-            padding: 0 12px;
-            font-size: 14px;
+            max-width: 280px;
+            padding: 0 14px;
+            font-size: 16px;
             outline: none;
+        }
+
+        .filter-input.filter-input-text {
+            max-width: none;
+        }
+
+        select.filter-input {
+            cursor: pointer;
+            background-color: #fff;
         }
 
         .filter-input:focus {
@@ -215,6 +232,14 @@
         }
 
         @media (max-width: 760px) {
+            .repair-filter-extra {
+                grid-template-columns: 1fr;
+            }
+
+            .repair-filter-extra .repair-filter-label.right {
+                text-align: left;
+            }
+
             .repair-filter-dates {
                 grid-template-columns: 1fr;
                 gap: 8px;
@@ -367,6 +392,20 @@
                     <input type="datetime-local" id="sc2-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
                     <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
                     <input type="datetime-local" id="sc2-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
+                </div>
+                <div class="repair-filter-extra">
+                    <span class="repair-filter-label">TÊN THIẾT BỊ</span>
+                    <select id="sc2-filter-ten-thiet-bi" class="filter-input filter-input-text" aria-label="Lọc tên thiết bị">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                    <span class="repair-filter-label right">TÊN LÁI MÁY</span>
+                    <select id="sc2-filter-ten-lai-may" class="filter-input filter-input-text" aria-label="Lọc tên lái máy">
+                        <option value="">— Tất cả —</option>
+                    </select>
+                    <span class="repair-filter-label right">NHÓM</span>
+                    <select id="sc2-filter-nhom" class="filter-input filter-input-text" aria-label="Lọc nhóm">
+                        <option value="">— Tất cả —</option>
+                    </select>
                 </div>
                 <div class="repair-filter-actions">
                     <button type="button" id="sc2-btn-load" class="action-btn">Tải dữ liệu AppSheet</button>
@@ -596,7 +635,11 @@
             accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
         };
         const TABLE_NXLC_CT = "Nhập xuất luân chuyển CT";
+        const TABLE_NXLC = "Nhập xuất luân chuyển";
         let cacheNxlcCtRows = null;
+        let cacheNxlcRows = null;
+        /** Map khóa ID (chuẩn hóa) → «Ghi chú» trên «Nhập xuất luân chuyển». */
+        let nxlcIdToGhiChu = null;
 
         function normalizeSpaces(s) {
             return String(s ?? "").trim().replace(/\s+/g, " ");
@@ -643,6 +686,81 @@
                 if (s) return s;
             }
             return "";
+        }
+
+        /** Khớp tên cột AppSheet khi khác hoa/thường hoặc ký tự đặc biệt nhẹ. */
+        function normalizeHeaderKey(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/\s+/g, " ");
+        }
+
+        function pickByHeaderAliases(row, aliases) {
+            const want = new Set((aliases || []).map((a) => normalizeHeaderKey(a)));
+            for (const [k, v] of Object.entries(row || {})) {
+                if (!want.has(normalizeHeaderKey(k))) continue;
+                const s = normalizeSpaces(cellDisplayString(v));
+                if (s) return s;
+            }
+            return "";
+        }
+
+        /** «Tên thiết bị» trên NXLC CT — dự phòng cho «Nhóm mã thống kê» khi «Tên nhóm» trống (không ưu tiên XMTB như pickTenThietBiSuaChua). */
+        function pickTenThietBiNxlcColumn(row) {
+            const exactKeys = [
+                "Tên thiết bị",
+                "Ten thiet bi",
+                "TenThietBi",
+                "Tên TB",
+                "Ten TB",
+                "Tên thiết bị sửa chữa",
+                "Ten thiet bi sua chua"
+            ];
+            const fromExact = pickFirstCell(row, exactKeys);
+            if (fromExact) return fromExact;
+            const fromAlias = pickByHeaderAliases(row, exactKeys);
+            if (fromAlias) return fromAlias;
+            const hits = [];
+            for (const [k, v] of Object.entries(row || {})) {
+                const nk = normalizeHeaderKey(k);
+                const looksTb =
+                    /\bten thiet bi\b/.test(nk) ||
+                    /\bten tb\b/.test(nk) ||
+                    /^ten thiet bi/.test(nk) ||
+                    nk === "tenthietbi";
+                if (!looksTb) continue;
+                if (/\blinh\b|\blink\b/.test(nk)) continue;
+                const s = normalizeSpaces(cellDisplayString(v));
+                if (!s) continue;
+                hits.push({ nk, s, len: nk.length });
+            }
+            hits.sort((a, b) => a.len - b.len || a.nk.localeCompare(b.nk, "vi"));
+            return hits.length ? hits[0].s : "";
+        }
+
+        /** «Tên nhóm» / nhóm TB trên NXLC CT — nguồn chính cho «Nhóm mã thống kê». */
+        function pickTenNhomNxlc(row) {
+            const exactKeys = [
+                "Tên nhóm",
+                "Ten nhom",
+                "TenNhom",
+                "Nhóm thiết bị",
+                "Nhom thiet bi",
+                "Nhóm xe máy thiết bị",
+                "Nhom xe may thiet bi",
+                "Nhóm XMTB",
+                "Nhom XMTB"
+            ];
+            const fromExact = pickFirstCell(row, exactKeys);
+            if (fromExact) return fromExact;
+            const fromAlias = pickByHeaderAliases(row, exactKeys);
+            if (fromAlias) return fromAlias;
+            const fromKeyRx = pickByRegex(row, /t[eê]n.*nh[oô]m/i);
+            if (fromKeyRx) return fromKeyRx;
+            return pickByRegex(row, /nh[oô]m.*(th[iệ]t\s*b[iị]|xe\s*m[aá]y|xmtb)/i);
         }
 
         function parseNumeric(raw) {
@@ -726,9 +844,19 @@
             return pickByRegex(row, /(t[eê]n.*(l[aá]i|lm).*(m[aá]y|xmtb)|l[aá]i.*m[aá]y|t[eê]n.*v[aậ]n.*h[aà]nh)/i);
         }
 
+        /** «Nhóm mã thống kê»: ưu tiên «Tên nhóm» NXLC CT; nếu trống mới dùng «Tên thiết bị», rồi các cột cũ. */
         function pickNhomThongKe(row) {
-            const direct = pickFirstCell(row, ["Nhóm mã thống kê", "Nhom ma thong ke", "Tên nơi quản lý", "Ten noi quan ly"]);
-            if (direct) return direct;
+            const tenNhom = pickTenNhomNxlc(row);
+            if (tenNhom) return tenNhom;
+            const tenTbNxlc = pickTenThietBiNxlcColumn(row);
+            if (tenTbNxlc) return tenTbNxlc;
+            const legacy = pickFirstCell(row, [
+                "Nhóm mã thống kê",
+                "Nhom ma thong ke",
+                "Tên nơi quản lý",
+                "Ten noi quan ly"
+            ]);
+            if (legacy) return legacy;
             const tenTb = pickTenThietBiSuaChua(row);
             const m = tenTb.match(/^(\d{1,2}\.\s*[^-]+)/);
             return m ? normalizeSpaces(m[1]) : "";
@@ -778,7 +906,55 @@
             return null;
         }
 
+        function joinKeyIdPhieu(s) {
+            return String(s ?? "").trim().toLowerCase();
+        }
+
+        function pickIdPhieuNxlcJoin(row) {
+            const keys = [
+                "ID phiếu",
+                "ID phieu",
+                "ID Phiếu",
+                "Id phieu",
+                "Ref",
+                "REF",
+                "Nhập xuất luân chuyển",
+                "ID cha"
+            ];
+            for (const k of keys) {
+                if (row?.[k] == null) continue;
+                const s = joinKeyIdPhieu(cellString(row[k]));
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function rebuildNxlcIdToGhiChuMap() {
+            nxlcIdToGhiChu = new Map();
+            for (const p of cacheNxlcRows || []) {
+                const idKeys = ["ID", "Id", "ROW ID", "Row ID", "RowId"];
+                let idK = "";
+                for (const k of idKeys) {
+                    if (p?.[k] == null) continue;
+                    const raw = joinKeyIdPhieu(cellString(p[k]));
+                    if (raw) {
+                        idK = raw;
+                        break;
+                    }
+                }
+                if (!idK) continue;
+                const gc = pickFirstCell(p, ["Ghi chú", "Ghi chu", "GhiChu", "Mô tả", "Mo ta"]);
+                if (gc) nxlcIdToGhiChu.set(idK, gc);
+            }
+        }
+
+        /** «DG chung»: ưu tiên «Ghi chú» phiếu «Nhập xuất luân chuyển» khớp «ID phiếu» CT với «ID» phiếu. */
         function pickDgChung(row) {
+            const ref = pickIdPhieuNxlcJoin(row);
+            if (ref && nxlcIdToGhiChu?.has(ref)) {
+                const fromPhieu = nxlcIdToGhiChu.get(ref);
+                if (fromPhieu) return fromPhieu;
+            }
             return pickFirstCell(row, ["DG chung", "Dg chung", "Diễn giải chung", "Dien giai chung", "Ghi chú", "Ghi chu"]);
         }
 
@@ -835,6 +1011,44 @@
             return [];
         }
 
+        function fillSelectUniqueOptions(selectEl, values, emptyLabel) {
+            if (!selectEl || selectEl.tagName !== "SELECT") return;
+            const prev = selectEl.value;
+            selectEl.innerHTML = "";
+            const o0 = document.createElement("option");
+            o0.value = "";
+            o0.textContent = emptyLabel || "— Tất cả —";
+            selectEl.appendChild(o0);
+            for (const v of values) {
+                const t = normalizeSpaces(v);
+                if (!t) continue;
+                const o = document.createElement("option");
+                o.value = t;
+                o.textContent = t;
+                selectEl.appendChild(o);
+            }
+            const hasPrev = prev && [...selectEl.options].some((op) => op.value === prev);
+            selectEl.value = hasPrev ? prev : "";
+        }
+
+        function populateSc2FilterSelects() {
+            const setTb = new Set();
+            const setLm = new Set();
+            const setNhom = new Set();
+            for (const r of cacheNxlcCtRows || []) {
+                const tb = normalizeSpaces(pickTenThietBiSuaChua(r));
+                const lm = normalizeSpaces(pickTenLaiMay(r));
+                const nh = normalizeSpaces(pickNhomThongKe(r));
+                if (tb) setTb.add(tb);
+                if (lm) setLm.add(lm);
+                if (nh) setNhom.add(nh);
+            }
+            const sortVi = (a, b) => String(a).localeCompare(String(b), "vi");
+            fillSelectUniqueOptions(document.getElementById("sc2-filter-ten-thiet-bi"), [...setTb].sort(sortVi));
+            fillSelectUniqueOptions(document.getElementById("sc2-filter-ten-lai-may"), [...setLm].sort(sortVi));
+            fillSelectUniqueOptions(document.getElementById("sc2-filter-nhom"), [...setNhom].sort(sortVi));
+        }
+
         function renderPaymentRows() {
             const tbody = document.getElementById("sc2-tbody");
             if (!tbody) return;
@@ -876,8 +1090,23 @@
                 return;
             }
 
+            const qTb = normalizeSpaces(document.getElementById("sc2-filter-ten-thiet-bi")?.value ?? "").toLowerCase();
+            const qLm = normalizeSpaces(document.getElementById("sc2-filter-ten-lai-may")?.value ?? "").toLowerCase();
+            const qNhom = normalizeSpaces(document.getElementById("sc2-filter-nhom")?.value ?? "").toLowerCase();
+            const filtered = rows.filter((r) => {
+                if (qTb && normalizeSpaces(r.tenTb).toLowerCase() !== qTb) return false;
+                if (qLm && normalizeSpaces(r.tenLm).toLowerCase() !== qLm) return false;
+                if (qNhom && normalizeSpaces(r.nhom).toLowerCase() !== qNhom) return false;
+                return true;
+            });
+
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-left">Không có dòng phù hợp bộ lọc (tên thiết bị / lái máy / nhóm).</td></tr>';
+                return;
+            }
+
             let total = 0;
-            const htmlRows = rows.map((r) => {
+            const htmlRows = filtered.map((r) => {
                 const tien = r.tt != null && isFinite(r.tt) ? r.tt : 0;
                 total += tien;
                 return `<tr>
@@ -910,13 +1139,26 @@
             if (btnLoad) btnLoad.disabled = true;
             if (btnRefresh) btnRefresh.disabled = true;
             try {
-                if (forceRefresh) cacheNxlcCtRows = null;
+                if (forceRefresh) {
+                    cacheNxlcCtRows = null;
+                    cacheNxlcRows = null;
+                    nxlcIdToGhiChu = null;
+                }
                 setStatus("Đang tải AppSheet…", false);
                 if (!cacheNxlcCtRows) {
                     cacheNxlcCtRows = await fetchAppSheetTable(TABLE_NXLC_CT);
                 }
+                if (!cacheNxlcRows) {
+                    setStatus(`Đang tải «${TABLE_NXLC}»…`, false);
+                    cacheNxlcRows = await fetchAppSheetTable(TABLE_NXLC);
+                }
+                rebuildNxlcIdToGhiChuMap();
+                populateSc2FilterSelects();
                 renderPaymentRows();
-                setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}».`, false);
+                setStatus(
+                    `Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», ${(cacheNxlcRows || []).length} dòng «${TABLE_NXLC}».`,
+                    false
+                );
             } catch (error) {
                 console.error(error);
                 setStatus(`Lỗi: ${error?.message || error}`, true);
@@ -1007,6 +1249,9 @@
         document.getElementById("sc2-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
         document.getElementById("sc2-filter-from-datetime")?.addEventListener("change", () => renderPaymentRows());
         document.getElementById("sc2-filter-to-datetime")?.addEventListener("change", () => renderPaymentRows());
+        for (const id of ["sc2-filter-ten-thiet-bi", "sc2-filter-ten-lai-may", "sc2-filter-nhom"]) {
+            document.getElementById(id)?.addEventListener("change", () => renderPaymentRows());
+        }
         loadFromAppSheet(false);
     </script>
 </body>
