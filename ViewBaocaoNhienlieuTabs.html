@@ -44,8 +44,8 @@
             background: #fff;
             color: #374151;
             border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 16px;
+            padding: 12px 16px;
+            font-size: 18px;
             font-weight: 700;
             cursor: pointer;
         }
@@ -74,8 +74,8 @@
 
         @media (max-width: 1100px) {
             .tab-btn {
-                font-size: 14px;
-                padding: 8px 12px;
+                font-size: 16px;
+                padding: 10px 12px;
             }
         }
     </style>
@@ -105,7 +105,7 @@
         const buttons = Array.from(document.querySelectorAll(".tab-btn"));
         const panel = document.getElementById("panel-report");
         let currentTopTab = "bc-thiet-bi";
-        const CACHE_VER = "20260423-05";
+        const CACHE_VER = "20260423-14";
 
         const TAB_SOURCES = {
             "bc-thiet-bi": `./Baocaotieuhaonhienlieu.html?v=${CACHE_VER}&tab=trang-thiet-bi&group=thiet-bi`,

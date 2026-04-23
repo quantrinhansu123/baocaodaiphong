@@ -13,7 +13,7 @@
         table th,
         table td {
             font-family: "Times New Roman", Times, serif !important;
-            font-size: 14pt !important;
+            font-size: 15pt !important;
         }
 
         body {
@@ -41,7 +41,7 @@
             border-radius: 0;
             padding: 2px 4px;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 18px;
             line-height: 1.05;
             letter-spacing: 0.4px;
             color: #0047ab;
@@ -61,8 +61,8 @@
         }
 
         .report-tab-btn {
-            padding: 6px 16px;
-            font-size: 11px;
+            padding: 8px 18px;
+            font-size: 14px;
             font-weight: bold;
             color: #475569;
             background: #e2e8f0;
@@ -84,10 +84,10 @@
         }
 
         .action-btn {
-            height: 26px;
+            height: 32px;
             border-radius: 9999px;
-            padding: 0 12px;
-            font-size: 11px;
+            padding: 0 16px;
+            font-size: 14px;
             font-weight: bold;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -128,7 +128,7 @@
         .work-table th,
         .work-table td {
             border: 1px solid #333;
-            padding: 4px 3px;
+            padding: 6px 4px;
             text-align: center;
             vertical-align: middle;
             word-wrap: break-word;
@@ -138,14 +138,14 @@
             background-color: #4a8694;
             color: white;
             font-weight: bold;
-            font-size: 9pt;
-            line-height: 1.2;
+            font-size: 11pt;
+            line-height: 1.25;
             text-transform: uppercase;
         }
 
         .work-table thead .sub-head th {
             background-color: #5b93a0;
-            font-size: 9pt;
+            font-size: 11pt;
         }
 
         .work-table thead .meta-header th {
@@ -153,7 +153,7 @@
             color: #111;
             text-align: left;
             padding-left: 8px;
-            font-size: 11pt;
+            font-size: 13pt;
             text-transform: none;
             font-weight: normal;
         }
@@ -161,14 +161,15 @@
         .work-table thead .title-header th {
             background-color: #fff;
             color: #111;
-            font-size: 18pt;
+            font-size: 22pt;
             font-weight: bold;
-            padding: 10px 0;
+            padding: 12px 0;
         }
 
         .work-table .body-row td {
-            height: 28px;
-            font-size: 9pt;
+            min-height: 32px;
+            height: auto;
+            font-size: 11pt;
         }
 
         .work-table .text-left {
@@ -193,7 +194,7 @@
         }
 
         .filter-item label {
-            font-size: 11px;
+            font-size: 15px;
             font-weight: bold;
             color: #475569;
         }
@@ -201,13 +202,13 @@
         .filter-item input,
         .filter-item input[type="date"],
         .filter-item select {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border: 2px solid #cbd5e1;
             border-radius: 9999px;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             min-width: 200px;
-            height: 48px;
+            height: 52px;
             background-color: white;
             outline: none;
             transition: all 0.2s;
@@ -240,6 +241,108 @@
             border-color: #0047ab;
         }
 
+        .filter-ms {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .filter-ms .ms-btn {
+            position: relative;
+            width: 100%;
+            min-width: 200px;
+            max-width: 320px;
+            min-height: 52px;
+            padding: 10px 36px 10px 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 9999px;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: left;
+            color: #0f172a;
+            cursor: pointer;
+        }
+
+        .filter-ms .ms-btn::after {
+            content: "▾";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .filter-ms .ms-wrap {
+            position: relative;
+        }
+
+        .filter-ms .ms-panel {
+            position: absolute;
+            z-index: 50;
+            left: 0;
+            top: calc(100% + 4px);
+            min-width: 100%;
+            max-width: 360px;
+            max-height: 280px;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #94a3b8;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .filter-ms .ms-panel[hidden] {
+            display: none !important;
+        }
+
+        .filter-ms .ms-actions {
+            display: flex;
+            gap: 8px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .filter-ms .ms-link {
+            border: 0;
+            background: none;
+            color: #0b57d0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+        }
+
+        .filter-ms .ms-list {
+            overflow-y: auto;
+            padding: 6px 4px 10px;
+        }
+
+        .filter-ms .ms-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 8px;
+            font-size: 15px;
+            line-height: 1.3;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .filter-ms .ms-item:hover {
+            background: #f1f5f9;
+        }
+
+        .filter-ms .ms-item input {
+            margin-top: 3px;
+            min-width: 16px;
+            min-height: 16px;
+            cursor: pointer;
+        }
+
         .signature-section {
             margin: 20px 0 10px;
             padding: 0 8px 20px;
@@ -257,14 +360,14 @@
 
         .signature-title {
             font-weight: 700;
-            font-size: 18px;
+            font-size: 20px;
             line-height: 1.15;
             text-transform: uppercase;
         }
 
         .signature-note {
             font-style: italic;
-            font-size: 12px;
+            font-size: 14px;
             margin-top: 2px;
         }
 
@@ -308,9 +411,9 @@
 
             .work-table th,
             .work-table td {
-                font-size: 7pt !important;
-                padding: 1px 1px;
-                line-height: 1.15;
+                font-size: 8.5pt !important;
+                padding: 2px 2px;
+                line-height: 1.2;
             }
 
             .work-table thead th {
@@ -324,11 +427,11 @@
             }
 
             .signature-title {
-                font-size: 12.5pt;
+                font-size: 14pt;
             }
 
             .signature-note {
-                font-size: 8.5pt;
+                font-size: 10pt;
             }
         }
     </style>
@@ -356,9 +459,9 @@
                 <div class="logo-caption-box">PHÒNG VẬT TƯ</div>
             </div>
             <div class="flex-1 mt-2">
-                <h2 class="font-bold text-base uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
-                <p class="text-sm">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
-                <div class="flex text-sm w-[400px] max-w-full flex-wrap">
+                <h2 class="font-bold text-lg uppercase">CÔNG TY CỔ PHẦN XÂY DỰNG HẠ TẦNG ĐẠI PHONG</h2>
+                <p class="text-base">Địa chỉ: Khu A, Thị trấn Lâm, Huyện Ý Yên, Tỉnh Nam Định</p>
+                <div class="flex text-base w-[400px] max-w-full flex-wrap">
                     <p class="w-1/2 min-w-[160px]">Điện thoại: 0228.3823 484</p>
                     <p class="w-1/2 min-w-[160px]">Fax: 0228.3953 567</p>
                 </div>
@@ -367,12 +470,13 @@
 
         <!-- Title Band -->
         <div class="bg-white text-[#0047ab] text-center py-2 border-y border-[#0047ab]">
-            <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]" style="font-size: clamp(1.65rem, 2.1vw, 2.05rem); line-height: 1.2;">BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
-            <p id="report-period-text" class="italic text-xs font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
+            <h1 class="font-extrabold uppercase mb-1 tracking-[0.6px] text-[#0f172a]" style="font-size: clamp(1.9rem, 2.4vw, 2.35rem); line-height: 1.2;">BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
+            <p id="report-period-text" class="italic text-sm font-bold text-[#0047ab]">(Từ ngày … tới ngày …)</p>
         </div>
 
         <!-- Filter & Toolbar -->
         <div class="p-2 bg-[#f8fafc] border-b border-gray-200 print-hide">
+            <p class="w-full text-center text-sm text-slate-500 mb-2" id="data-source-hint">Dòng: «<strong>Nhật trình máy CT</strong>». Cột <strong>CBKT</strong> = «<strong>Người tạo</strong>»; cột <strong>Ghi chú</strong> = «<strong>Nội dung</strong>» trên «<strong>Nhật trình máy</strong>» khi <strong>ID</strong> phiếu khớp <strong>ID cha</strong> (và tên tương tự) trên CT.</p>
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div class="flex items-center gap-3 flex-wrap">
                     <div class="filter-item">
@@ -383,11 +487,57 @@
                         <label>Đến ngày</label>
                         <input type="date" id="filter-to-date">
                     </div>
-                    <div class="filter-item">
-                        <label>Công trình</label>
-                        <select id="filter-project">
-                            <option value="">-- Tất cả --</option>
-                        </select>
+                    <div class="filter-item filter-ms">
+                        <label>Tên máy</label>
+                        <div class="ms-wrap">
+                            <button type="button" class="ms-btn" id="ms-btn-may" aria-haspopup="listbox" aria-expanded="false">Tất cả</button>
+                            <div class="ms-panel" id="ms-panel-may" hidden>
+                                <div class="ms-actions">
+                                    <button type="button" class="ms-link" data-ms-action="all" data-ms-list="ms-list-may">Chọn tất cả</button>
+                                    <button type="button" class="ms-link" data-ms-action="none" data-ms-list="ms-list-may">Bỏ chọn</button>
+                                </div>
+                                <div class="ms-list" id="ms-list-may" role="listbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-item filter-ms">
+                        <label>Loại máy</label>
+                        <div class="ms-wrap">
+                            <button type="button" class="ms-btn" id="ms-btn-loai" aria-haspopup="listbox" aria-expanded="false">Tất cả</button>
+                            <div class="ms-panel" id="ms-panel-loai" hidden>
+                                <div class="ms-actions">
+                                    <button type="button" class="ms-link" data-ms-action="all" data-ms-list="ms-list-loai">Chọn tất cả</button>
+                                    <button type="button" class="ms-link" data-ms-action="none" data-ms-list="ms-list-loai">Bỏ chọn</button>
+                                </div>
+                                <div class="ms-list" id="ms-list-loai" role="listbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-item filter-ms">
+                        <label>Công trình <span class="text-slate-400 font-normal">(Tên nơi quản lý)</span></label>
+                        <div class="ms-wrap">
+                            <button type="button" class="ms-btn" id="ms-btn-ct" aria-haspopup="listbox" aria-expanded="false">Tất cả</button>
+                            <div class="ms-panel" id="ms-panel-ct" hidden>
+                                <div class="ms-actions">
+                                    <button type="button" class="ms-link" data-ms-action="all" data-ms-list="ms-list-ct">Chọn tất cả</button>
+                                    <button type="button" class="ms-link" data-ms-action="none" data-ms-list="ms-list-ct">Bỏ chọn</button>
+                                </div>
+                                <div class="ms-list" id="ms-list-ct" role="listbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-item filter-ms">
+                        <label>Tên lái máy</label>
+                        <div class="ms-wrap">
+                            <button type="button" class="ms-btn" id="ms-btn-lai" aria-haspopup="listbox" aria-expanded="false">Tất cả</button>
+                            <div class="ms-panel" id="ms-panel-lai" hidden>
+                                <div class="ms-actions">
+                                    <button type="button" class="ms-link" data-ms-action="all" data-ms-list="ms-list-lai">Chọn tất cả</button>
+                                    <button type="button" class="ms-link" data-ms-action="none" data-ms-list="ms-list-lai">Bỏ chọn</button>
+                                </div>
+                                <div class="ms-list" id="ms-list-lai" role="listbox"></div>
+                            </div>
+                        </div>
                     </div>
                     <button type="button" id="btn-load-data" class="action-btn mt-4">Tải dữ liệu</button>
                 </div>
@@ -458,7 +608,7 @@
         </div>
 
         <!-- Footer Date -->
-        <div id="footer-date-text" class="text-right p-4 italic text-sm">Ý Yên, Ngày ... tháng ... năm ...</div>
+        <div id="footer-date-text" class="text-right p-4 italic text-base">Ý Yên, Ngày ... tháng ... năm ...</div>
 
         <!-- Signatures -->
         <div class="signature-section">
@@ -476,7 +626,7 @@
 
         <!-- Add Row Button (Floating or at bottom) -->
         <div class="no-print p-4 text-center">
-            <button id="btn-add-row" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-all transform hover:scale-105">
+            <button id="btn-add-row" class="bg-blue-500 hover:bg-blue-600 text-white text-lg font-bold py-2.5 px-5 rounded-full shadow-lg transition-all transform hover:scale-105">
                 + Thêm dòng trống
             </button>
         </div>
@@ -488,6 +638,227 @@
             appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
             accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
         };
+
+        const TABLE_NHAT_TRINH_MAY_CT = "Nhật trình máy CT";
+        const TABLE_NHAT_TRINH_MAY = "Nhật trình máy";
+        const CT_NGAY_KEYS = ["Ngày làm việc", "Ngay lam viec", "Ngày", "Ngay"];
+        /** Công trình — chỉ cột «Tên nơi quản lý» trên Nhật trình máy CT (bộ lọc + mô tả) */
+        const K_CONG_TRINH_TEN_NOI_QL = ["Tên nơi quản lý", "Ten noi quan ly", "Tên nơi QL", "Ten noi QL", "Nơi quản lý", "Noi quan ly"];
+        const K_TEN_MAY_FILTER = ["Tên tài sản", "Ten tai san", "Tên XMTB", "Ten XMTB", "Tên thiết bị", "Ten thiet bi", "Mã tài sản", "Ma tai san"];
+        const K_LOAI_MAY_FILTER = [
+            "Tên loại", "Ten loai", "Tên loại xe", "Ten loai xe", "TenLoai", "Loại", "Loai",
+            "Tên nhóm", "Ten nhom", "Nhóm xe máy thiết bị", "NhomXeMayThietBi", "Loại máy", "Loai may"
+        ];
+        const K_TEN_LAI_FILTER = ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"];
+        const K_TEN_NGUOI_TAO = [
+            "Tên người tạo", "Ten nguoi tao", "Người tạo", "Nguoi tao",
+            "User", "EMAIL", "Email", "Created by", "Tạo bởi", "Tao boi"
+        ];
+
+        function normFilterVal(s) {
+            if (s == null) return "";
+            return String(s).replace(/\s+/g, " ").trim();
+        }
+
+        /** Bộ nhật trình CT đã tải (lọc lại client không cần gọi lại AppSheet) */
+        let _cacheNtCt = null;
+        let _cacheNtPhieuLookup = null;
+
+        function cellString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value);
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value);
+            return String(v);
+        }
+
+        function cellDisplayString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null) {
+                const d = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
+                if (d != null && String(d).trim() !== "") return String(d);
+            }
+            return cellString(v);
+        }
+
+        function pickFirstCell(row, keys) {
+            if (!row || !keys) return "";
+            for (const k of keys) {
+                if (row[k] == null || row[k] === "") continue;
+                const s = cellDisplayString(row[k]).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function parseDateFlexible(val) {
+            if (val == null) return null;
+            if (val instanceof Date && !isNaN(val.getTime())) return val;
+            const s = String(cellDisplayString(val)).trim();
+            if (!s) return null;
+            const m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})/.exec(s);
+            if (m) {
+                const a = +m[1], b = +m[2], c = +m[3];
+                const y = c < 100 ? 2000 + c : c;
+                let d, mo, yFull;
+                if (a > 12) { d = a; mo = b; yFull = y; }
+                else if (b > 12) { d = b; mo = a; yFull = y; }
+                else { d = a; mo = b; yFull = y; }
+                const dt = new Date(yFull, mo - 1, d);
+                return isNaN(dt.getTime()) ? null : dt;
+            }
+            const t = new Date(s);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
+        function pickNgayLamViecFromCt(row) {
+            for (const k of CT_NGAY_KEYS) {
+                if (row[k] == null || row[k] === "") continue;
+                const d = parseDateFlexible(row[k]);
+                if (d) return d;
+            }
+            for (const [k, v] of Object.entries(row || {})) {
+                if (!/ng[aà]y|date/i.test(String(k))) continue;
+                const d = parseDateFlexible(v);
+                if (d) return d;
+            }
+            return null;
+        }
+
+        function pickTongGioLvFromCt(row) {
+            const keys = [
+                "Tổng giờ lv", "Tong gio lv", "Tổng giờ LV", "Tổng giờ làm việc", "Tong gio lam viec",
+                "Tổng giờ LV (giờ)", "Thời gian thực tế", "Thoi gian thuc te", "Tổng giờ", "Tong gio"
+            ];
+            const v = pickFirstCell(row, keys);
+            if (v) return v;
+            for (const [k, val] of Object.entries(row || {})) {
+                const kn = String(k).normalize("NFD").replace(/\u0300-\u036f/g, "").toLowerCase();
+                if (!/tong\s*gio|thoi\s*gian.*thuc/.test(kn)) continue;
+                if (/so\s*ngay|ngay\s*lv|ref|id\s*cha|related/i.test(kn)) continue;
+                const s = cellDisplayString(val).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function normalizeKeyPart(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/\u0300-\u036f/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "");
+        }
+
+        function parentIdsMatch(ref, parentId) {
+            const a0 = String(ref == null ? "" : ref).trim();
+            const b0 = String(parentId == null ? "" : parentId).trim();
+            if (!a0 || !b0) return false;
+            if (a0.toLowerCase() === b0.toLowerCase()) return true;
+            const na = normalizeKeyPart(a0);
+            const nb = normalizeKeyPart(b0);
+            if (na === nb) return true;
+            const MIN = 8;
+            if (na.length >= MIN && nb.length >= MIN && (na.includes(nb) || nb.includes(na))) return true;
+            if (nb.length >= MIN && na.length < nb.length && nb.includes(na)) return true;
+            if (na.length >= MIN && nb.length < na.length && na.includes(nb)) return true;
+            const lastA = a0.lastIndexOf("_");
+            const lastB = b0.lastIndexOf("_");
+            const tailA = lastA >= 0 ? normalizeKeyPart(a0.slice(lastA + 1)) : na;
+            const tailB = lastB >= 0 ? normalizeKeyPart(b0.slice(lastB + 1)) : nb;
+            if (tailA && tailB) {
+                if (tailA === tailB) return true;
+                if (tailA.length >= MIN && tailB.length >= MIN && (tailA.includes(tailB) || tailB.includes(tailA)))
+                    return true;
+            }
+            const ax = a0.toLowerCase();
+            const bx = b0.toLowerCase();
+            if (ax.includes(bx) || bx.includes(ax)) {
+                if (Math.min(ax.length, bx.length) >= 6) return true;
+            }
+            return false;
+        }
+
+        function getCtParentRefCandidates(row) {
+            if (!row || typeof row !== "object") return [];
+            const orderedKeys = [
+                "ID cha", "ID Cha", "Id cha", "ID phiếu", "ID phieu", "Id phieu", "ID Phiếu",
+                "Ref", "REF", "Nhật trình máy", "Nhat trinh may"
+            ];
+            const found = [];
+            const seen = new Set();
+            for (const k of orderedKeys) {
+                const t = cellString(row[k]).trim();
+                if (t === "" || seen.has(t)) continue;
+                seen.add(t);
+                found.push(t);
+            }
+            for (const [k, v] of Object.entries(row)) {
+                const t = cellString(v).trim();
+                if (t === "") continue;
+                if (/phiếu|phieu|ref|nhật trình máy|id cha|related/i.test(k)) {
+                    if (!seen.has(t)) {
+                        seen.add(t);
+                        found.push(t);
+                    }
+                }
+            }
+            return found;
+        }
+
+        function getNtPhieuIdCandidates(record) {
+            const ids = [];
+            const seen = new Set();
+            const add = (v) => {
+                const t = cellString(v).trim();
+                if (t === "" || seen.has(t)) return;
+                seen.add(t);
+                ids.push(t);
+            };
+            if (!record || typeof record !== "object") return ids;
+            for (const k of ["ID", "Row ID", "RowId", "_RowNumber", "ID phát hiện", "Id phat hien", "KEY", "Key"]) {
+                add(record[k]);
+            }
+            return ids;
+        }
+
+        function buildNtMayPhieuLookup(ntRows) {
+            const exactNoiDung = new Map();
+            const exactNguoiTao = new Map();
+            const bundles = [];
+            for (const row of ntRows || []) {
+                const noiDung = pickFirstCell(row, ["Nội dung", "Noi dung"]);
+                const nguoiTao = pickFirstCell(row, K_TEN_NGUOI_TAO);
+                if (!noiDung && !nguoiTao) continue;
+                const ids = getNtPhieuIdCandidates(row);
+                if (!ids.length) continue;
+                bundles.push({ ids, noiDung, nguoiTao });
+                for (const id of ids) {
+                    if (noiDung) exactNoiDung.set(id, noiDung);
+                    if (nguoiTao) exactNguoiTao.set(id, nguoiTao);
+                }
+            }
+            return { exactNoiDung, exactNguoiTao, bundles };
+        }
+
+        function valueFromNtPhieuTheoIdCha(ctRow, lookup, field) {
+            if (!lookup || !ctRow) return "";
+            const exact = field === "nguoiTao" ? lookup.exactNguoiTao : lookup.exactNoiDung;
+            const refs = getCtParentRefCandidates(ctRow);
+            for (const ref of refs) {
+                if (exact.has(ref)) return exact.get(ref);
+            }
+            for (const ref of refs) {
+                for (const b of lookup.bundles) {
+                    const val = field === "nguoiTao" ? b.nguoiTao : b.noiDung;
+                    if (!val) continue;
+                    for (const id of b.ids) {
+                        if (parentIdsMatch(ref, id)) return val;
+                    }
+                }
+            }
+            return "";
+        }
 
         const REPORT_TAB_URLS = {
             "xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben",
@@ -534,19 +905,14 @@
         function updatePeriodText() {
             const from = document.getElementById("filter-from-date").value;
             const to = document.getElementById("filter-to-date").value;
-            const project = document.getElementById("filter-project").value;
-            
             if (from && to) {
-                const fd = new Date(from);
-                const td = new Date(to);
+                const fd = parseYmdToLocalStart(from) || new Date(from);
+                const td = parseYmdToLocalStart(to) || new Date(to);
                 document.getElementById("report-period-text").innerText = `(Từ ngày ${fd.getDate()}/${fd.getMonth()+1}/${fd.getFullYear()} tới ngày ${td.getDate()}/${td.getMonth()+1}/${td.getFullYear()})`;
-                
                 const today = new Date();
                 document.getElementById("footer-date-text").innerText = `Ý Yên, Ngày ${today.getDate()} tháng ${today.getMonth()+1} năm ${today.getFullYear()}`;
                 document.getElementById("table-title").innerText = `BÁO CÁO CÔNG VIỆC NGÀY ${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
             }
-            
-            document.getElementById("table-project").innerText = `Công trình: ${project || "Tất cả"}`;
         }
 
         // --- AppSheet Data Fetching ---
@@ -570,27 +936,277 @@
             return Array.isArray(data) ? data : (data.Rows || []);
         }
 
-        function parseDate(val) {
-            if (!val) return null;
-            const d = new Date(val);
-            return isNaN(d.getTime()) ? null : d;
+        function getMsState(listId) {
+            const el = document.getElementById(listId);
+            if (!el) return { selected: [], total: 0 };
+            const cbs = Array.from(el.querySelectorAll("input[type=checkbox][data-ms-v]"));
+            const total = cbs.length;
+            const selected = cbs
+                .filter((c) => c.checked)
+                .map((c) => normFilterVal(c.getAttribute("data-ms-v") || ""));
+            return { selected, total };
         }
 
-        function populateProjectDropdown(rows) {
-            const select = document.getElementById("filter-project");
-            const currentVal = select.value;
-            const projects = new Set();
-            rows.forEach(r => {
-                const p = (r["Công trình"] || r["Cong trinh"] || r["CongTruong"] || "").trim();
-                if (p) projects.add(p);
+        function rowPassesMultiselect(fieldValue, listId) {
+            const { selected, total } = getMsState(listId);
+            if (total === 0) return true;
+            if (selected.length === 0) return true;
+            if (selected.length === total) return true;
+            const v = normFilterVal(
+                fieldValue == null || fieldValue === undefined ? "" : String(fieldValue)
+            );
+            if (!v) return false;
+            return selected.includes(v);
+        }
+
+        function getMsCheckedSet(listId) {
+            return new Set(
+                Array.from(document.querySelectorAll(`#${listId} input[type=checkbox][data-ms-v]:checked`)).map((c) =>
+                    normFilterVal(c.getAttribute("data-ms-v") || "")
+                )
+            );
+        }
+
+        function fillMultiselectList(listId, values, listKey) {
+            const list = document.getElementById(listId);
+            if (!list) return;
+            const prev = getMsCheckedSet(listId);
+            const hasPrev = prev.size > 0;
+            list.innerHTML = "";
+            let i = 0;
+            (values || []).forEach((val) => {
+                const nv = normFilterVal(val);
+                if (!nv) return;
+                const id = `ms-${listKey}-${i++}`;
+                const label = document.createElement("label");
+                label.className = "ms-item";
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.setAttribute("data-ms-v", nv);
+                cb.id = id;
+                cb.checked = hasPrev ? prev.has(nv) : false;
+                const span = document.createElement("span");
+                span.textContent = nv;
+                label.appendChild(cb);
+                label.appendChild(span);
+                list.appendChild(label);
             });
-            
-            let html = '<option value="">-- Tất cả --</option>';
-            Array.from(projects).sort().forEach(p => {
-                html += `<option value="${p}">${p}</option>`;
+        }
+
+        function updateOneMsButton(listId, btnId) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            const { selected, total } = getMsState(listId);
+            if (total === 0) {
+                btn.textContent = "— (không có)";
+                return;
+            }
+            if (selected.length === 0) {
+                btn.textContent = `Chưa lọc (${total} mục)`;
+                return;
+            }
+            if (selected.length === total) {
+                btn.textContent = `Tất cả (${total})`;
+                return;
+            }
+            btn.textContent = `Đã chọn ${selected.length}/${total}`;
+        }
+
+        function updateAllMsButtonLabels() {
+            updateOneMsButton("ms-list-may", "ms-btn-may");
+            updateOneMsButton("ms-list-loai", "ms-btn-loai");
+            updateOneMsButton("ms-list-ct", "ms-btn-ct");
+            updateOneMsButton("ms-list-lai", "ms-btn-lai");
+        }
+
+        function populateFilterMultiselects(rows) {
+            const sCt = new Set();
+            const sMay = new Set();
+            const sLoai = new Set();
+            const sLai = new Set();
+            for (const r of rows || []) {
+                const p = normFilterVal(pickFirstCell(r, K_CONG_TRINH_TEN_NOI_QL));
+                const m = normFilterVal(pickFirstCell(r, K_TEN_MAY_FILTER));
+                const lo = normFilterVal(pickFirstCell(r, K_LOAI_MAY_FILTER));
+                const l = normFilterVal(pickFirstCell(r, K_TEN_LAI_FILTER));
+                if (p) sCt.add(p);
+                if (m) sMay.add(m);
+                if (lo) sLoai.add(lo);
+                if (l) sLai.add(l);
+            }
+            fillMultiselectList("ms-list-may", [...sMay].sort((a, b) => a.localeCompare(b, "vi")), "may");
+            fillMultiselectList("ms-list-loai", [...sLoai].sort((a, b) => a.localeCompare(b, "vi")), "loai");
+            fillMultiselectList("ms-list-ct", [...sCt].sort((a, b) => a.localeCompare(b, "vi")), "ct");
+            fillMultiselectList("ms-list-lai", [...sLai].sort((a, b) => a.localeCompare(b, "vi")), "lai");
+            updateAllMsButtonLabels();
+        }
+
+        function applyLocalFilters() {
+            if (!_cacheNtCt) return;
+            filterMapRenderFromRows(_cacheNtCt, _cacheNtPhieuLookup);
+        }
+
+        function filterMapRenderFromRows(allRows, ntPhieuLookup) {
+            const fromStr = document.getElementById("filter-from-date").value;
+            const toStr = document.getElementById("filter-to-date").value;
+            const fromDate = fromStr ? parseYmdToLocalStart(fromStr) : null;
+            const toDate = toStr ? parseYmdToLocalEnd(toStr) : null;
+
+            const filtered = (allRows || []).filter((r) => {
+                const d = pickNgayLamViecFromCt(r);
+                if (!d) return false;
+                if (fromDate && d < fromDate) return false;
+                if (toDate && d > toDate) return false;
+                if (!rowPassesMultiselect(pickFirstCell(r, K_TEN_MAY_FILTER), "ms-list-may")) return false;
+                if (!rowPassesMultiselect(pickFirstCell(r, K_LOAI_MAY_FILTER), "ms-list-loai")) return false;
+                if (!rowPassesMultiselect(pickFirstCell(r, K_CONG_TRINH_TEN_NOI_QL), "ms-list-ct")) return false;
+                if (!rowPassesMultiselect(pickFirstCell(r, K_TEN_LAI_FILTER), "ms-list-lai")) return false;
+                return true;
             });
-            select.innerHTML = html;
-            select.value = currentVal;
+
+            filtered.sort((a, b) => {
+                const da = pickNgayLamViecFromCt(a);
+                const db = pickNgayLamViecFromCt(b);
+                const t = (da && db) ? da - db : 0;
+                if (t) return t;
+                const sa = pickFirstCell(a, K_TEN_MAY_FILTER);
+                const sb = pickFirstCell(b, K_TEN_MAY_FILTER);
+                return (sa || "").localeCompare(sb || "", "vi");
+            });
+
+            if (filtered.length > 0) {
+                const first = filtered[0];
+                const ct0 = pickFirstCell(first, K_CONG_TRINH_TEN_NOI_QL);
+                document.getElementById("table-project").innerText = `Công trình (Tên nơi quản lý): ${ct0 || "—"}`;
+                document.getElementById("table-mui").innerText = `Mũi thi công: ${pickFirstCell(first, ["Mũi thi công", "Mui thi cong", "Hạng mục", "Hang muc", "Công tác thực hiện", "Cong tac thuc hien"]) || "—"}`;
+                document.getElementById("table-phu-trach").innerText = `CB Phụ trách: ${pickFirstCell(first, ["CB phụ trách", "CB phu trach", "Người phụ trách", "Nguoi phu trach", "Cán bộ quản lý", "Can bo quan ly"]) || "—"}`;
+                document.getElementById("table-chuc-vu").innerText = `Loại công việc / Loại: ${pickFirstCell(first, ["Loại công việc", "Loai cong viec", "Chức vụ", "Chuc vu"]) || "—"}`;
+            } else {
+                document.getElementById("table-project").innerText = "Công trình (Tên nơi quản lý): (không có dòng trong khoảng lọc)";
+                document.getElementById("table-mui").innerText = "Mũi thi công: —";
+                document.getElementById("table-phu-trach").innerText = "CB Phụ trách: —";
+                document.getElementById("table-chuc-vu").innerText = "Loại công việc / Loại: —";
+            }
+
+            const K_CBKT = ["CBKT", "CB kỹ thuật", "CB ky thuat", "Cán bộ kỹ thuật", "Can bo ky thuat", "Cán bộ kỹ thuật trực", "Cán bộ CĐ"];
+            const K_PHU = ["Người phụ trách", "Nguoi phu trach", "CB phụ trách", "CB phu trach", "Cán bộ quản lý", "Cán bộ thi công", "Cán bộ theo dõi"];
+            const K_LAI = ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"];
+            const K_CVIEC = [
+                "Công việc thực hiện", "Cong viec thuc hien", "Nội dung công việc", "Noi dung cong viec",
+                "Ghi chú công tác", "Mô tả công việc", "Loại công việc", "Loai cong viec"
+            ];
+            const K_LTU = [
+                "Từ km", "Tu km", "Từ KM", "Tu KM", "Từ Km",
+                "Từ lý trình", "Tu ly trinh", "Lý trình từ", "Ly trinh tu", "Lý trình từ (km)"
+            ];
+            const K_LDEN = [
+                "Đến km", "Den km", "Đến KM", "Den KM", "Đến Km",
+                "Đến lý trình", "Den ly trinh", "Lý trình đến", "Ly trinh den", "Lý trình đến (km)"
+            ];
+            const K_LY1 = ["Lý trình", "Ly trinh", "km lý trình", "Cự ly từ", "Cự ly từ (km)"];
+
+            const mapped = filtered.map((r) => {
+                const tLyTu = pickFirstCell(r, K_LTU);
+                const tLyDen = pickFirstCell(r, K_LDEN);
+                const oneLy = pickFirstCell(r, K_LY1);
+                return {
+                    cbkt:
+                        pickFirstCell(r, K_TEN_NGUOI_TAO) ||
+                        valueFromNtPhieuTheoIdCha(r, ntPhieuLookup, "nguoiTao") ||
+                        pickFirstCell(r, K_CBKT),
+                    cbPhuTrach: pickFirstCell(r, K_PHU),
+                    laiMay: pickFirstCell(r, K_LAI),
+                    loaiMay: pickFirstCell(r, K_LOAI_MAY_FILTER),
+                    noiDung: pickFirstCell(r, K_CVIEC),
+                    lyTrinhTu: tLyTu || (tLyDen ? "" : oneLy),
+                    lyTrinhDen: tLyDen,
+                    dvt: pickFirstCell(r, ["ĐVT", "DVT", "Đơn vị tính", "Don vi tinh", "DVT công tác", "DVT công tác tính giờ"]) || "Giờ",
+                    khKh: pickFirstCell(r, ["Khối lượng kế hoạch", "Khoi luong ke hoach", "KL kế hoạch", "Sản lượng theo mẫu", "Gio theo mẫu (giờ)"]),
+                    khTt: pickFirstCell(r, [
+                        "Khối lượng", "Khoi luong", "Khối lượng thực tế", "Khoi luong thuc te",
+                        "Klg thực tế theo công tác thực hiện", "Klg theo công tác thực hiện"
+                    ]),
+                    tgKh: pickFirstCell(r, ["Thời gian kế hoạch", "Thoi gian ke hoach", "Hệ số theo mẫu (giờ)"]),
+                    tgTt: pickTongGioLvFromCt(r) || pickFirstCell(r, ["Tổng thời gian", "Số giờ theo công tác thực hiện (giờ)"]),
+                    ghiChu:
+                        valueFromNtPhieuTheoIdCha(r, ntPhieuLookup, "noiDung") ||
+                        pickFirstCell(r, ["Ghi chú", "Ghi chu", "Nội dung bổ sung", "Ghi chú công tác thực hiện"])
+                };
+            });
+
+            renderRows(mapped);
+            updatePeriodText();
+        }
+
+        function closeAllMultiselectPanels() {
+            document.querySelectorAll(".filter-ms .ms-panel").forEach((p) => {
+                p.hidden = true;
+            });
+            document.querySelectorAll(".filter-ms .ms-btn").forEach((b) => {
+                b.setAttribute("aria-expanded", "false");
+            });
+        }
+
+        function toggleMultiselectPanel(btn) {
+            const wrap = btn.closest(".ms-wrap");
+            const panel = wrap && wrap.querySelector(".ms-panel");
+            if (!panel) return;
+            const wasOpen = !panel.hidden;
+            closeAllMultiselectPanels();
+            if (!wasOpen) {
+                panel.hidden = false;
+                btn.setAttribute("aria-expanded", "true");
+            }
+        }
+
+        function initFilterMultiselects() {
+            document.getElementById("ms-btn-may")?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleMultiselectPanel(e.currentTarget);
+            });
+            document.getElementById("ms-btn-loai")?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleMultiselectPanel(e.currentTarget);
+            });
+            document.getElementById("ms-btn-ct")?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleMultiselectPanel(e.currentTarget);
+            });
+            document.getElementById("ms-btn-lai")?.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleMultiselectPanel(e.currentTarget);
+            });
+            document.querySelectorAll(".filter-ms .ms-panel").forEach((p) => {
+                p.addEventListener("click", (e) => e.stopPropagation());
+            });
+            document.addEventListener("click", () => closeAllMultiselectPanels());
+            document.querySelectorAll(".ms-link[data-ms-list]").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const listId = e.currentTarget.getAttribute("data-ms-list");
+                    const act = e.currentTarget.getAttribute("data-ms-action");
+                    const list = document.getElementById(listId);
+                    if (!list) return;
+                    const cbs = list.querySelectorAll("input[type=checkbox][data-ms-v]");
+                    const check = act === "all";
+                    cbs.forEach((c) => {
+                        c.checked = check;
+                    });
+                    if (listId === "ms-list-may") updateOneMsButton("ms-list-may", "ms-btn-may");
+                    else if (listId === "ms-list-loai") updateOneMsButton("ms-list-loai", "ms-btn-loai");
+                    else if (listId === "ms-list-ct") updateOneMsButton("ms-list-ct", "ms-btn-ct");
+                    else if (listId === "ms-list-lai") updateOneMsButton("ms-list-lai", "ms-btn-lai");
+                    applyLocalFilters();
+                });
+            });
+            ["ms-list-may", "ms-list-loai", "ms-list-ct", "ms-list-lai"].forEach((id) => {
+                document.getElementById(id)?.addEventListener("change", (e) => {
+                    if (e.target && e.target.matches("input[type=checkbox]")) {
+                        updateAllMsButtonLabels();
+                        applyLocalFilters();
+                    }
+                });
+            });
         }
 
         async function loadData() {
@@ -599,64 +1215,18 @@
             btn.innerText = "Đang tải...";
             
             try {
-                const fromStr = document.getElementById("filter-from-date").value;
-                const toStr = document.getElementById("filter-to-date").value;
-                const projectFilter = document.getElementById("filter-project").value;
-                
-                const fromDate = new Date(fromStr);
-                const toDate = new Date(toStr);
-                fromDate.setHours(0,0,0,0);
-                toDate.setHours(23,59,59,999);
-
-                // Try "Báo cáo công việc" table first, fallback to "Nhật trình máy CT"
-                let allRows = [];
+                const allRows = await fetchAppSheetTable(TABLE_NHAT_TRINH_MAY_CT);
+                let ntMayRows = [];
                 try {
-                    allRows = await fetchAppSheetTable("Báo cáo công việc");
+                    ntMayRows = await fetchAppSheetTable(TABLE_NHAT_TRINH_MAY);
                 } catch (e) {
-                    console.log("Table 'Báo cáo công việc' not found, falling back to 'Nhật trình máy CT'");
-                    allRows = await fetchAppSheetTable("Nhật trình máy CT");
+                    console.warn("«Nhật trình máy» không tải được — Ghi chú chỉ lấy từ cột trên CT nếu có:", e);
                 }
-
-                populateProjectDropdown(allRows);
-                
-                const filtered = allRows.filter(r => {
-                    const d = parseDate(r["Ngày"] || r["Ngay"]);
-                    if (!d) return false;
-                    if (d < fromDate || d > toDate) return false;
-                    
-                    if (projectFilter && projectFilter !== "") {
-                        const p = (r["Công trình"] || r["Cong trinh"] || r["CongTruong"] || "").trim();
-                        if (p !== projectFilter) return false;
-                    }
-                    return true;
-                });
-
-                if (filtered.length > 0) {
-                    const first = filtered[0];
-                    document.getElementById("table-project").innerText = `Công trình: ${first["Công trình"] || first["Cong trinh"] || first["CongTruong"] || ""}`;
-                    document.getElementById("table-mui").innerText = `Mũi thi công: ${first["Mũi thi công"] || first["Mui thi cong"] || first["Noi thi cong"] || ""}`;
-                    document.getElementById("table-phu-trach").innerText = `CB Phụ trách: ${first["CB phụ trách"] || first["CB phu trach"] || first["Người phụ trách"] || first["Nguoi phu trach"] || ""}`;
-                    document.getElementById("table-chuc-vu").innerText = `Chức vụ: ${first["Chức vụ"] || first["Chuc vu"] || ""}`;
-                }
-
-                const mapped = filtered.map(r => ({
-                    cbkt: r["CBKT"] || "", 
-                    cbPhuTrach: r["Người phụ trách"] || r["Nguoi phu trach"] || r["CB phụ trách"] || "",
-                    laiMay: r["Tên lái máy"] || r["Ten lai may"] || r["Lái máy"] || "",
-                    loaiMay: r["Tên tài sản"] || r["Ten tai san"] || r["Tên thiết bị"] || "",
-                    noiDung: r["Nội dung công việc"] || r["Noi dung cong viec"] || "",
-                    lyTrinhTu: r["Lý trình"] || r["Ly trinh"] || r["Từ lý trình"] || "",
-                    lyTrinhDen: r["Đến lý trình"] || r["Den ly trinh"] || "",
-                    dvt: r["ĐVT"] || r["DVT"] || "Giờ",
-                    khKh: r["Khối lượng kế hoạch"] || "",
-                    khTt: r["Khối lượng"] || r["Khoi luong"] || r["Khối lượng thực tế"] || "",
-                    tgKh: r["Thời gian kế hoạch"] || "",
-                    tgTt: r["Tổng giờ lv"] || r["Tong gio lv"] || r["Thời gian thực tế"] || "",
-                    ghiChu: r["Ghi chú"] || r["Ghi chu"] || ""
-                }));
-
-                renderRows(mapped);
-                updatePeriodText();
+                const ntPhieuLookup = buildNtMayPhieuLookup(ntMayRows);
+                _cacheNtCt = allRows;
+                _cacheNtPhieuLookup = ntPhieuLookup;
+                populateFilterMultiselects(allRows);
+                filterMapRenderFromRows(allRows, ntPhieuLookup);
             } catch (error) {
                 console.error(error);
                 alert("Lỗi tải dữ liệu: " + error.message);
@@ -664,6 +1234,20 @@
                 btn.disabled = false;
                 btn.innerText = "Tải dữ liệu";
             }
+        }
+
+        function parseYmdToLocalStart(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const t = new Date(+m[1], +m[2] - 1, +m[3], 0, 0, 0, 0);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
+        function parseYmdToLocalEnd(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const t = new Date(+m[1], +m[2] - 1, +m[3], 23, 59, 59, 999);
+            return isNaN(t.getTime()) ? null : t;
         }
 
         // --- Data Rendering ---
@@ -720,7 +1304,7 @@
                 const worksheet = workbook.addWorksheet("Báo cáo công việc");
                 
                 // Set default row height
-                worksheet.properties.defaultRowHeight = 25;
+                worksheet.properties.defaultRowHeight = 28;
 
                 const rows = Array.from(table.rows);
                 
@@ -731,23 +1315,23 @@
                     // Title Header
                     if (rowIndex === 0) {
                         worksheet.mergeCells(1, 1, 1, row.cells.length);
-                        excelRow.height = 40;
-                        excelRow.font = { name: 'Times New Roman', bold: true, size: 20, color: { argb: 'FF0F172A' } };
+                        excelRow.height = 44;
+                        excelRow.font = { name: 'Times New Roman', bold: true, size: 22, color: { argb: 'FF0F172A' } };
                         excelRow.alignment = { vertical: 'middle', horizontal: 'center' };
                     } 
                     // Project / Meta Headers
                     else if (rowIndex >= 1 && rowIndex <= 2) {
                         worksheet.mergeCells(rowIndex + 1, 1, rowIndex + 1, row.cells.length);
-                        excelRow.height = 30;
-                        excelRow.font = { name: 'Times New Roman', bold: true, size: 14 };
+                        excelRow.height = 32;
+                        excelRow.font = { name: 'Times New Roman', bold: true, size: 15 };
                         excelRow.alignment = { vertical: 'middle', horizontal: 'left' };
                     }
                     // Table Header
                     else if (rowIndex >= 3 && rowIndex <= 4) {
-                        excelRow.height = 35;
+                        excelRow.height = 38;
                         excelRow.eachCell(cell => {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4A8694' } };
-                            cell.font = { name: 'Times New Roman', color: { argb: 'FFFFFFFF' }, bold: true, size: 11 };
+                            cell.font = { name: 'Times New Roman', color: { argb: 'FFFFFFFF' }, bold: true, size: 12 };
                             cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                             cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                         });
@@ -755,7 +1339,7 @@
                     // Body Rows
                     else {
                         excelRow.eachCell(cell => {
-                            cell.font = { name: 'Times New Roman', size: 12 };
+                            cell.font = { name: 'Times New Roman', size: 13 };
                             cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
                             cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                         });
@@ -796,11 +1380,15 @@
         // --- Event Listeners ---
         document.addEventListener("DOMContentLoaded", () => {
             initDateFilters();
+            initFilterMultiselects();
             renderRows();
             
-            document.getElementById("filter-from-date").addEventListener("change", updatePeriodText);
-            document.getElementById("filter-to-date").addEventListener("change", updatePeriodText);
-            document.getElementById("filter-project").addEventListener("change", updatePeriodText);
+            const onDateOrMsChange = () => {
+                updatePeriodText();
+                applyLocalFilters();
+            };
+            document.getElementById("filter-from-date").addEventListener("change", onDateOrMsChange);
+            document.getElementById("filter-to-date").addEventListener("change", onDateOrMsChange);
             
             document.getElementById("export-excel").addEventListener("click", exportToExcel);
             document.getElementById("export-pdf").addEventListener("click", () => window.print());
