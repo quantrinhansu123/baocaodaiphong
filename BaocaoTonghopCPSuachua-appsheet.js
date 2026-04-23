@@ -374,18 +374,43 @@
         fillRepairFilterSelect(document.getElementById("sc-filter-nhom"), [...setNhom].sort(sortVi));
     }
 
+    function parseYmdToLocalStart(ymd) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+        if (!m) return null;
+        const y = +m[1], mo = +m[2] - 1, d = +m[3];
+        const t = new Date(y, mo, d, 0, 0, 0, 0);
+        return isNaN(t.getTime()) ? null : t;
+    }
+
+    function parseYmdToLocalEnd(ymd) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+        if (!m) return null;
+        const y = +m[1], mo = +m[2] - 1, d = +m[3];
+        const t = new Date(y, mo, d, 23, 59, 59, 999);
+        return isNaN(t.getTime()) ? null : t;
+    }
+
     function getDateRangeFromFilters() {
-        const fromRaw = document.getElementById("sc-filter-from-datetime")?.value?.trim() ?? "";
-        const toRaw = document.getElementById("sc-filter-to-datetime")?.value?.trim() ?? "";
-        const from = fromRaw ? new Date(fromRaw) : null;
-        const to = toRaw ? new Date(toRaw) : null;
-        const hasFrom = !!(from && !isNaN(from.getTime()));
-        const hasTo = !!(to && !isNaN(to.getTime()));
+        let fromRaw = document.getElementById("sc-filter-from-date")?.value?.trim() ?? "";
+        let toRaw = document.getElementById("sc-filter-to-date")?.value?.trim() ?? "";
+        if (fromRaw && toRaw) {
+            const a = parseYmdToLocalStart(fromRaw);
+            const b = parseYmdToLocalStart(toRaw);
+            if (a && b && a.getTime() > b.getTime()) {
+                [fromRaw, toRaw] = [toRaw, fromRaw];
+                const fromEl = document.getElementById("sc-filter-from-date");
+                const toEl = document.getElementById("sc-filter-to-date");
+                if (fromEl) fromEl.value = fromRaw;
+                if (toEl) toEl.value = toRaw;
+            }
+        }
+        const from = fromRaw ? parseYmdToLocalStart(fromRaw) : null;
+        const to = toRaw ? parseYmdToLocalEnd(toRaw) : null;
         return {
-            hasFrom,
-            hasTo,
-            from: hasFrom ? from : null,
-            to: hasTo ? to : null
+            hasFrom: !!from,
+            hasTo: !!to,
+            from,
+            to
         };
     }
 
@@ -404,22 +429,17 @@
     function syncDateRangeBanner() {
         const el = document.getElementById("sc-date-range");
         if (!el) return;
-        const fromRaw = document.getElementById("sc-filter-from-datetime")?.value?.trim() ?? "";
-        const toRaw = document.getElementById("sc-filter-to-datetime")?.value?.trim() ?? "";
-        const from = fromRaw ? new Date(fromRaw) : null;
-        const to = toRaw ? new Date(toRaw) : null;
-        const labelFrom = from && !isNaN(from.getTime()) ? formatDateDdMmYyyy(from) : "…";
-        const labelTo = to && !isNaN(to.getTime()) ? formatDateDdMmYyyy(to) : "…";
+        const fromRaw = document.getElementById("sc-filter-from-date")?.value?.trim() ?? "";
+        const toRaw = document.getElementById("sc-filter-to-date")?.value?.trim() ?? "";
+        const dFrom = fromRaw ? parseYmdToLocalStart(fromRaw) : null;
+        const dTo = toRaw ? parseYmdToLocalStart(toRaw) : null;
+        const labelFrom = dFrom ? formatDateDdMmYyyy(dFrom) : "…";
+        const labelTo = dTo ? formatDateDdMmYyyy(dTo) : "…";
         el.textContent = `(Từ ngày ${labelFrom} tới ngày ${labelTo})`;
     }
 
     function aggregateRepairRows(rows) {
         const dateRange = getDateRangeFromFilters();
-        if (dateRange.hasFrom && dateRange.hasTo && dateRange.from > dateRange.to) {
-            const tmp = dateRange.from;
-            dateRange.from = dateRange.to;
-            dateRange.to = tmp;
-        }
 
         const filteredRows = [];
         const textNeedles = getNxlcTextFilterNeedles();
@@ -728,8 +748,8 @@
             syncDateRangeBanner();
             renderRepairSummaryTable();
         };
-        document.getElementById("sc-filter-from-datetime")?.addEventListener("change", rerender);
-        document.getElementById("sc-filter-to-datetime")?.addEventListener("change", rerender);
+        document.getElementById("sc-filter-from-date")?.addEventListener("change", rerender);
+        document.getElementById("sc-filter-to-date")?.addEventListener("change", rerender);
         const textRerender = () => {
             syncDateRangeBanner();
             renderRepairSummaryTable();

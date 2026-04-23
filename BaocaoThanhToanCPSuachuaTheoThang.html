@@ -388,10 +388,10 @@
         <div class="toolbar print-hide">
             <div class="repair-filter-bar">
                 <div class="repair-filter-dates">
-                    <span class="repair-filter-label">TỪ NGÀY GIỜ</span>
-                    <input type="datetime-local" id="sc2-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
-                    <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
-                    <input type="datetime-local" id="sc2-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
+                    <span class="repair-filter-label">TỪ NGÀY</span>
+                    <input type="date" id="sc2-filter-from-date" class="filter-input" aria-label="Từ ngày">
+                    <span class="repair-filter-label right">ĐẾN NGÀY</span>
+                    <input type="date" id="sc2-filter-to-date" class="filter-input" aria-label="Đến ngày">
                 </div>
                 <div class="repair-filter-extra">
                     <span class="repair-filter-label">TÊN THIẾT BỊ</span>
@@ -965,16 +965,43 @@
             el.style.color = isErr ? "#b91c1c" : "#374151";
         }
 
+        function parseYmdToLocalStart(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const y = +m[1], mo = +m[2] - 1, d = +m[3];
+            const t = new Date(y, mo, d, 0, 0, 0, 0);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
+        function parseYmdToLocalEnd(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const y = +m[1], mo = +m[2] - 1, d = +m[3];
+            const t = new Date(y, mo, d, 23, 59, 59, 999);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
         function getDateRangeFromFilters() {
-            const fromRaw = document.getElementById("sc2-filter-from-datetime")?.value?.trim() ?? "";
-            const toRaw = document.getElementById("sc2-filter-to-datetime")?.value?.trim() ?? "";
-            const from = fromRaw ? new Date(fromRaw) : null;
-            const to = toRaw ? new Date(toRaw) : null;
+            let fromRaw = document.getElementById("sc2-filter-from-date")?.value?.trim() ?? "";
+            let toRaw = document.getElementById("sc2-filter-to-date")?.value?.trim() ?? "";
+            if (fromRaw && toRaw) {
+                const a = parseYmdToLocalStart(fromRaw);
+                const b = parseYmdToLocalStart(toRaw);
+                if (a && b && a.getTime() > b.getTime()) {
+                    [fromRaw, toRaw] = [toRaw, fromRaw];
+                    const fromEl = document.getElementById("sc2-filter-from-date");
+                    const toEl = document.getElementById("sc2-filter-to-date");
+                    if (fromEl) fromEl.value = fromRaw;
+                    if (toEl) toEl.value = toRaw;
+                }
+            }
+            const from = fromRaw ? parseYmdToLocalStart(fromRaw) : null;
+            const to = toRaw ? parseYmdToLocalEnd(toRaw) : null;
             return {
-                hasFrom: !!(from && !isNaN(from.getTime())),
-                hasTo: !!(to && !isNaN(to.getTime())),
-                from: from && !isNaN(from.getTime()) ? from : null,
-                to: to && !isNaN(to.getTime()) ? to : null
+                hasFrom: !!from,
+                hasTo: !!to,
+                from,
+                to
             };
         }
 
@@ -1053,11 +1080,6 @@
             const tbody = document.getElementById("sc2-tbody");
             if (!tbody) return;
             const dateRange = getDateRangeFromFilters();
-            if (dateRange.hasFrom && dateRange.hasTo && dateRange.from > dateRange.to) {
-                const tmp = dateRange.from;
-                dateRange.from = dateRange.to;
-                dateRange.to = tmp;
-            }
 
             const rows = [];
             for (const r of cacheNxlcCtRows || []) {
@@ -1247,8 +1269,8 @@
 
         document.getElementById("sc2-btn-load")?.addEventListener("click", () => loadFromAppSheet(false));
         document.getElementById("sc2-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
-        document.getElementById("sc2-filter-from-datetime")?.addEventListener("change", () => renderPaymentRows());
-        document.getElementById("sc2-filter-to-datetime")?.addEventListener("change", () => renderPaymentRows());
+        document.getElementById("sc2-filter-from-date")?.addEventListener("change", () => renderPaymentRows());
+        document.getElementById("sc2-filter-to-date")?.addEventListener("change", () => renderPaymentRows());
         for (const id of ["sc2-filter-ten-thiet-bi", "sc2-filter-ten-lai-may", "sc2-filter-nhom"]) {
             document.getElementById(id)?.addEventListener("change", () => renderPaymentRows());
         }

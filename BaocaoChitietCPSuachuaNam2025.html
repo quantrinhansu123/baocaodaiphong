@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng kê chi tiết CP sửa chữa năm 2025</title>
+    <title>Bảng kê chi tiết CP sửa chữa năm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <style>
@@ -381,16 +381,16 @@
         </div>
 
         <div class="title-band">
-            <h1>BẢNG KÊ CHI TIẾT CP SỬA CHỮA NĂM 2025</h1>
+            <h1>BẢNG KÊ CHI TIẾT CP SỬA CHỮA NĂM <span id="sc3-title-year"></span></h1>
         </div>
 
         <div class="toolbar print-hide">
             <div class="repair-filter-bar">
                 <div class="repair-filter-dates">
-                    <span class="repair-filter-label">TỪ NGÀY GIỜ</span>
-                    <input type="datetime-local" id="sc3-filter-from-datetime" class="filter-input" aria-label="Từ ngày giờ">
-                    <span class="repair-filter-label right">ĐẾN NGÀY GIỜ</span>
-                    <input type="datetime-local" id="sc3-filter-to-datetime" class="filter-input" aria-label="Đến ngày giờ">
+                    <span class="repair-filter-label">TỪ NGÀY</span>
+                    <input type="date" id="sc3-filter-from-date" class="filter-input" aria-label="Từ ngày">
+                    <span class="repair-filter-label right">ĐẾN NGÀY</span>
+                    <input type="date" id="sc3-filter-to-date" class="filter-input" aria-label="Đến ngày">
                 </div>
                 <div class="repair-filter-extra">
                     <span class="repair-filter-label">TÊN THIẾT BỊ</span>
@@ -908,17 +908,63 @@
             el.style.color = isErr ? "#b91c1c" : "#374151";
         }
 
+        function parseYmdToLocalStart(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const y = +m[1], mo = +m[2] - 1, d = +m[3];
+            const t = new Date(y, mo, d, 0, 0, 0, 0);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
+        function parseYmdToLocalEnd(ymd) {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd?.trim() ?? "");
+            if (!m) return null;
+            const y = +m[1], mo = +m[2] - 1, d = +m[3];
+            const t = new Date(y, mo, d, 23, 59, 59, 999);
+            return isNaN(t.getTime()) ? null : t;
+        }
+
         function getDateRangeFromFilters() {
-            const fromRaw = document.getElementById("sc3-filter-from-datetime")?.value?.trim() ?? "";
-            const toRaw = document.getElementById("sc3-filter-to-datetime")?.value?.trim() ?? "";
-            const from = fromRaw ? new Date(fromRaw) : null;
-            const to = toRaw ? new Date(toRaw) : null;
+            let fromRaw = document.getElementById("sc3-filter-from-date")?.value?.trim() ?? "";
+            let toRaw = document.getElementById("sc3-filter-to-date")?.value?.trim() ?? "";
+            if (fromRaw && toRaw) {
+                const a = parseYmdToLocalStart(fromRaw);
+                const b = parseYmdToLocalStart(toRaw);
+                if (a && b && a.getTime() > b.getTime()) {
+                    [fromRaw, toRaw] = [toRaw, fromRaw];
+                    const fromEl = document.getElementById("sc3-filter-from-date");
+                    const toEl = document.getElementById("sc3-filter-to-date");
+                    if (fromEl) fromEl.value = fromRaw;
+                    if (toEl) toEl.value = toRaw;
+                }
+            }
+            const from = fromRaw ? parseYmdToLocalStart(fromRaw) : null;
+            const to = toRaw ? parseYmdToLocalEnd(toRaw) : null;
             return {
-                hasFrom: !!(from && !isNaN(from.getTime())),
-                hasTo: !!(to && !isNaN(to.getTime())),
-                from: from && !isNaN(from.getTime()) ? from : null,
-                to: to && !isNaN(to.getTime()) ? to : null
+                hasFrom: !!from,
+                hasTo: !!to,
+                from,
+                to
             };
+        }
+
+        /** Năm trên tiêu đề báo cáo: theo năm của «Từ ngày»; nếu chưa chọn thì theo năm hiện tại. */
+        function getReportYearFromFromDate() {
+            const fromRaw = document.getElementById("sc3-filter-from-date")?.value?.trim() ?? "";
+            if (fromRaw) {
+                const m = /^(\d{4})-/.exec(fromRaw);
+                if (m) return +m[1];
+                const d = parseYmdToLocalStart(fromRaw);
+                if (d) return d.getFullYear();
+            }
+            return new Date().getFullYear();
+        }
+
+        function updateSc3ReportTitle() {
+            const y = getReportYearFromFromDate();
+            const el = document.getElementById("sc3-title-year");
+            if (el) el.textContent = String(y);
+            document.title = `Bảng kê chi tiết CP sửa chữa năm ${y}`;
         }
 
         function rowInDateRange(dateObj, dateRange) {
@@ -996,11 +1042,6 @@
             const tbody = document.getElementById("sc3-tbody");
             if (!tbody) return 0;
             const dateRange = getDateRangeFromFilters();
-            if (dateRange.hasFrom && dateRange.hasTo && dateRange.from > dateRange.to) {
-                const tmp = dateRange.from;
-                dateRange.from = dateRange.to;
-                dateRange.to = tmp;
-            }
 
             const rawItems = [];
             const qTb = normalizeSpaces(document.getElementById("sc3-filter-ten-thiet-bi")?.value ?? "").toLowerCase();
@@ -1249,7 +1290,10 @@
         const exportPdfBtn = document.getElementById("export-pdf");
 
         if (exportExcelBtn) {
-            exportExcelBtn.addEventListener("click", () => exportPageTableToExcel(".detail-table", "bang-ke-chi-tiet-cp-sua-chua-nam-2025"));
+            exportExcelBtn.addEventListener("click", () => {
+                const y = getReportYearFromFromDate();
+                exportPageTableToExcel(".detail-table", `bang-ke-chi-tiet-cp-sua-chua-nam-${y}`);
+            });
         }
         if (exportPdfBtn) {
             exportPdfBtn.addEventListener("click", exportPageToPdf);
@@ -1257,11 +1301,12 @@
 
         document.getElementById("sc3-btn-load")?.addEventListener("click", () => loadFromAppSheet(false));
         document.getElementById("sc3-btn-refresh")?.addEventListener("click", () => loadFromAppSheet(true));
-        document.getElementById("sc3-filter-from-datetime")?.addEventListener("change", () => {
+        document.getElementById("sc3-filter-from-date")?.addEventListener("change", () => {
+            updateSc3ReportTitle();
             const shown = renderDetailRows();
             setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
         });
-        document.getElementById("sc3-filter-to-datetime")?.addEventListener("change", () => {
+        document.getElementById("sc3-filter-to-date")?.addEventListener("change", () => {
             const shown = renderDetailRows();
             setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
         });
@@ -1271,6 +1316,7 @@
                 if (cacheNxlcCtRows) setStatus(`Đã tải ${cacheNxlcCtRows.length} dòng «${TABLE_NXLC_CT}», đang hiển thị ${shown} dòng.`, false);
             });
         }
+        updateSc3ReportTitle();
         loadFromAppSheet(false);
     </script>
 </body>

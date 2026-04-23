@@ -956,10 +956,10 @@
                             <th rowspan="2" style="width: 3.5%;">Tồn cuối<br>kỳ (L)</th>
                             <th rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
                             <th colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
                             <th rowspan="2" style="width: 3%;">Định mức<br>trong bình<br>(L/cm)</th>
-                            <th rowspan="2" style="width: 3%;">Định mức<br>tiêu hao<br>(L/cm)</th>
+                            <th rowspan="2" style="width: 3%;">Định mức<br>tiêu hao<br>(L/h)</th>
                             <th rowspan="2" style="width: 9%;">Công việc</th>
                             <th rowspan="2" style="width: 6%;">Công trường</th>
                         </tr>
@@ -4755,7 +4755,7 @@
                 line1,
                 line2
             } = getKmMonthLabelsFromFiltersOrRows(filters);
-            const tieuHaoUnit = "L/cm";
+            const tieuHaoUnit = "L/h";
             th1.innerHTML = thietBiTongGioHoatDongHeaderHtml(line1);
             th2.innerHTML = thietBiTongGioHoatDongHeaderHtml(line2);
 

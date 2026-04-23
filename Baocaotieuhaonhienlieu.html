@@ -1016,11 +1016,11 @@
                             <th id="th-ton-cuoi-ky" rowspan="2" style="width: 3.5%;">Tồn cuối kỳ<br>(lít)</th>
                             <th id="th-luong-dau-th" rowspan="2" style="width: 4%;">Lượng dầu<br>tiêu hao (L)</th>
                             <th id="th-nlphu-colspan" colspan="4" style="width: 14%;">Nhiên liệu phụ</th>
-                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
-                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/cm)</th>
+                            <th id="th-thtt-t1" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
+                            <th id="th-thtt-t2" rowspan="2" style="width: 3.5%;">Tiêu hao<br>thực tế<br>(L/h)</th>
                             <th id="th-dm-trong-binh" rowspan="2" style="width: 3%;">ĐM bình<br>(L/cm)</th>
                             <th id="th-dm-tieu-hao" rowspan="2" style="width: 3%;" class="th-dinh-muc-tieu-hao">ĐM
-                                TH<br>(L/cm)</th>
+                                TH<br>(L/h)</th>
                             <th id="th-cong-viec" rowspan="2" style="width: 7.5%;">Công việc</th>
                             <th id="th-cong-truong" rowspan="2" style="width: 9%;">Công trường</th>
                         </tr>
@@ -4926,7 +4926,7 @@
             } = getKmMonthLabelsFromFiltersOrRows(filters);
             const thietBiTab = currentReportTab === "trang-thiet-bi";
             const xeTab = currentReportTab === "xe-ben" || currentReportTab === "xe-bon";
-            const tieuHaoUnit = thietBiTab ? "L/cm" : "L/km";
+            const tieuHaoUnit = thietBiTab ? "L/h" : "L/km";
 
             /** Tab «thiết bị máy»: cùng logic cập nhật theo Từ/Đến ngày như xe ben / xe bồn; đơn vị giờ + (CT). */
             if (thietBiTab) {
@@ -4934,11 +4934,11 @@
                 th2.innerHTML = thietBiTongGioHoatDongHeaderHtml(line2 || "");
                 if (thTieuHao1) {
                     const m1 = line1 ? escapeHtml(line1) : "—";
-                    thTieuHao1.innerHTML = `Tiêu hao<br>thực tế<br>${m1}<br>(L/cm)`;
+                    thTieuHao1.innerHTML = `Tiêu hao<br>thực tế<br>${m1}<br>(${tieuHaoUnit})`;
                 }
                 if (thTieuHao2) {
                     const m2 = line2 ? escapeHtml(line2) : "—";
-                    thTieuHao2.innerHTML = `Tiêu hao<br>thực tế<br>${m2}<br>(L/cm)`;
+                    thTieuHao2.innerHTML = `Tiêu hao<br>thực tế<br>${m2}<br>(${tieuHaoUnit})`;
                 }
             } else {
                 th1.innerHTML =
@@ -4984,9 +4984,11 @@
             setHtml("th-dau-xuat-thang", "Lượng dầu nhập<br>trong tháng (lít)", "Lượng dầu nhập<br>trong tháng (lít)");
             setHtml("th-ton-cuoi-ky", "Tồn cuối kỳ<br>(lít)", "Tồn cuối kỳ<br>(lít)");
             setHtml("th-luong-dau-th", "Lượng dầu<br>tiêu hao (L)", "Lượng dầu<br>tiêu hao (L)");
-            const dmBinhUnit = (currentReportTab === "xe-ben" || currentReportTab === "xe-bon") ? "L/h" : "L/cm";
+            const dmBinhUnit = "L/cm";
             setHtml("th-dm-trong-binh", `Định mức<br>trong bình (${dmBinhUnit})`, `ĐM bình<br>(${dmBinhUnit})`);
-            const dmThUnit = (currentReportTab === "xe-ben" || currentReportTab === "xe-bon") ? "L/km" : "L/cm";
+            let dmThUnit = "L/h";
+            if (currentReportTab === "xe-ben" || currentReportTab === "xe-bon") dmThUnit = "L/km";
+            else if (currentReportTab === "trang-thiet-bi") dmThUnit = "L/h";
             setHtml("th-dm-tieu-hao", `Định mức<br>tiêu hao (${dmThUnit})`, `ĐM TH<br>(${dmThUnit})`);
             /**
              * Nhiên liệu phụ: đơn vị trong ngoặc xuống dòng; cùng bộ nhãn đầy đủ cho cả ba tab báo cáo này.
