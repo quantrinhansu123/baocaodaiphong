@@ -69,9 +69,14 @@
         .dotted-line {
             flex-grow: 1;
             border-bottom: 1.5px dotted #000;
-            height: 1em;
+            min-height: 1.2em;
             position: relative;
             top: -4px; /* Adjust vertical alignment of dots */
+            padding: 0 4px;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            white-space: nowrap;
         }
         .short-dotted {
             width: 200px;
@@ -133,6 +138,28 @@
             font-style: italic;
             font-weight: normal;
         }
+
+        .status-line {
+            margin-top: 8px;
+            font-size: 13px;
+            font-style: italic;
+            color: #334155;
+            min-height: 18px;
+        }
+
+        .id-picker-row {
+            margin-bottom: 10px;
+        }
+
+        .id-picker {
+            min-width: 320px;
+            max-width: 100%;
+            border: 1px solid #334155;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 15px;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
@@ -153,26 +180,33 @@
         </div>
 
         <div class="info-section">
+            <div class="info-row id-picker-row">
+                <span class="info-label">Mã ID:</span>
+                <select id="field-select-id" class="id-picker">
+                    <option value="">-- Chọn mã ID --</option>
+                </select>
+            </div>
             <div class="info-row">
                 <span class="info-label">Công trình:</span>
-                <span class="dotted-line"></span>
+                <span id="field-cong-trinh" class="dotted-line"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">Họ tên người xin cấp:</span>
-                <span class="dotted-line"></span>
+                <span id="field-nguoi-de-xuat" class="dotted-line"></span>
                 <span class="info-label ml-15">Chức vụ:</span>
-                <span class="dotted-line short-dotted"></span>
+                <span id="field-chuc-vu" class="dotted-line short-dotted"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">Họ tên Lái xe/máy:</span>
-                <span class="dotted-line"></span>
+                <span id="field-lai-may" class="dotted-line"></span>
                 <span class="info-label ml-15">Loại máy:</span>
-                <span class="dotted-line short-dotted"></span>
+                <span id="field-ma-thiet-bi" class="dotted-line short-dotted"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">Lý do xin cấp:</span>
-                <span class="dotted-line"></span>
+                <span id="field-ly-do" class="dotted-line"></span>
             </div>
+            <div id="status-line" class="status-line"></div>
         </div>
 
         <table>
@@ -228,5 +262,274 @@
         </div>
     </div>
 
+    <script>
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+        const TABLE_DE_XUAT_SC = "Đề xuất SC";
+        const TABLE_DE_XUAT_SC_CHI_TIET = "Đề xuất SC chi tiết";
+        let _masterRows = [];
+        let _detailRows = [];
+
+        function cellDisplayString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null) {
+                const d = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
+                if (d != null && String(d).trim() !== "") return String(d);
+            }
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value ?? "");
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value ?? "");
+            return String(v);
+        }
+
+        function pickFirstCell(row, keys) {
+            if (!row || !Array.isArray(keys)) return "";
+            for (const k of keys) {
+                const s = cellDisplayString(row[k]).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function normalizeKey(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "");
+        }
+
+        function getQueryId() {
+            const params = new URLSearchParams(window.location.search);
+            return (params.get("id") || params.get("key") || params.get("recordId") || "").trim();
+        }
+
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`${tableName}: ${response.status}`);
+            const data = await response.json();
+            return Array.isArray(data) ? data : (Array.isArray(data.Rows) ? data.Rows : []);
+        }
+
+        function findRowById(rows, inputId) {
+            const wanted = normalizeKey(inputId);
+            if (!wanted) return null;
+            const idKeys = [
+                "ID", "Id", "id", "_RowKey", "RowKey", "Key", "Mã", "Ma",
+                "Mã đề xuất", "Ma de xuat", "Mã phiếu", "Ma phieu", "Số phiếu", "So phieu"
+            ];
+            for (const r of rows || []) {
+                const direct = pickFirstCell(r, idKeys);
+                if (normalizeKey(direct) === wanted) return r;
+            }
+            for (const r of rows || []) {
+                for (const [k, v] of Object.entries(r || {})) {
+                    if (!/id|key|m[aã]|so|phi[eế]u|de\s*xuat/i.test(String(k))) continue;
+                    if (normalizeKey(cellDisplayString(v)) === wanted) return r;
+                }
+            }
+            return null;
+        }
+
+        function getRowPrimaryId(row) {
+            return pickFirstCell(row, [
+                "ID", "Id", "id", "_RowKey", "RowKey", "Key",
+                "Mã đề xuất", "Ma de xuat", "Mã phiếu", "Ma phieu", "Số phiếu", "So phieu"
+            ]);
+        }
+
+        function parentIdsMatch(ref, parentId) {
+            const a = normalizeKey(ref);
+            const b = normalizeKey(parentId);
+            if (!a || !b) return false;
+            if (a === b) return true;
+            const min = 8;
+            if (a.length >= min && b.length >= min && (a.includes(b) || b.includes(a))) return true;
+            return false;
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = String(text || "").trim();
+        }
+
+        function setStatus(text, isError) {
+            const el = document.getElementById("status-line");
+            if (!el) return;
+            el.textContent = text || "";
+            el.style.color = isError ? "#b91c1c" : "#334155";
+        }
+
+        function buildIdOptionLabel(row, id) {
+            const tenCongTrinh = pickFirstCell(row, ["Tên công trình", "Ten cong trinh", "Công trình", "Cong trinh"]);
+            const tenNguoiDeXuat = pickFirstCell(row, ["Tên người đề xuất", "Ten nguoi de xuat", "Người đề xuất", "Nguoi de xuat"]);
+            const parts = [id];
+            if (tenCongTrinh) parts.push(tenCongTrinh);
+            if (tenNguoiDeXuat) parts.push(tenNguoiDeXuat);
+            return parts.join(" | ");
+        }
+
+        function renderIdOptions(rows, selectedId) {
+            const sel = document.getElementById("field-select-id");
+            if (!sel) return;
+            const prev = selectedId || sel.value || "";
+            sel.innerHTML = "";
+            const first = document.createElement("option");
+            first.value = "";
+            first.textContent = "-- Chọn mã ID --";
+            sel.appendChild(first);
+            for (const row of rows || []) {
+                const id = getRowPrimaryId(row);
+                if (!id) continue;
+                const opt = document.createElement("option");
+                opt.value = id;
+                opt.textContent = buildIdOptionLabel(row, id);
+                sel.appendChild(opt);
+            }
+            sel.value = prev || "";
+        }
+
+        function bindHeaderInfo(row) {
+            const tenCongTrinh = pickFirstCell(row, ["Tên công trình", "Ten cong trinh", "Công trình", "Cong trinh"]);
+            const tenNguoiDeXuat = pickFirstCell(row, ["Tên người đề xuất", "Ten nguoi de xuat", "Người đề xuất", "Nguoi de xuat", "Họ tên người xin cấp"]);
+            const tenLaiMay = pickFirstCell(row, ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"]);
+            const lyDoDeXuat = pickFirstCell(row, ["Lý do đề xuất", "Ly do de xuat", "Lý do", "Ly do", "Nội dung đề xuất", "Noi dung de xuat"]);
+            const chucVu = pickFirstCell(row, ["Chức vụ", "Chuc vu"]);
+            const maThietBi = pickFirstCell(row, ["Mã thiết bị", "Ma thiet bi", "Tên thiết bị", "Ten thiet bi", "Tên tài sản", "Ten tai san"]);
+
+            setText("field-cong-trinh", tenCongTrinh);
+            setText("field-nguoi-de-xuat", tenNguoiDeXuat);
+            setText("field-lai-may", tenLaiMay);
+            setText("field-ly-do", lyDoDeXuat);
+            setText("field-chuc-vu", chucVu);
+            setText("field-ma-thiet-bi", maThietBi);
+        }
+
+        function renderDetailRows(detailRows) {
+            const body = document.querySelector("table tbody");
+            if (!body) return;
+            const rows = Array.isArray(detailRows) ? detailRows : [];
+            const fixedCount = 10;
+            const total = Math.max(fixedCount, rows.length);
+
+            const getVal = (r, keys) => pickFirstCell(r, keys);
+            const esc = (v) => String(v ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+
+            let html = "";
+            for (let i = 0; i < total; i++) {
+                const r = rows[i] || {};
+                const tenVatTu = getVal(r, [
+                    "Tên link kiện sửa chữa", "Ten link kien sua chua",
+                    "Tên linh kiện sửa chữa", "Ten linh kien sua chua",
+                    "Tên vật tư", "Ten vat tu", "Vật tư", "Vat tu"
+                ]);
+                const dvt = getVal(r, ["ĐVT SC", "DVT SC", "ĐVT", "DVT", "Đơn vị tính", "Don vi tinh"]);
+                const soLuongSc = getVal(r, ["Số lượng SC", "So luong SC", "Số lượng", "So luong"]);
+                const khThangNam = soLuongSc;
+                const daCapTrongKy = soLuongSc;
+                const capKyNay = soLuongSc;
+                const thoiGianCan = getVal(r, ["Thời gian cần", "Thoi gian can", "Ngày cần", "Ngay can", "Thời gian", "Thoi gian"]);
+                html += `<tr>
+                    <td>${i < rows.length ? i + 1 : ""}</td>
+                    <td>${esc(tenVatTu)}</td>
+                    <td>${esc(dvt)}</td>
+                    <td>${esc(khThangNam)}</td>
+                    <td>${esc(daCapTrongKy)}</td>
+                    <td>${esc(capKyNay)}</td>
+                    <td>${esc(thoiGianCan)}</td>
+                </tr>`;
+            }
+            body.innerHTML = html;
+        }
+
+        function filterDetailByParentId(detailRows, parentId) {
+            const idChaKeys = ["ID cha", "Id cha", "id cha", "ID Cha", "Id Cha", "Ref", "Mã cha", "Ma cha", "ID đề xuất", "Id de xuat"];
+            return (detailRows || []).filter((r) => {
+                const direct = pickFirstCell(r, idChaKeys);
+                if (parentIdsMatch(direct, parentId)) return true;
+                for (const [k, v] of Object.entries(r || {})) {
+                    if (!/id\s*cha|ref|parent|ma\s*cha|de\s*xuat/i.test(String(k))) continue;
+                    if (parentIdsMatch(cellDisplayString(v), parentId)) return true;
+                }
+                return false;
+            });
+        }
+
+        function updateUrlId(id) {
+            const u = new URL(window.location.href);
+            if (id) u.searchParams.set("id", id);
+            else u.searchParams.delete("id");
+            window.history.replaceState({}, "", `${u.pathname}${u.search}${u.hash}`);
+        }
+
+        function applyById(id) {
+            const matched = findRowById(_masterRows, id);
+            if (!matched) {
+                renderDetailRows([]);
+                bindHeaderInfo({});
+                setStatus(`Không tìm thấy bản ghi Đề xuất SC theo id: ${id}`, true);
+                return;
+            }
+            bindHeaderInfo(matched);
+            const parentId = getRowPrimaryId(matched) || id;
+            const details = filterDetailByParentId(_detailRows, parentId);
+            renderDetailRows(details);
+            setStatus(`Đã tự động điền thông tin và ${details.length} dòng chi tiết theo id: ${id}`, false);
+        }
+
+        async function initAutoFill() {
+            const id = getQueryId();
+            setStatus("Đang tải dữ liệu Đề xuất SC...", false);
+            try {
+                const [rows, detailRows] = await Promise.all([
+                    fetchAppSheetTable(TABLE_DE_XUAT_SC),
+                    fetchAppSheetTable(TABLE_DE_XUAT_SC_CHI_TIET)
+                ]);
+                _masterRows = rows || [];
+                _detailRows = detailRows || [];
+                renderIdOptions(_masterRows, id);
+                const startId = id || getRowPrimaryId(_masterRows[0] || {});
+                if (!startId) {
+                    setStatus("Không có dữ liệu ID trong bảng Đề xuất SC.", true);
+                    renderDetailRows([]);
+                    return;
+                }
+                document.getElementById("field-select-id").value = startId;
+                updateUrlId(startId);
+                applyById(startId);
+            } catch (err) {
+                setStatus(`Lỗi tải dữ liệu: ${err?.message || err}`, true);
+            }
+        }
+
+        document.getElementById("field-select-id")?.addEventListener("change", (e) => {
+            const id = String(e.target.value || "").trim();
+            if (!id) return;
+            updateUrlId(id);
+            applyById(id);
+        });
+
+        initAutoFill();
+    </script>
 </body>
 </html>
