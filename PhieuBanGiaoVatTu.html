@@ -14,7 +14,7 @@
 
         body {
             font-family: "Times New Roman", Times, serif;
-            background: #ccc;
+            background: #525659;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -25,228 +25,173 @@
         .page {
             background: #fff;
             width: 210mm;
-            min-height: 148mm;
-            padding: 10mm 12mm 10mm 12mm;
+            min-height: 297mm;
+            /* Chuẩn A4 */
+            padding: 35px 45px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
         }
 
-        /* ── HEADER ── */
-        .header {
+        /* ── HEADER BỐ CỤC 3 PHẦN ── */
+        .header-container {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 6px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .header-left {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .company-block {
-            font-size: 9pt;
-            line-height: 1.5;
-        }
-
-        .company-block .top-line {
-            font-size: 8pt;
             text-align: center;
-        }
-
-        .company-block .main-name {
+            font-size: 15px;
             font-weight: bold;
-            font-size: 10pt;
-            text-align: center;
-            text-decoration: underline;
+            width: 30%;
+            margin-top: 5px;
         }
 
-        .company-block .sub-name {
-            font-weight: bold;
-            font-size: 10pt;
-            text-align: center;
-            text-decoration: underline;
+        .header-left .dots {
+            display: block;
+            margin-top: -3px;
+            letter-spacing: 2px;
+            font-weight: normal;
         }
 
-        /* Stamp circle */
-        .stamp {
-            width: 58px;
-            height: 58px;
-            border: 2.5px solid #c0392b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            flex-shrink: 0;
-            position: relative;
-            margin-top: 2px;
-        }
-
-        .stamp-inner {
-            width: 46px;
-            height: 46px;
-            border: 1.5px solid #c0392b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+        .header-center {
             text-align: center;
-        }
-
-        .stamp-text {
-            font-size: 5.5pt;
-            color: #c0392b;
-            font-weight: bold;
-            line-height: 1.2;
-            text-align: center;
-            padding: 2px;
-        }
-
-        .header-right {
-            text-align: center;
-            flex-shrink: 0;
+            width: 45%;
         }
 
         .form-title {
-            font-size: 17pt;
+            font-size: 20px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.2;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
         }
 
-        .form-code {
-            font-size: 9pt;
+        .form-date {
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .header-right {
             text-align: right;
-            margin-top: 2px;
+            font-size: 16px;
+            width: 25%;
+            margin-top: 5px;
         }
 
-        /* ── INFO LINE ── */
+        /* ── INFO SECTION ── */
+        .info-section {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
         .info-line {
             display: flex;
-            align-items: baseline;
-            gap: 20px;
-            margin-bottom: 6px;
-            font-size: 10pt;
+            align-items: flex-end;
+            margin-bottom: 10px;
         }
 
-        .info-line .date-part {
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
+        .info-label {
+            white-space: nowrap;
+            margin-right: 5px;
         }
 
-        .dotted {
-            display: inline-block;
-            border-bottom: 1px dotted #000;
-            min-width: 40px;
-            height: 13px;
-        }
-
-        .dotted-long {
-            min-width: 100px;
+        .dotted-fill {
+            flex-grow: 1;
+            border-bottom: 1.5px dotted #000;
+            height: 1em;
+            position: relative;
+            top: -4px;
         }
 
         /* ── TABLE ── */
         .main-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10pt;
-            margin-top: 4px;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
 
         .main-table th,
         .main-table td {
-            border: 1.5px solid #000;
+            border: 1px solid #000;
             text-align: center;
+            padding: 8px 5px;
             vertical-align: middle;
-            padding: 3px 4px;
-            line-height: 1.35;
         }
 
         .main-table th {
             font-weight: bold;
-            font-size: 10pt;
-            background: #fff;
+            padding: 12px 5px;
         }
 
-        .main-table td.left {
-            text-align: left;
-            padding-left: 5px;
-        }
-
-        .col-stt {
-            width: 7%;
+        /* Chỉnh tỷ lệ cột y hệt ảnh */
+        .col-tt {
+            width: 5%;
         }
 
         .col-ten {
-            width: 27%;
+            width: 35%;
+            text-align: left;
+            padding-left: 10px;
         }
 
         .col-dvt {
-            width: 10%;
+            width: 8%;
         }
 
         .col-sl {
-            width: 10%;
+            width: 8%;
         }
 
-        .col-tt {
-            width: 23%;
+        .col-tinhtrang {
+            width: 22%;
         }
 
-        .col-thu {
-            width: 23%;
+        .col-thuhoi {
+            width: 22%;
         }
 
-        /* data rows dotted */
-        .main-table tbody tr.data-row {
-            height: 22px;
+        /* Nét đứt ngang cho các dòng thân bảng */
+        .main-table tbody td {
+            border-bottom: 1.5px dotted #000;
+            border-top: none;
+            height: 38px;
         }
 
-        .main-table tbody tr.data-row td {
-            border: 1.5px solid #000;
-            position: relative;
-        }
-
-        .main-table tbody tr.data-row td::after {
-            content: '';
-            position: absolute;
-            bottom: 5px;
-            left: 4px;
-            right: 4px;
-            border-bottom: 1px dotted #aaa;
-        }
-
-        tr.cong-row td {
+        /* Dòng Cộng cuối cùng (nét liền) */
+        .cong-row td {
+            border-top: 1px solid #000 !important;
+            border-bottom: 1px solid #000 !important;
             font-weight: bold;
+            height: 35px;
+        }
+
+        .cong-text {
+            text-align: center !important;
+            font-size: 18px;
         }
 
         /* ── SIGNATURES ── */
         .signatures {
             display: flex;
             justify-content: space-between;
-            margin-top: 8px;
-            padding: 0 2px;
+            margin-top: 10px;
         }
 
         .sig-block {
-            flex: 1;
+            width: 25%;
             text-align: center;
         }
 
         .sig-title {
-            font-size: 10.5pt;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
 
         .sig-sub {
-            font-size: 9.5pt;
+            font-size: 15px;
             font-style: italic;
         }
 
@@ -258,6 +203,8 @@
 
             .page {
                 box-shadow: none;
+                width: 100%;
+                padding: 0;
             }
         }
     </style>
@@ -266,115 +213,59 @@
 <body>
     <div class="page">
 
-        <!-- HEADER -->
-        <div class="header">
-            <div class="header-left">
-                <div class="company-block">
-                    <div class="top-line">CÔNG TY CPXD</div>
-                    <div class="main-name">HẠ TẦNG</div>
-                    <div class="sub-name">ĐẠI PHONG</div>
-                </div>
-
+        <div class="header-container">
+            <div class="header-left" style="text-align: left; width: 40%; font-size: 14px;">
+                CÔNG TY CPXDHT ĐẠI PHONG
             </div>
-
-            <div class="header-right">
-                <div class="form-title">Phiếu bàn giao vật tư</div>
-                <div class="form-code">Số: BG06-033</div>
+            <div class="header-center">
+                <div class="form-title" style="font-size: 22px;">PHIẾU BÀN GIAO VẬT TƯ</div>
+                <div class="form-date" style="font-size: 15px;">Ngày ...... tháng ......năm 2026</div>
+            </div>
+            <div class="header-right" style="width: 25%; font-size: 16px; padding-top: 5px;">
+                Số: BG06-033
             </div>
         </div>
 
-        <!-- INFO LINE -->
-        <div class="info-line">
-            <div class="date-part">
-                Ngày <span class="dotted" style="min-width:30px"></span>
-                tháng <span class="dotted" style="min-width:30px"></span>
-                năm 2026
+        <div class="info-section" style="margin-top: -10px;">
+            <div class="info-line" style="margin-bottom: 5px;">
+                <span class="info-label">Công trình:</span>
+                <span class="dotted-fill"></span>
             </div>
-            <div class="date-part">
-                Loại máy: <span class="dotted dotted-long"></span>
+            <div class="info-line">
+                <span class="info-label">Tên lái xe/máy:</span>
+                <span class="dotted-fill"></span>
+                <span class="info-label" style="margin-left: 15px;">Loại máy:</span>
+                <span class="dotted-fill" style="max-width: 320px;"></span>
             </div>
         </div>
 
-        <!-- TABLE -->
         <table class="main-table">
             <thead>
                 <tr>
-                    <th class="col-stt">STT</th>
-                    <th class="col-ten">Tên vật tư, thiết bị</th>
-                    <th class="col-dvt">ĐVT</th>
-                    <th class="col-sl">SL</th>
-                    <th class="col-tt">Tình trạng sau khi sửa</th>
-                    <th class="col-thu">Vật tư thu hồi</th>
+                    <th style="width: 45px;">STT</th>
+                    <th style="width: 260px;">Tên vật tư, thiết bị</th>
+                    <th style="width: 60px;">ĐVT</th>
+                    <th style="width: 50px;">SL</th>
+                    <th style="width: 180px;">Tình trạng sau khi<br>sửa</th>
+                    <th>Vật tư thu hồi</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="data-row">
-                    <td></td>
-                    <td class="left"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                <!-- 10 dòng dữ liệu để lấp đầy bảng như ảnh -->
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+
                 <tr class="cong-row">
+                    <td colspan="2" class="cong-text" style="font-size: 16px; padding-right: 50px; text-align: right !important;">Cộng</td>
                     <td></td>
-                    <td class="left" colspan="2">Cộng</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -382,8 +273,7 @@
             </tbody>
         </table>
 
-        <!-- SIGNATURES -->
-        <div class="signatures">
+        <div class="signatures" style="margin-top: 15px;">
             <div class="sig-block">
                 <div class="sig-title">Tổ cấp phát</div>
                 <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
