@@ -208,6 +208,16 @@
         return "";
     }
 
+    function pickLoaiPhieu(row) {
+        const direct = pickFirstCell(row, ["Loại phiếu", "Loai phieu", "Loại", "Loai"]);
+        if (direct) return direct;
+        return pickByRegex(row, /lo[aạ]i.*phi[eế]u/i);
+    }
+
+    function isXuatLoaiPhieu(row) {
+        return normalizeHeaderKey(pickLoaiPhieu(row)) === "xuat";
+    }
+
     function pickTenLinhKienSuaChua(row) {
         const direct = pickFirstCell(row, [
             "Tên link kiện sửa chữa",
@@ -687,8 +697,14 @@
             throw new Error(`${tableName}: ${response.status} ${err}`);
         }
         const data = await response.json();
-        if (Array.isArray(data)) return data.map(normalizeNxlcScDateFields);
-        if (data && Array.isArray(data.Rows)) return data.Rows.map(normalizeNxlcScDateFields);
+        if (Array.isArray(data)) {
+            const rows = data.map(normalizeNxlcScDateFields);
+            return tableName === TABLE_NXLC_CT ? rows.filter(isXuatLoaiPhieu) : rows;
+        }
+        if (data && Array.isArray(data.Rows)) {
+            const rows = data.Rows.map(normalizeNxlcScDateFields);
+            return tableName === TABLE_NXLC_CT ? rows.filter(isXuatLoaiPhieu) : rows;
+        }
         return [];
     }
 

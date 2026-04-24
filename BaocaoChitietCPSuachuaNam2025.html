@@ -705,6 +705,25 @@
             return "";
         }
 
+        function normalizeLooseText(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/\s+/g, " ");
+        }
+
+        function pickLoaiPhieu(row) {
+            const direct = pickFirstCell(row, ["Loại phiếu", "Loai phieu", "Loại", "Loai"]);
+            if (direct) return direct;
+            return pickByRegex(row, /lo[aạ]i.*phi[eế]u/i);
+        }
+
+        function isXuatLoaiPhieu(row) {
+            return normalizeLooseText(pickLoaiPhieu(row)) === "xuat";
+        }
+
         function parseNumeric(raw) {
             if (raw == null || raw === "") return null;
             if (typeof raw === "number" && !isNaN(raw)) return raw;
@@ -995,8 +1014,14 @@
                 throw new Error(`${tableName}: ${response.status} ${err}`);
             }
             const data = await response.json();
-            if (Array.isArray(data)) return data;
-            if (data && Array.isArray(data.Rows)) return data.Rows;
+            if (Array.isArray(data)) {
+                const rows = data;
+                return tableName === TABLE_NXLC_CT ? rows.filter(isXuatLoaiPhieu) : rows;
+            }
+            if (data && Array.isArray(data.Rows)) {
+                const rows = data.Rows;
+                return tableName === TABLE_NXLC_CT ? rows.filter(isXuatLoaiPhieu) : rows;
+            }
             return [];
         }
 

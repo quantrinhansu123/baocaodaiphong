@@ -105,45 +105,73 @@
             line-height: 1.2;
         }
 
-        .meta-block {
-            padding: 8px 12px 6px;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1.5;
+        .report-filter-box {
+            padding: 8px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        .meta-block .meta-row {
+        .report-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 8px 12px;
+        }
+
+        .report-filter-item {
             display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 6px 16px;
-            margin-bottom: 4px;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
         }
 
-        .meta-block label {
-            flex-shrink: 0;
-        }
-
-        .meta-block input[type="text"],
-        .meta-block input[type="date"] {
-            font-family: inherit;
-            font-size: 13px;
+        .report-filter-item span {
+            color: #2b7132;
             font-weight: 700;
-            border: none;
-            border-bottom: 1px solid #94a3b8;
-            background: transparent;
-            min-width: 120px;
-            flex: 1;
-            max-width: 100%;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
-        .meta-block input[type="date"] {
-            min-width: 140px;
-            max-width: 180px;
+        .report-filter-item.range-item {
+            grid-column: span 2;
         }
 
-        .meta-block .meta-wide input[type="text"] {
-            min-width: 200px;
+        .range-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .range-wrap .range-text {
+            font-size: 12px;
+            color: #2b7132;
+            font-weight: 700;
+        }
+
+        .filter-input {
+            height: 32px;
+            border: 1px solid #b7d0b9;
+            border-radius: 8px;
+            background: #fff;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 0 10px;
+            width: 100%;
+            min-width: 0;
+            outline: none;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        select.filter-input {
+            appearance: auto;
+            cursor: pointer;
+        }
+
+        .filter-input:focus {
+            border-color: #2b7132;
+            box-shadow: 0 0 0 2px rgba(43, 113, 50, 0.12);
         }
 
         .toolbar {
@@ -151,7 +179,7 @@
             justify-content: flex-end;
             flex-wrap: wrap;
             gap: 8px;
-            padding: 0 10px 6px;
+            padding-top: 8px;
         }
 
         .action-btn {
@@ -299,6 +327,24 @@
                 font-size: 10px;
                 padding: 5px 10px;
             }
+
+            .report-filter-grid {
+                grid-template-columns: repeat(2, minmax(180px, 1fr));
+            }
+
+            .report-filter-item.range-item {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .report-filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-filter-item.range-item {
+                grid-column: span 1;
+            }
         }
 
         @media print {
@@ -370,34 +416,37 @@
             <h1>BẢNG CHI TIẾT GIỜ LÀM VIỆC</h1>
         </div>
 
-        <div class="meta-block">
-            <div class="meta-row">
-                <label for="meta-lessor">Đơn vị cho thuê :</label>
-                <input id="meta-lessor" type="text" value="Phạm Văn Vinh" autocomplete="organization">
+        <div class="report-filter-box print-hide">
+            <div class="report-filter-grid">
+                <div class="report-filter-item">
+                    <span>ĐƠN VỊ CHO THUÊ:</span>
+                    <select id="meta-lessor" class="filter-input"></select>
+                </div>
+                <div class="report-filter-item">
+                    <span>LÁI MÁY:</span>
+                    <select id="meta-operator" class="filter-input"></select>
+                </div>
+                <div class="report-filter-item">
+                    <span>TÊN MÁY:</span>
+                    <select id="meta-machine" class="filter-input"></select>
+                </div>
+                <div class="report-filter-item range-item">
+                    <span>THỜI GIAN:</span>
+                    <div class="range-wrap">
+                        <span class="range-text">Từ</span>
+                        <input id="meta-start" class="filter-input" type="date" value="2026-02-26">
+                        <span class="range-text">đến</span>
+                        <input id="meta-end" class="filter-input" type="date" value="2026-03-25">
+                    </div>
+                </div>
             </div>
-            <div class="meta-row">
-                <label for="meta-operator">Lái máy :</label>
-                <input id="meta-operator" type="text" value="Nguyễn Văn Điểm" autocomplete="name">
+            <div class="toolbar">
+                <button type="button" id="btn-load-appsheet" class="action-btn action-btn-secondary">Tải dữ liệu AppSheet</button>
+                <button type="button" id="btn-rebuild-rows" class="action-btn action-btn-secondary">Tạo lại dòng theo ngày</button>
+                <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
+                <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
+                <span id="appsheet-status" style="align-self:center;font-size:12px;font-weight:700;color:#334155;"></span>
             </div>
-            <div class="meta-row">
-                <span>Thực hiện : Từ</span>
-                <input id="meta-start" type="date" value="2026-02-26">
-                <span>đến</span>
-                <input id="meta-end" type="date" value="2026-03-25">
-            </div>
-            <div class="meta-row meta-wide">
-                <label for="meta-machine">Tên máy :</label>
-                <input id="meta-machine" type="text" value="Máy xúc SK200 - Đường gom đê Đông Anh" autocomplete="off" list="meta-machine-options">
-                <datalist id="meta-machine-options"></datalist>
-            </div>
-        </div>
-
-        <div class="toolbar print-hide">
-            <button type="button" id="btn-load-appsheet" class="action-btn action-btn-secondary">Tải dữ liệu AppSheet</button>
-            <button type="button" id="btn-rebuild-rows" class="action-btn action-btn-secondary">Tạo lại dòng theo ngày</button>
-            <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
-            <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
-            <span id="appsheet-status" style="align-self:center;font-size:12px;font-weight:700;color:#334155;"></span>
         </div>
 
         <div class="table-wrap">
@@ -711,26 +760,61 @@
             return [...new Set((rentalMap ? [...rentalMap.values()] : []))];
         }
 
+        function fillSelectWithOptions(selectId, items, keepCurrent, includeAllOption) {
+            const el = document.getElementById(selectId);
+            if (!el) return;
+            const prev = String(el.value || "");
+            el.innerHTML = "";
+            if (includeAllOption) {
+                const all = document.createElement("option");
+                all.value = "";
+                all.textContent = "— Tất cả —";
+                el.appendChild(all);
+            }
+            (items || []).forEach((v) => {
+                const val = String(v || "").trim();
+                if (!val) return;
+                const opt = document.createElement("option");
+                opt.value = val;
+                opt.textContent = val;
+                el.appendChild(opt);
+            });
+            if (keepCurrent && prev && [...el.options].some((o) => o.value === prev)) {
+                el.value = prev;
+            } else if (!includeAllOption && el.options.length > 0) {
+                el.selectedIndex = 0;
+            } else {
+                el.value = "";
+            }
+        }
+
+        function getDistinctCtValues(keys) {
+            const out = new Set();
+            for (const row of _cacheCtRows || []) {
+                const v = pickFirstCell(row, keys).trim();
+                if (v) out.add(v);
+            }
+            return [...out].sort((a, b) => a.localeCompare(b, "vi"));
+        }
+
         function fillMachineOptionsFromRentalMap(rentalMap) {
-            const list = document.getElementById("meta-machine-options");
             const input = document.getElementById("meta-machine");
-            if (!list || !input) return;
-            list.innerHTML = "";
+            if (!input) return;
             const items = getUniqueRentalAssets(rentalMap)
                 .map((v) => v.displayName)
                 .filter(Boolean)
                 .sort((a, b) => a.localeCompare(b, "vi"));
-            items.forEach((name) => {
-                const opt = document.createElement("option");
-                opt.value = name;
-                list.appendChild(opt);
-            });
-            const curKey = normalizeKeyText(input.value);
-            if (curKey && rentalMap.has(curKey)) {
-                input.value = rentalMap.get(curKey).displayName || input.value;
-            } else {
-                input.value = items[0] || "";
-            }
+            fillSelectWithOptions("meta-machine", items, true, false);
+        }
+
+        function fillLessorAndOperatorOptions() {
+            const lessorsFromAssets = getUniqueRentalAssets(_rentalAssetMap).map((v) => v.tenDonVi).filter(Boolean);
+            const lessorsFromCt = getDistinctCtValues(["Đơn vị cho thuê", "Don vi cho thue", "Tên đơn vị", "Ten don vi", "Đơn vị", "Don vi"]);
+            const lessors = [...new Set([...lessorsFromAssets, ...lessorsFromCt])].sort((a, b) => a.localeCompare(b, "vi"));
+            fillSelectWithOptions("meta-lessor", lessors, true, true);
+
+            const operators = getDistinctCtValues(["Tên lái máy", "Ten lai may", "Lái máy", "Lai may", "Tên lái xe", "Ten lai xe"]);
+            fillSelectWithOptions("meta-operator", operators, true, true);
         }
 
         function syncLessorByMachine() {
@@ -903,6 +987,7 @@
 
                 _rentalAssetMap = buildRentalAssetMap(_cacheDsRows);
                 fillMachineOptionsFromRentalMap(_rentalAssetMap);
+                fillLessorAndOperatorOptions();
                 syncLessorByMachine();
                 setStatus(`Đã tải ${getUniqueRentalAssets(_rentalAssetMap).length} thiết bị thuê, ${(_cacheCtRows || []).length} dòng Nhật trình máy CT.`, false);
             } catch (e) {
@@ -1217,12 +1302,9 @@
                 syncLessorByMachine();
                 rebuildTableBody();
             });
-            machineInput.addEventListener("input", rebuildTableBody);
         }
         document.getElementById("meta-lessor")?.addEventListener("change", rebuildTableBody);
-        document.getElementById("meta-lessor")?.addEventListener("input", rebuildTableBody);
         document.getElementById("meta-operator")?.addEventListener("change", rebuildTableBody);
-        document.getElementById("meta-operator")?.addEventListener("input", rebuildTableBody);
         if (startInput) {
             startInput.addEventListener("change", rebuildTableBody);
             startInput.addEventListener("input", rebuildTableBody);
@@ -1236,7 +1318,7 @@
             "tab-xe-ben": "Baocaotieuhaonhienlieu.html?tab=xe-ben&group=thiet-bi",
             "tab-xe-bon": "Baocaotieuhaonhienlieu.html?tab=xe-bon&group=thiet-bi",
             "tab-trang-thiet-bi": "Baocaotieuhaonhienlieu.html?tab=trang-thiet-bi&group=thiet-bi",
-            "tab-thue-thiet-bi": "BaocaoThueThietBi.html?v=20260423-27"
+            "tab-thue-thiet-bi": "BaocaoThueThietBi.html?v=20260424-01"
         };
 
         function activateCurrentTab() {

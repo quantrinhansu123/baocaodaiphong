@@ -1150,6 +1150,7 @@
             const K_CBKT = ["CBKT", "CB kỹ thuật", "CB ky thuat", "Cán bộ kỹ thuật", "Can bo ky thuat", "Cán bộ kỹ thuật trực", "Cán bộ CĐ"];
             const K_PHU = ["Người phụ trách", "Nguoi phu trach", "CB phụ trách", "CB phu trach", "Cán bộ quản lý", "Cán bộ thi công", "Cán bộ theo dõi"];
             const K_LAI = ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"];
+            const K_CA = ["Ca làm việc", "Ca lam viec", "Ca", "Kíp", "Kip"];
             const K_CVIEC = [
                 "Công việc thực hiện", "Cong viec thuc hien", "Nội dung công việc", "Noi dung cong viec",
                 "Ghi chú công tác", "Mô tả công việc", "Loại công việc", "Loai cong viec"
@@ -1169,11 +1170,16 @@
                 const tLyDen = pickFirstCell(r, K_LDEN);
                 const oneLy = pickFirstCell(r, K_LY1);
                 const laiMay = pickFirstCell(r, K_LAI);
+                const tenMay = pickFirstCell(r, K_TEN_MAY_FILTER);
+                const caLamViec = pickFirstCell(r, K_CA);
                 const ngayCt = pickNgayLamViecFromCt(r);
                 const planByDriverDay = (khPlanLookup && makeDriverDayKey(laiMay, ngayCt))
                     ? khPlanLookup.get(makeDriverDayKey(laiMay, ngayCt))
                     : null;
                 return {
+                    tenMay,
+                    ngayKey: toLocalDateKey(ngayCt),
+                    caLamViec,
                     cbkt:
                         pickFirstCell(r, K_TEN_NGUOI_TAO) ||
                         valueFromNtPhieuTheoIdCha(r, ntPhieuLookup, "nguoiTao") ||
@@ -1202,8 +1208,53 @@
                 };
             });
 
-            renderRows(mapped);
+            renderRows(groupRowsByWorkKey(mapped));
             updatePeriodText();
+        }
+
+        function mergeUniqueText(currentVal, nextVal) {
+            const cur = String(currentVal ?? "").trim();
+            const nxt = String(nextVal ?? "").trim();
+            if (!nxt) return cur;
+            if (!cur) return nxt;
+            if (cur === nxt) return cur;
+            const parts = new Set(cur.split(/\s*;\s*/).filter(Boolean));
+            parts.add(nxt);
+            return [...parts].join("; ");
+        }
+
+        function buildWorkGroupKey(item) {
+            const tenMay = normalizeKeyPart(item.tenMay || "");
+            const ngay = normalizeKeyPart(item.ngayKey || "");
+            const laiMay = normalizeKeyPart(item.laiMay || "");
+            const caLamViec = normalizeKeyPart(item.caLamViec || "");
+            const lyTrinhTu = normalizeKeyPart(item.lyTrinhTu || "");
+            const lyTrinhDen = normalizeKeyPart(item.lyTrinhDen || "");
+            return `${tenMay}__${ngay}__${laiMay}__${caLamViec}__${lyTrinhTu}__${lyTrinhDen}`;
+        }
+
+        function groupRowsByWorkKey(rows) {
+            const map = new Map();
+            for (const row of rows || []) {
+                const key = buildWorkGroupKey(row);
+                const current = map.get(key);
+                if (!current) {
+                    map.set(key, { ...row });
+                    continue;
+                }
+                current.cbkt = mergeUniqueText(current.cbkt, row.cbkt);
+                current.cbPhuTrach = mergeUniqueText(current.cbPhuTrach, row.cbPhuTrach);
+                current.laiMay = mergeUniqueText(current.laiMay, row.laiMay);
+                current.loaiMay = mergeUniqueText(current.loaiMay, row.loaiMay);
+                current.noiDung = mergeUniqueText(current.noiDung, row.noiDung);
+                current.dvt = mergeUniqueText(current.dvt, row.dvt);
+                current.khKh = mergePreferNumeric(current.khKh, row.khKh);
+                current.khTt = mergePreferNumeric(current.khTt, row.khTt);
+                current.tgKh = mergePreferNumeric(current.tgKh, row.tgKh);
+                current.tgTt = mergePreferNumeric(current.tgTt, row.tgTt);
+                current.ghiChu = mergeUniqueText(current.ghiChu, row.ghiChu);
+            }
+            return [...map.values()];
         }
 
         function closeAllMultiselectPanels() {
