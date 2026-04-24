@@ -24,10 +24,10 @@
 
         .page {
             background: #fff;
-            width: 210mm;
-            min-height: 297mm;
-            /* Chuẩn A4 */
-            padding: 35px 45px;
+            width: 297mm;
+            min-height: 210mm;
+            /* A4 ngang */
+            padding: 24px 28px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
@@ -102,6 +102,39 @@
             height: 1em;
             position: relative;
             top: -4px;
+            padding: 0 4px;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .id-picker-wrap {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .id-picker-wrap label {
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+        .id-picker {
+            min-width: 360px;
+            max-width: 100%;
+            border: 1px solid #334155;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 15px;
+            background: #fff;
+        }
+
+        .status-line {
+            margin-top: 6px;
+            font-size: 13px;
+            font-style: italic;
+            color: #334155;
+            min-height: 18px;
         }
 
         /* ── TABLE ── */
@@ -196,6 +229,11 @@
         }
 
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
             body {
                 background: none;
                 padding: 0;
@@ -204,6 +242,7 @@
             .page {
                 box-shadow: none;
                 width: 100%;
+                min-height: auto;
                 padding: 0;
             }
         }
@@ -212,6 +251,13 @@
 
 <body>
     <div class="page">
+        <div class="id-picker-wrap">
+            <label for="field-select-id">Mã ID:</label>
+            <select id="field-select-id" class="id-picker">
+                <option value="">-- Chọn ID --</option>
+            </select>
+            <div id="status-line" class="status-line"></div>
+        </div>
 
         <div class="header-container">
             <div class="header-left" style="text-align: left; width: 40%; font-size: 14px;">
@@ -219,7 +265,7 @@
             </div>
             <div class="header-center">
                 <div class="form-title" style="font-size: 22px;">PHIẾU BÀN GIAO VẬT TƯ</div>
-                <div class="form-date" style="font-size: 15px;">Ngày ...... tháng ......năm 2026</div>
+                <div id="field-form-date" class="form-date" style="font-size: 15px;">Ngày ...... tháng ...... năm 2026</div>
             </div>
             <div class="header-right" style="width: 25%; font-size: 16px; padding-top: 5px;">
                 Số: BG06-033
@@ -229,13 +275,13 @@
         <div class="info-section" style="margin-top: -10px;">
             <div class="info-line" style="margin-bottom: 5px;">
                 <span class="info-label">Công trình:</span>
-                <span class="dotted-fill"></span>
+                <span id="field-cong-trinh" class="dotted-fill"></span>
             </div>
             <div class="info-line">
                 <span class="info-label">Tên lái xe/máy:</span>
-                <span class="dotted-fill"></span>
+                <span id="field-lai-may" class="dotted-fill"></span>
                 <span class="info-label" style="margin-left: 15px;">Loại máy:</span>
-                <span class="dotted-fill" style="max-width: 320px;"></span>
+                <span id="field-loai-may" class="dotted-fill" style="max-width: 320px;"></span>
             </div>
         </div>
 
@@ -293,6 +339,315 @@
         </div>
 
     </div>
+    <script>
+        const APPSHEET_CONFIG = {
+            appId: "3be5baea-960f-4d3f-b388-d13364cc4f22",
+            accessKey: "V2-GaoRd-ItaM1-r44oH-c6Smd-uOe7V-cmVoK-IJINF-5XLQa"
+        };
+        const TABLE_DE_XUAT_SC = "Đề xuất SC";
+        const TABLE_DE_XUAT_SC_CHI_TIET = "Đề xuất SC chi tiết";
+        let _masterRows = [];
+        let _detailRows = [];
+
+        function cellDisplayString(v) {
+            if (v == null) return "";
+            if (typeof v === "object" && v !== null) {
+                const d = v.DisplayValue ?? v.displayValue ?? v.FormattedValue ?? v.formattedValue ?? v.Text ?? v.text;
+                if (d != null && String(d).trim() !== "") return String(d);
+            }
+            if (typeof v === "object" && v !== null && "Value" in v) return String(v.Value ?? "");
+            if (typeof v === "object" && v !== null && "value" in v) return String(v.value ?? "");
+            return String(v);
+        }
+
+        function pickFirstCell(row, keys) {
+            if (!row || !Array.isArray(keys)) return "";
+            for (const k of keys) {
+                const s = cellDisplayString(row[k]).trim();
+                if (s) return s;
+            }
+            return "";
+        }
+
+        function normalizeKey(s) {
+            return String(s ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "");
+        }
+
+        function getRowPrimaryId(row) {
+            return pickFirstCell(row, [
+                "ID", "Id", "id", "_RowKey", "RowKey", "Key",
+                "Mã đề xuất", "Ma de xuat", "Mã phiếu", "Ma phieu", "Số phiếu", "So phieu"
+            ]);
+        }
+
+        function getQueryId() {
+            const params = new URLSearchParams(window.location.search);
+            return (params.get("id") || params.get("key") || params.get("recordId") || "").trim();
+        }
+
+        async function fetchAppSheetTable(tableName) {
+            const url = `https://api.appsheet.com/api/v2/apps/${encodeURIComponent(APPSHEET_CONFIG.appId)}/tables/${encodeURIComponent(tableName)}/Action`;
+            const payload = {
+                Action: "Find",
+                Properties: { Locale: "vi-VN", Timezone: "Asia/Ho_Chi_Minh" },
+                Rows: []
+            };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ApplicationAccessKey: APPSHEET_CONFIG.accessKey
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`${tableName}: ${response.status}`);
+            const data = await response.json();
+            return Array.isArray(data) ? data : (Array.isArray(data.Rows) ? data.Rows : []);
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = String(text || "").trim();
+        }
+
+        function setStatus(text, isError) {
+            const el = document.getElementById("status-line");
+            if (!el) return;
+            el.textContent = text || "";
+            el.style.color = isError ? "#b91c1c" : "#334155";
+        }
+
+        function parseDateFlexible(value) {
+            const ordered = typeof value === "object" && value !== null
+                ? [value.Value, value.value, value.DisplayValue, value.displayValue, value.FormattedValue, value.formattedValue, value.Text, value.text]
+                : [value];
+            for (const raw of ordered) {
+                const s = String(raw || "").trim();
+                if (!s) continue;
+                let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+                if (m) {
+                    const dIso = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+                    if (!isNaN(dIso.getTime())) return dIso;
+                }
+                m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,].*)?$/);
+                if (m) {
+                    const a = Number(m[1]);
+                    const b = Number(m[2]);
+                    const y = Number(m[3]);
+                    const dSlash = a > 12 ? new Date(y, b - 1, a) : (b > 12 ? new Date(y, a - 1, b) : new Date(y, a - 1, b));
+                    if (!isNaN(dSlash.getTime())) return dSlash;
+                }
+                const dNative = new Date(s);
+                if (!isNaN(dNative.getTime())) return dNative;
+            }
+            return null;
+        }
+
+        function pickNgayDeXuatDate(row) {
+            const keys = ["Ngày đề xuất", "Ngay de xuat", "Ngày đề nghị", "Ngay de nghi", "Ngày tạo", "Ngay tao", "Ngày", "Ngay"];
+            for (const k of keys) {
+                const d = parseDateFlexible(row?.[k]);
+                if (d) return d;
+            }
+            for (const [k, v] of Object.entries(row || {})) {
+                const nk = normalizeKey(k);
+                if (!(nk.includes("ngay") && (nk.includes("dexuat") || nk.includes("denghi") || nk.includes("tao")))) continue;
+                const d = parseDateFlexible(v);
+                if (d) return d;
+            }
+            return null;
+        }
+
+        function findRowById(rows, inputId) {
+            const wanted = normalizeKey(inputId);
+            if (!wanted) return null;
+            const idKeys = [
+                "ID", "Id", "id", "_RowKey", "RowKey", "Key", "Mã", "Ma",
+                "Mã đề xuất", "Ma de xuat", "Mã phiếu", "Ma phieu", "Số phiếu", "So phieu"
+            ];
+            for (const r of rows || []) {
+                const direct = pickFirstCell(r, idKeys);
+                if (normalizeKey(direct) === wanted) return r;
+            }
+            for (const r of rows || []) {
+                for (const [k, v] of Object.entries(r || {})) {
+                    if (!/id|key|m[aã]|so|phi[eế]u|de\s*xuat/i.test(String(k))) continue;
+                    if (normalizeKey(cellDisplayString(v)) === wanted) return r;
+                }
+            }
+            return null;
+        }
+
+        function parentIdsMatch(ref, parentId) {
+            const a = normalizeKey(ref);
+            const b = normalizeKey(parentId);
+            if (!a || !b) return false;
+            if (a === b) return true;
+            const min = 8;
+            if (a.length >= min && b.length >= min && (a.includes(b) || b.includes(a))) return true;
+            return false;
+        }
+
+        function renderIdOptions(rows, selectedId) {
+            const sel = document.getElementById("field-select-id");
+            if (!sel) return;
+            const prev = selectedId || sel.value || "";
+            sel.innerHTML = "";
+            const first = document.createElement("option");
+            first.value = "";
+            first.textContent = "-- Chọn ID --";
+            sel.appendChild(first);
+            for (const row of rows || []) {
+                const id = getRowPrimaryId(row);
+                if (!id) continue;
+                const congTrinh = pickFirstCell(row, ["Tên công trình", "Ten cong trinh", "Công trình", "Cong trinh"]);
+                const opt = document.createElement("option");
+                opt.value = id;
+                opt.textContent = congTrinh ? `${id} | ${congTrinh}` : id;
+                sel.appendChild(opt);
+            }
+            sel.value = prev || "";
+        }
+
+        function bindHeaderInfo(row) {
+            setText("field-cong-trinh", pickFirstCell(row, ["Tên công trình", "Ten cong trinh", "Công trình", "Cong trinh"]));
+            setText("field-lai-may", pickFirstCell(row, ["Tên lái máy", "Ten lai may", "Tên lái xe", "Ten lai xe", "Lái máy", "Lai may"]));
+            setText("field-loai-may", pickFirstCell(row, ["Tên thiết bị", "Ten thiet bi", "Mã thiết bị", "Ma thiet bi", "Tên tài sản", "Ten tai san", "Loại máy", "Loai may"]));
+            const d = pickNgayDeXuatDate(row);
+            setText("field-form-date", d ? `Ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}` : "Ngày ...... tháng ...... năm 2026");
+        }
+
+        function renderDetailRows(detailRows) {
+            const body = document.querySelector(".main-table tbody");
+            if (!body) return;
+            const rows = Array.isArray(detailRows) ? detailRows : [];
+            const fixedCount = 10;
+            const total = Math.max(fixedCount, rows.length);
+
+            const getVal = (r, keys) => pickFirstCell(r, keys);
+            const esc = (v) => String(v ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+
+            let sumSl = 0;
+            let html = "";
+            for (let i = 0; i < total; i++) {
+                const r = rows[i] || {};
+                const tenVatTu = getVal(r, [
+                    "Tên link kiện sửa chữa", "Ten link kien sua chua",
+                    "Tên linh kiện sửa chữa", "Ten linh kien sua chua",
+                    "Tên vật tư", "Ten vat tu", "Vật tư", "Vat tu"
+                ]);
+                const dvt = getVal(r, ["ĐVT SC", "DVT SC", "ĐVT", "DVT", "Đơn vị tính", "Don vi tinh"]);
+                const soLuong = getVal(r, ["Số lượng SC", "So luong SC", "Số lượng", "So luong"]);
+                const tinhTrangSauSua = getVal(r, ["Tình trạng sau khi sửa", "Tinh trang sau khi sua", "Tình trạng", "Tinh trang"]);
+                const vatTuThuHoi = getVal(r, ["Vật tư thu hồi", "Vat tu thu hoi", "Thu hồi", "Thu hoi"]);
+
+                const n = Number(String(soLuong).replace(",", "."));
+                if (Number.isFinite(n)) sumSl += n;
+
+                html += `<tr>
+                    <td>${i < rows.length ? i + 1 : ""}</td>
+                    <td>${esc(tenVatTu)}</td>
+                    <td>${esc(dvt)}</td>
+                    <td>${esc(soLuong)}</td>
+                    <td>${esc(tinhTrangSauSua)}</td>
+                    <td>${esc(vatTuThuHoi)}</td>
+                </tr>`;
+            }
+
+            const sumText = Number.isFinite(sumSl) && sumSl !== 0 ? String(sumSl).replace(".", ",") : "";
+            html += `<tr class="cong-row">
+                <td colspan="2" class="cong-text" style="font-size: 16px; padding-right: 50px; text-align: right !important;">Cộng</td>
+                <td></td>
+                <td>${sumText}</td>
+                <td></td>
+                <td></td>
+            </tr>`;
+
+            body.innerHTML = html;
+        }
+
+        function filterDetailByParentId(detailRows, parentId) {
+            const idChaKeys = ["ID cha", "Id cha", "id cha", "ID Cha", "Id Cha", "Ref", "Mã cha", "Ma cha", "ID đề xuất", "Id de xuat"];
+            return (detailRows || []).filter((r) => {
+                const direct = pickFirstCell(r, idChaKeys);
+                if (parentIdsMatch(direct, parentId)) return true;
+                for (const [k, v] of Object.entries(r || {})) {
+                    if (!/id\s*cha|ref|parent|ma\s*cha|de\s*xuat/i.test(String(k))) continue;
+                    if (parentIdsMatch(cellDisplayString(v), parentId)) return true;
+                }
+                return false;
+            });
+        }
+
+        function updateUrlId(id) {
+            const u = new URL(window.location.href);
+            if (id) u.searchParams.set("id", id);
+            else u.searchParams.delete("id");
+            window.history.replaceState({}, "", `${u.pathname}${u.search}${u.hash}`);
+        }
+
+        function applyById(id) {
+            const matched = findRowById(_masterRows, id);
+            if (!matched) {
+                bindHeaderInfo({});
+                renderDetailRows([]);
+                setStatus(`Không tìm thấy bản ghi Đề xuất SC theo id: ${id}`, true);
+                return;
+            }
+            bindHeaderInfo(matched);
+            const parentId = getRowPrimaryId(matched) || id;
+            const details = filterDetailByParentId(_detailRows, parentId);
+            if (!pickNgayDeXuatDate(matched)) {
+                const d = pickNgayDeXuatDate(details[0] || {});
+                if (d) setText("field-form-date", `Ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`);
+            }
+            renderDetailRows(details);
+        }
+
+        async function initAutoFill() {
+            const id = getQueryId();
+            setStatus("Đang tải dữ liệu Đề xuất SC...", false);
+            try {
+                const [rows, detailRows] = await Promise.all([
+                    fetchAppSheetTable(TABLE_DE_XUAT_SC),
+                    fetchAppSheetTable(TABLE_DE_XUAT_SC_CHI_TIET)
+                ]);
+                _masterRows = rows || [];
+                _detailRows = detailRows || [];
+                renderIdOptions(_masterRows, id);
+                const startId = id || getRowPrimaryId(_masterRows[0] || {});
+                if (!startId) {
+                    setStatus("Không có dữ liệu ID trong bảng Đề xuất SC.", true);
+                    renderDetailRows([]);
+                    return;
+                }
+                document.getElementById("field-select-id").value = startId;
+                updateUrlId(startId);
+                applyById(startId);
+            } catch (err) {
+                setStatus(`Lỗi tải dữ liệu: ${err?.message || err}`, true);
+            }
+        }
+
+        document.getElementById("field-select-id")?.addEventListener("change", (e) => {
+            const id = String(e.target.value || "").trim();
+            if (!id) return;
+            updateUrlId(id);
+            applyById(id);
+        });
+
+        initAutoFill();
+    </script>
 </body>
 
 </html>

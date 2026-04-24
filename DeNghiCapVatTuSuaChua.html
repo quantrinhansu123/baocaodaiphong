@@ -238,7 +238,7 @@
             </tbody>
         </table>
 
-        <div class="footer-date">
+        <div id="field-footer-date" class="footer-date">
             Nam Định, ngày ... tháng ... năm 202.
         </div>
         
@@ -375,6 +375,47 @@
             el.style.color = isError ? "#b91c1c" : "#334155";
         }
 
+        function parseDateFlexible(value) {
+            const ordered = typeof value === "object" && value !== null
+                ? [value.Value, value.value, value.DisplayValue, value.displayValue, value.FormattedValue, value.formattedValue, value.Text, value.text]
+                : [value];
+            for (const raw of ordered) {
+                const s = String(raw || "").trim();
+                if (!s) continue;
+                let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+                if (m) {
+                    const dIso = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+                    if (!isNaN(dIso.getTime())) return dIso;
+                }
+                m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\s,].*)?$/);
+                if (m) {
+                    const a = Number(m[1]);
+                    const b = Number(m[2]);
+                    const y = Number(m[3]);
+                    const dSlash = a > 12 ? new Date(y, b - 1, a) : (b > 12 ? new Date(y, a - 1, b) : new Date(y, a - 1, b));
+                    if (!isNaN(dSlash.getTime())) return dSlash;
+                }
+                const dNative = new Date(s);
+                if (!isNaN(dNative.getTime())) return dNative;
+            }
+            return null;
+        }
+
+        function pickNgayDeXuatDate(row) {
+            const directKeys = ["Ngày đề xuất", "Ngay de xuat", "Ngày đề nghị", "Ngay de nghi", "Ngày tạo", "Ngay tao", "Ngày", "Ngay"];
+            for (const k of directKeys) {
+                const d = parseDateFlexible(row?.[k]);
+                if (d) return d;
+            }
+            for (const [k, v] of Object.entries(row || {})) {
+                const nk = normalizeKey(k);
+                if (!(nk.includes("ngay") && (nk.includes("dexuat") || nk.includes("denghi") || nk.includes("tao")))) continue;
+                const d = parseDateFlexible(v);
+                if (d) return d;
+            }
+            return null;
+        }
+
         function buildIdOptionLabel(row, id) {
             const tenCongTrinh = pickFirstCell(row, ["Tên công trình", "Ten cong trinh", "Công trình", "Cong trinh"]);
             const tenNguoiDeXuat = pickFirstCell(row, ["Tên người đề xuất", "Ten nguoi de xuat", "Người đề xuất", "Nguoi de xuat"]);
@@ -411,6 +452,7 @@
             const lyDoDeXuat = pickFirstCell(row, ["Lý do đề xuất", "Ly do de xuat", "Lý do", "Ly do", "Nội dung đề xuất", "Noi dung de xuat"]);
             const chucVu = pickFirstCell(row, ["Chức vụ", "Chuc vu"]);
             const maThietBi = pickFirstCell(row, ["Mã thiết bị", "Ma thiet bi", "Tên thiết bị", "Ten thiet bi", "Tên tài sản", "Ten tai san"]);
+            const ngayDeXuat = pickNgayDeXuatDate(row);
 
             setText("field-cong-trinh", tenCongTrinh);
             setText("field-nguoi-de-xuat", tenNguoiDeXuat);
@@ -418,6 +460,12 @@
             setText("field-ly-do", lyDoDeXuat);
             setText("field-chuc-vu", chucVu);
             setText("field-ma-thiet-bi", maThietBi);
+            setText(
+                "field-footer-date",
+                ngayDeXuat
+                    ? `Nam Định, ngày ${ngayDeXuat.getDate()} tháng ${ngayDeXuat.getMonth() + 1} năm ${ngayDeXuat.getFullYear()}.`
+                    : "Nam Định, ngày ... tháng ... năm 2026."
+            );
         }
 
         function renderDetailRows(detailRows) {
@@ -493,8 +541,12 @@
             bindHeaderInfo(matched);
             const parentId = getRowPrimaryId(matched) || id;
             const details = filterDetailByParentId(_detailRows, parentId);
+            const footerEl = document.getElementById("field-footer-date");
+            const ngayTuChiTiet = pickNgayDeXuatDate(details[0] || {});
+            if (footerEl && (!pickNgayDeXuatDate(matched)) && ngayTuChiTiet) {
+                footerEl.textContent = `Nam Định, ngày ${ngayTuChiTiet.getDate()} tháng ${ngayTuChiTiet.getMonth() + 1} năm ${ngayTuChiTiet.getFullYear()}.`;
+            }
             renderDetailRows(details);
-            setStatus(`Đã tự động điền thông tin và ${details.length} dòng chi tiết theo id: ${id}`, false);
         }
 
         async function initAutoFill() {
