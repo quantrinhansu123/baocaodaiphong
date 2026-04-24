@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Bàn Giao Vật Tư - BG06-033</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .page {
+            background: #fff;
+            width: 210mm;
+            min-height: 148mm;
+            padding: 10mm 12mm 10mm 12mm;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .company-block {
+            font-size: 9pt;
+            line-height: 1.5;
+        }
+
+        .company-block .top-line {
+            font-size: 8pt;
+            text-align: center;
+        }
+
+        .company-block .main-name {
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .company-block .sub-name {
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        /* Stamp circle */
+        .stamp {
+            width: 58px;
+            height: 58px;
+            border: 2.5px solid #c0392b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+            margin-top: 2px;
+        }
+
+        .stamp-inner {
+            width: 46px;
+            height: 46px;
+            border: 1.5px solid #c0392b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stamp-text {
+            font-size: 5.5pt;
+            color: #c0392b;
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .header-right {
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .form-title {
+            font-size: 17pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .form-code {
+            font-size: 9pt;
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        /* ── INFO LINE ── */
+        .info-line {
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+            margin-bottom: 6px;
+            font-size: 10pt;
+        }
+
+        .info-line .date-part {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .dotted {
+            display: inline-block;
+            border-bottom: 1px dotted #000;
+            min-width: 40px;
+            height: 13px;
+        }
+
+        .dotted-long {
+            min-width: 100px;
+        }
+
+        /* ── TABLE ── */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 4px;
+        }
+
+        .main-table th,
+        .main-table td {
+            border: 1.5px solid #000;
+            text-align: center;
+            vertical-align: middle;
+            padding: 3px 4px;
+            line-height: 1.35;
+        }
+
+        .main-table th {
+            font-weight: bold;
+            font-size: 10pt;
+            background: #fff;
+        }
+
+        .main-table td.left {
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .col-ten {
+            width: 34%;
+        }
+
+        .col-dvt {
+            width: 10%;
+        }
+
+        .col-sl {
+            width: 10%;
+        }
+
+        .col-tt {
+            width: 23%;
+        }
+
+        .col-thu {
+            width: 23%;
+        }
+
+        /* data rows dotted */
+        .main-table tbody tr.data-row {
+            height: 22px;
+        }
+
+        .main-table tbody tr.data-row td {
+            border: 1.5px solid #000;
+            position: relative;
+        }
+
+        .main-table tbody tr.data-row td::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 4px;
+            right: 4px;
+            border-bottom: 1px dotted #aaa;
+        }
+
+        tr.cong-row td {
+            font-weight: bold;
+        }
+
+        /* ── SIGNATURES ── */
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 2px;
+        }
+
+        .sig-block {
+            flex: 1;
+            text-align: center;
+        }
+
+        .sig-title {
+            font-size: 10.5pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .sig-sub {
+            font-size: 9.5pt;
+            font-style: italic;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .page {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <div class="company-block">
+                    <div class="top-line">CÔNG TY CPXD</div>
+                    <div class="main-name">HẠ TẦNG</div>
+                    <div class="sub-name">ĐẠI PHONG</div>
+                </div>
+
+            </div>
+
+            <div class="header-right">
+                <div class="form-title">Phiếu bàn giao vật tư</div>
+                <div class="form-code">Số: BG06-033</div>
+            </div>
+        </div>
+
+        <!-- INFO LINE -->
+        <div class="info-line">
+            <div class="date-part">
+                Ngày <span class="dotted" style="min-width:30px"></span>
+                tháng <span class="dotted" style="min-width:30px"></span>
+                năm 2026
+            </div>
+            <div class="date-part">
+                Loại máy: <span class="dotted dotted-long"></span>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-ten">Tên vật tư, thiết bị</th>
+                    <th class="col-dvt">ĐVT</th>
+                    <th class="col-sl">SL</th>
+                    <th class="col-tt">Tình trạng sau khi sửa</th>
+                    <th class="col-thu">Vật tư thu hồi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="data-row">
+                    <td class="left"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="cong-row">
+                    <td class="left" colspan="2">Cộng</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- SIGNATURES -->
+        <div class="signatures">
+            <div class="sig-block">
+                <div class="sig-title">Tổ cấp phát</div>
+                <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-title">Kế toán</div>
+                <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-title">Tổ sửa chữa</div>
+                <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-title">Thợ vận hành</div>
+                <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
