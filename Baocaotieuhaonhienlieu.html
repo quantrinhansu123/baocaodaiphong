@@ -481,10 +481,55 @@
             white-space: normal;
         }
 
-        /* 3 tab con trong «BC thiết bị»: ưu tiên dễ đọc, cỡ chữ đồng nhất. */
-        #report-table.tab-bc-thiet-bi-readable {
-            zoom: 1;
-            transform-origin: top left;
+        /* Tab «Báo cáo thiết bị máy»: cỡ chữ 14pt thống nhất (màn hình). */
+        #report-table.tab-bc-thiet-bi-readable,
+        #report-table.tab-bc-thiet-bi-readable th,
+        #report-table.tab-bc-thiet-bi-readable td {
+            font-size: 14pt !important;
+            line-height: 1.25;
+        }
+
+        #report-table.tab-bc-thiet-bi-readable thead th,
+        #report-table.tab-bc-thiet-bi-readable .number-row th {
+            font-size: 14pt !important;
+        }
+
+        #report-table.tab-bc-thiet-bi-readable .group-a-row td,
+        #report-table.tab-bc-thiet-bi-readable .sub-group-row td,
+        #report-table.tab-bc-thiet-bi-readable .nhom-tong-row td,
+        #report-table.tab-bc-thiet-bi-readable .grand-total-row td {
+            font-size: 14pt !important;
+        }
+
+        body.report-tab-trang-thiet-bi .table-wrapper {
+            font-size: 14pt;
+        }
+
+        body.report-tab-trang-thiet-bi .report-filter-item span,
+        body.report-tab-trang-thiet-bi .filter-input,
+        body.report-tab-trang-thiet-bi .filter-select,
+        body.report-tab-trang-thiet-bi .action-btn,
+        body.report-tab-trang-thiet-bi .status-line,
+        body.report-tab-trang-thiet-bi #report-main-title,
+        body.report-tab-trang-thiet-bi #report-date-range,
+        body.report-tab-trang-thiet-bi .report-print-filter-summary,
+        body.report-tab-trang-thiet-bi .signature-date,
+        body.report-tab-trang-thiet-bi .signature-title,
+        body.report-tab-trang-thiet-bi .signature-note {
+            font-size: 14pt !important;
+        }
+
+        body.report-tab-trang-thiet-bi .flex.items-start.bg-white h2,
+        body.report-tab-trang-thiet-bi .flex.items-start.bg-white p {
+            font-size: 14pt !important;
+        }
+
+        body.report-tab-trang-thiet-bi .logo-caption-box {
+            font-size: 14pt !important;
+        }
+
+        body.report-tab-trang-thiet-bi .logo-text {
+            font-size: 14px;
         }
 
         /* Giữ header theo layout chuẩn của tab xe bồn. */
@@ -723,6 +768,27 @@
                 padding: 0 8px;
                 font-size: 10px;
             }
+
+            body.report-tab-trang-thiet-bi .table-wrapper {
+                font-size: 14pt;
+            }
+
+            body.report-tab-trang-thiet-bi #report-table.tab-bc-thiet-bi-readable th,
+            body.report-tab-trang-thiet-bi #report-table.tab-bc-thiet-bi-readable td,
+            body.report-tab-trang-thiet-bi #report-table.tab-bc-thiet-bi-readable thead th,
+            body.report-tab-trang-thiet-bi #report-table.tab-bc-thiet-bi-readable .number-row th {
+                font-size: 14pt !important;
+            }
+
+            body.report-tab-trang-thiet-bi .filter-input,
+            body.report-tab-trang-thiet-bi .filter-select {
+                font-size: 14pt !important;
+                max-width: none;
+            }
+
+            body.report-tab-trang-thiet-bi .action-btn {
+                font-size: 14pt !important;
+            }
         }
 
         @media print {
@@ -850,7 +916,7 @@
                     bồn</button>
                 <button id="tab-trang-thiet-bi" class="report-tab-btn active"
                     onclick="switchReportTab('trang-thiet-bi')">Báo cáo thiết bị máy</button>
-                <button id="tab-thue-thiet-bi" class="report-tab-btn" onclick="switchReportTab('thue-thiet-bi')">BC thuê
+                <button id="tab-thue-thiet-bi" class="report-tab-btn" onclick="switchReportTab('thue-thiet-bi')">Báo cáo thuê
                     thiết bị</button>
                 <button id="tab-thiet-bi-noi-ql" class="report-tab-btn" onclick="switchReportTab('thiet-bi-noi-ql')">Báo
                     cáo TB theo nơi quản lý</button>
@@ -5089,7 +5155,9 @@
         function updateCompactTypographyForTab() {
             const table = document.getElementById("report-table");
             if (!table) return;
-            table.classList.remove("tab-bc-thiet-bi-readable");
+            const isThietBiMay = currentReportTab === "trang-thiet-bi";
+            table.classList.toggle("tab-bc-thiet-bi-readable", isThietBiMay);
+            document.body.classList.toggle("report-tab-trang-thiet-bi", isThietBiMay);
         }
 
         /** Đồng bộ dòng chữ kỳ báo cáo + tiêu đề cột km theo bộ lọc / dữ liệu. */

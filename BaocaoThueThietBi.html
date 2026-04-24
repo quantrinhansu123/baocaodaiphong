@@ -26,7 +26,7 @@
 
         .report-tab-btn {
             padding: 6px 16px;
-            font-size: 11px;
+            font-size: 14pt;
             font-weight: bold;
             color: #475569;
             background: #e2e8f0;
@@ -73,7 +73,7 @@
             border-radius: 0;
             padding: 2px 4px;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 14pt;
             line-height: 1.05;
             letter-spacing: 0.4px;
             color: #0047ab;
@@ -97,7 +97,7 @@
 
         .title-band h1 {
             margin: 0;
-            font-size: clamp(1.65rem, 2.1vw, 2.05rem);
+            font-size: 14pt;
             font-weight: 900;
             text-transform: uppercase;
             color: #0f172a;
@@ -127,7 +127,7 @@
         .report-filter-item span {
             color: #2b7132;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 14pt;
             white-space: nowrap;
         }
 
@@ -144,7 +144,7 @@
         }
 
         .range-wrap .range-text {
-            font-size: 12px;
+            font-size: 14pt;
             color: #2b7132;
             font-weight: 700;
         }
@@ -155,7 +155,7 @@
             border-radius: 8px;
             background: #fff;
             color: #0f172a;
-            font-size: 13px;
+            font-size: 14pt;
             font-weight: 600;
             padding: 0 10px;
             width: 100%;
@@ -186,7 +186,7 @@
             height: 26px;
             border-radius: 9999px;
             padding: 0 12px;
-            font-size: 11px;
+            font-size: 14pt;
             font-weight: 700;
             border: 1px solid #2b7132;
             background: #2b7132;
@@ -230,7 +230,7 @@
         .report-table thead th {
             background: #4a8694;
             color: #fff;
-            font-size: 9pt;
+            font-size: 14pt !important;
             font-weight: 700;
             line-height: 1.15;
         }
@@ -246,7 +246,7 @@
 
         .report-table tbody td {
             height: 26px;
-            font-size: 11px;
+            font-size: 14pt !important;
         }
 
         .report-table td.left,
@@ -265,7 +265,7 @@
             border: none;
             background: transparent;
             text-align: center;
-            font-size: 11px;
+            font-size: 14pt;
             font-family: Arial, Helvetica, sans-serif;
             padding: 2px 0;
         }
@@ -280,7 +280,7 @@
             border: none;
             background: transparent;
             text-align: left;
-            font-size: 11px;
+            font-size: 14pt;
             padding: 2px 4px;
             font-family: Arial, Helvetica, sans-serif;
         }
@@ -289,7 +289,7 @@
             border: none;
             background: transparent;
             text-align: center;
-            font-size: 11px;
+            font-size: 14pt;
             width: 100%;
             font-family: Arial, Helvetica, sans-serif;
         }
@@ -304,7 +304,7 @@
             justify-content: space-between;
             gap: 16px;
             padding: 16px 12px 20px;
-            font-size: 13px;
+            font-size: 14pt;
             font-weight: 700;
         }
 
@@ -318,13 +318,25 @@
             margin-top: 48px;
             font-style: italic;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 14pt;
+            color: #334155;
+        }
+
+        .header-wrap h2,
+        .header-wrap p {
+            font-size: 14pt !important;
+        }
+
+        #appsheet-status {
+            align-self: center;
+            font-size: 14pt;
+            font-weight: 700;
             color: #334155;
         }
 
         @media (max-width: 1100px) {
             .report-tab-btn {
-                font-size: 10px;
+                font-size: 14pt;
                 padding: 5px 10px;
             }
 
@@ -392,7 +404,7 @@
             <button id="tab-xe-ben" class="report-tab-btn" type="button">Báo cáo xe ben</button>
             <button id="tab-xe-bon" class="report-tab-btn" type="button">Báo cáo xe bồn</button>
             <button id="tab-trang-thiet-bi" class="report-tab-btn" type="button">Báo cáo thiết bị máy</button>
-            <button id="tab-thue-thiet-bi" class="report-tab-btn active" type="button">BC thuê thiết bị</button>
+            <button id="tab-thue-thiet-bi" class="report-tab-btn active" type="button">Báo cáo thuê thiết bị</button>
         </div>
 
         <div class="header-wrap">
@@ -445,7 +457,7 @@
                 <button type="button" id="btn-rebuild-rows" class="action-btn action-btn-secondary">Tạo lại dòng theo ngày</button>
                 <button type="button" id="export-excel" class="action-btn action-btn-secondary">Xuất Excel</button>
                 <button type="button" id="export-pdf" class="action-btn">Xuất PDF</button>
-                <span id="appsheet-status" style="align-self:center;font-size:12px;font-weight:700;color:#334155;"></span>
+                <span id="appsheet-status"></span>
             </div>
         </div>
 

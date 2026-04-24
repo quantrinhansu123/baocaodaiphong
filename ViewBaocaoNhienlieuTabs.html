@@ -145,7 +145,7 @@
 
             childButtons.forEach((btn) => {
                 const id = btn.id || "";
-                btn.style.fontSize = "16pt";
+                btn.style.fontSize = currentTopTab === "bc-thiet-bi" ? "14pt" : "16pt";
                 if (!allowed.size) {
                     btn.style.display = "none";
                     return;
